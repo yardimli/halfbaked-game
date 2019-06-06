@@ -1,0 +1,189 @@
+{
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 103,
+      "type": "VEC3",
+      "max": [
+        1,
+        1,
+        1
+      ],
+      "min": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 103,
+      "type": "VEC3",
+      "max": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "min": [
+        -1.0,
+        -1.0,
+        -1.0
+      ]
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 103,
+      "type": "VEC4",
+      "max": [
+        1.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "min": [
+        1.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 103,
+      "type": "VEC2",
+      "max": [
+        0.29941773414611816,
+        0.3999992311000824
+      ],
+      "min": [
+        0.20214563608169556,
+        0.39768338203430176
+      ]
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5125,
+      "count": 186,
+      "type": "SCALAR",
+      "max": [
+        102.0
+      ],
+      "min": [
+        0.0
+      ]
+    }
+  ],
+  "asset": {
+    "generator": "UnityGLTF (2019.1.4f1)",
+    "version": "2.0"
+  },
+  "buffers": [
+    {
+      "uri": "SF_Prop_SignPost_01.bin",
+      "byteLength": 5688
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 1236
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 1236,
+      "byteLength": 1236
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 2472,
+      "byteLength": 1648
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 4120,
+      "byteLength": 824
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 4944,
+      "byteLength": 744
+    }
+  ],
+  "images": [
+    {
+      "uri": "11560_Fantasy_Texture.jpg",
+      "name": "Fantasy_Texture"
+    }
+  ],
+  "materials": [
+    {
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.5
+      },
+      "name": "Fantasy_Texture"
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1,
+            "TANGENT": 2,
+            "TEXCOORD_0": 3
+          },
+          "indices": 4,
+          "material": 0
+        }
+      ],
+      "name": "SF_Prop_SignPost_01"
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0,
+      "rotation": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "name": "SF_Prop_SignPost_01"
+    }
+  ],
+  "samplers": [
+    {
+      "minFilter": 9729
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ],
+      "name": "SF_Prop_SignPost_01"
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0,
+      "name": "Fantasy_Texture"
+    }
+  ]
+}

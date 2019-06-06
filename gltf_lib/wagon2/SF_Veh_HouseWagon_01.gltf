@@ -1,0 +1,488 @@
+{
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 1183,
+      "type": "VEC3",
+      "max": [
+        0.02027391642332077,
+        0.061622545123100281,
+        0.054502103477716446
+      ],
+      "min": [
+        -0.02027391642332077,
+        0.006220770999789238,
+        -0.032192133367061615
+      ]
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 1183,
+      "type": "VEC3",
+      "max": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "min": [
+        -1.0,
+        -1.0,
+        -1.0
+      ]
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 1183,
+      "type": "VEC4",
+      "max": [
+        1.0,
+        0.0,
+        0.025373103097081184,
+        1.0
+      ],
+      "min": [
+        -0.4750310480594635,
+        -1.0,
+        -0.026246611028909683,
+        -1.0
+      ]
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 1183,
+      "type": "VEC2",
+      "max": [
+        0.95339828729629517,
+        0.97344857454299927
+      ],
+      "min": [
+        0.10791545361280441,
+        0.0076555311679840088
+      ]
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5125,
+      "count": 2070,
+      "type": "SCALAR",
+      "max": [
+        1118.0
+      ],
+      "min": [
+        0.0
+      ]
+    },
+    {
+      "bufferView": 5,
+      "componentType": 5125,
+      "count": 96,
+      "type": "SCALAR",
+      "max": [
+        1182.0
+      ],
+      "min": [
+        1119.0
+      ]
+    },
+    {
+      "bufferView": 6,
+      "componentType": 5126,
+      "count": 464,
+      "type": "VEC3",
+      "max": [
+        0.013068684376776218,
+        0.00785883143544197,
+        0.0078589590266346931
+      ],
+      "min": [
+        -0.013068685308098793,
+        -0.00785883143544197,
+        -0.0078589590266346931
+      ]
+    },
+    {
+      "bufferView": 7,
+      "componentType": 5126,
+      "count": 464,
+      "type": "VEC3",
+      "max": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "min": [
+        -1.0,
+        -1.0,
+        -1.0
+      ]
+    },
+    {
+      "bufferView": 8,
+      "componentType": 5126,
+      "count": 464,
+      "type": "VEC4",
+      "max": [
+        1.0,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "min": [
+        1.0,
+        0.0,
+        0.0,
+        -1.0
+      ]
+    },
+    {
+      "bufferView": 9,
+      "componentType": 5126,
+      "count": 464,
+      "type": "VEC2",
+      "max": [
+        0.35857969522476196,
+        0.39864164590835571
+      ],
+      "min": [
+        0.14251521229743958,
+        0.0629068911075592
+      ]
+    },
+    {
+      "bufferView": 10,
+      "componentType": 5125,
+      "count": 828,
+      "type": "SCALAR",
+      "max": [
+        463.0
+      ],
+      "min": [
+        0.0
+      ]
+    },
+    {
+      "bufferView": 11,
+      "componentType": 5126,
+      "count": 464,
+      "type": "VEC3",
+      "max": [
+        0.013068685308098793,
+        0.00785883143544197,
+        0.0078589590266346931
+      ],
+      "min": [
+        -0.013068684376776218,
+        -0.00785883143544197,
+        -0.0078589590266346931
+      ]
+    },
+    {
+      "bufferView": 12,
+      "componentType": 5126,
+      "count": 464,
+      "type": "VEC3",
+      "max": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "min": [
+        -1.0,
+        -1.0,
+        -1.0
+      ]
+    },
+    {
+      "bufferView": 13,
+      "componentType": 5126,
+      "count": 464,
+      "type": "VEC4",
+      "max": [
+        1.0,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "min": [
+        1.0,
+        0.0,
+        0.0,
+        -1.0
+      ]
+    },
+    {
+      "bufferView": 14,
+      "componentType": 5126,
+      "count": 464,
+      "type": "VEC2",
+      "max": [
+        0.35857969522476196,
+        0.39864164590835571
+      ],
+      "min": [
+        0.14251521229743958,
+        0.0629068911075592
+      ]
+    },
+    {
+      "bufferView": 15,
+      "componentType": 5125,
+      "count": 828,
+      "type": "SCALAR",
+      "max": [
+        463.0
+      ],
+      "min": [
+        0.0
+      ]
+    }
+  ],
+  "asset": {
+    "generator": "UnityGLTF (2019.1.4f1)",
+    "version": "2.0"
+  },
+  "buffers": [
+    {
+      "uri": "SF_Veh_HouseWagon_01.bin",
+      "byteLength": 116616
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 14196
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 14196,
+      "byteLength": 14196
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 28392,
+      "byteLength": 18928
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 47320,
+      "byteLength": 9464
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 56784,
+      "byteLength": 8280
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 65064,
+      "byteLength": 384
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 65448,
+      "byteLength": 5568
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 71016,
+      "byteLength": 5568
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 76584,
+      "byteLength": 7424
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 84008,
+      "byteLength": 3712
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 87720,
+      "byteLength": 3312
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 91032,
+      "byteLength": 5568
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 96600,
+      "byteLength": 5568
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 102168,
+      "byteLength": 7424
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 109592,
+      "byteLength": 3712
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 113304,
+      "byteLength": 3312
+    }
+  ],
+  "images": [
+    {
+      "uri": "11660_Fantasy_Texture.jpg",
+      "name": "Fantasy_Texture"
+    }
+  ],
+  "materials": [
+    {
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.5
+      },
+      "name": "Fantasy_Texture"
+    },
+    {
+      "pbrMetallicRoughness": {
+        "metallicFactor": 0.0
+      },
+      "emissiveFactor": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "name": "lambert2"
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1,
+            "TANGENT": 2,
+            "TEXCOORD_0": 3
+          },
+          "indices": 4,
+          "material": 0
+        },
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1,
+            "TANGENT": 2,
+            "TEXCOORD_0": 3
+          },
+          "indices": 5,
+          "material": 0
+        }
+      ],
+      "name": "SF_Veh_HouseWagon_01"
+    },
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 6,
+            "NORMAL": 7,
+            "TANGENT": 8,
+            "TEXCOORD_0": 9
+          },
+          "indices": 10,
+          "material": 1
+        }
+      ],
+      "name": "SF_Veh_HouseWheel_Back"
+    },
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 11,
+            "NORMAL": 12,
+            "TANGENT": 13,
+            "TEXCOORD_0": 14
+          },
+          "indices": 15,
+          "material": 1
+        }
+      ],
+      "name": "SF_Veh_HouseWheel_Front"
+    }
+  ],
+  "nodes": [
+    {
+      "children": [
+        1,
+        2
+      ],
+      "mesh": 0,
+      "rotation": [
+        0.0,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "name": "SF_Veh_HouseWagon_01"
+    },
+    {
+      "mesh": 1,
+      "rotation": [
+        0.0,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "translation": [
+        6.825864E-05,
+        0.00782097,
+        0.0143044246
+      ],
+      "name": "SF_Veh_HouseWheel_Back"
+    },
+    {
+      "mesh": 2,
+      "rotation": [
+        0.0,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "translation": [
+        6.825864E-05,
+        0.00782097,
+        -0.0131478151
+      ],
+      "name": "SF_Veh_HouseWheel_Front"
+    }
+  ],
+  "samplers": [
+    {
+      "minFilter": 9729
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ],
+      "name": "SF_Veh_HouseWagon_01"
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0,
+      "name": "Fantasy_Texture"
+    }
+  ]
+}

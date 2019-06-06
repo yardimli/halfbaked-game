@@ -1,0 +1,102 @@
+{
+    "uri": "SF_Prop_SignPost_01.gltf",
+    "mimeType": "model/gltf+json",
+    "validatorVersion": "2.0.0-dev.2.7",
+    "validatedAt": "2019-06-03T13:46:01.665Z",
+    "issues": {
+        "numErrors": 9,
+        "numWarnings": 0,
+        "numInfos": 0,
+        "numHints": 0,
+        "messages": [
+            {
+                "code": "ROTATION_NON_UNIT",
+                "message": "Rotation quaternion must be normalized.",
+                "severity": 0,
+                "pointer": "/nodes/0/rotation"
+            },
+            {
+                "code": "ACCESSOR_MIN_MISMATCH",
+                "message": "Declared minimum value for this component (0) does not match actual minimum (-0.008000478148460388).",
+                "severity": 0,
+                "pointer": "/accessors/0/min/0"
+            },
+            {
+                "code": "ACCESSOR_ELEMENT_OUT_OF_MIN_BOUND",
+                "message": "Accessor contains 55 element(s) less than declared minimum value 0.",
+                "severity": 0,
+                "pointer": "/accessors/0/min/0"
+            },
+            {
+                "code": "ACCESSOR_MIN_MISMATCH",
+                "message": "Declared minimum value for this component (0) does not match actual minimum (-0.006777820643037558).",
+                "severity": 0,
+                "pointer": "/accessors/0/min/2"
+            },
+            {
+                "code": "ACCESSOR_ELEMENT_OUT_OF_MIN_BOUND",
+                "message": "Accessor contains 74 element(s) less than declared minimum value 0.",
+                "severity": 0,
+                "pointer": "/accessors/0/min/2"
+            },
+            {
+                "code": "ACCESSOR_MAX_MISMATCH",
+                "message": "Declared maximum value for this component (1) does not match actual maximum (0.008000478148460388).",
+                "severity": 0,
+                "pointer": "/accessors/0/max/0"
+            },
+            {
+                "code": "ACCESSOR_MAX_MISMATCH",
+                "message": "Declared maximum value for this component (1) does not match actual maximum (0.03082936257123947).",
+                "severity": 0,
+                "pointer": "/accessors/0/max/1"
+            },
+            {
+                "code": "ACCESSOR_MAX_MISMATCH",
+                "message": "Declared maximum value for this component (1) does not match actual maximum (0.006777820643037558).",
+                "severity": 0,
+                "pointer": "/accessors/0/max/2"
+            },
+            {
+                "code": "ACCESSOR_MAX_MISMATCH",
+                "message": "Declared maximum value for this component (1) does not match actual maximum (0.9991607666015625).",
+                "severity": 0,
+                "pointer": "/accessors/1/max/1"
+            }
+        ],
+        "truncated": false
+    },
+    "info": {
+        "version": "2.0",
+        "generator": "UnityGLTF (2019.1.4f1)",
+        "resources": [
+            {
+                "pointer": "/buffers/0",
+                "mimeType": "application/gltf-buffer",
+                "storage": "external",
+                "uri": "SF_Prop_SignPost_01.bin",
+                "byteLength": 5688
+            },
+            {
+                "pointer": "/images/0",
+                "mimeType": "image/jpeg",
+                "storage": "external",
+                "uri": "11560_Fantasy_Texture.jpg",
+                "image": {
+                    "width": 1024,
+                    "height": 1024,
+                    "format": "RGB",
+                    "bits": 8
+                }
+            }
+        ],
+        "hasAnimations": false,
+        "hasMaterials": true,
+        "hasMorphTargets": false,
+        "hasSkins": false,
+        "hasTextures": true,
+        "hasDefaultScene": true,
+        "primitivesCount": 1,
+        "maxAttributesUsed": 4
+    }
+}

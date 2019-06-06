@@ -1,0 +1,353 @@
+{
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 1700,
+      "type": "VEC3",
+      "max": [
+        0.050304718315601349,
+        0.18554748594760895,
+        0.044115446507930756
+      ],
+      "min": [
+        -0.050304792821407318,
+        0.0,
+        -0.044115293771028519
+      ]
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 1700,
+      "type": "VEC3",
+      "max": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "min": [
+        -1.0,
+        -1.0,
+        -1.0
+      ]
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 1700,
+      "type": "VEC4",
+      "max": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "min": [
+        -1.0,
+        -1.0,
+        -0.86602818965911865,
+        -1.0
+      ]
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 1700,
+      "type": "VEC2",
+      "max": [
+        0.79996132850646973,
+        0.51655387878417969
+      ],
+      "min": [
+        0.012330129742622375,
+        0.0079585611820220947
+      ]
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5126,
+      "count": 1700,
+      "type": "VEC4",
+      "max": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "min": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "bufferView": 5,
+      "componentType": 5125,
+      "count": 3060,
+      "type": "SCALAR",
+      "max": [
+        1699.0
+      ],
+      "min": [
+        0.0
+      ]
+    },
+    {
+      "bufferView": 6,
+      "componentType": 5126,
+      "count": 980,
+      "type": "VEC3",
+      "max": [
+        0.05280105397105217,
+        0.099353797733783722,
+        0.087479166686534882
+      ],
+      "min": [
+        -0.052801132202148438,
+        -0.099353797733783722,
+        -0.087479166686534882
+      ]
+    },
+    {
+      "bufferView": 7,
+      "componentType": 5126,
+      "count": 980,
+      "type": "VEC3",
+      "max": [
+        0.97596865892410278,
+        1.0,
+        0.97598308324813843
+      ],
+      "min": [
+        -0.97596937417984009,
+        -1.0,
+        -0.97597593069076538
+      ]
+    },
+    {
+      "bufferView": 8,
+      "componentType": 5126,
+      "count": 980,
+      "type": "VEC4",
+      "max": [
+        1.0,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "min": [
+        1.0,
+        0.0,
+        0.0,
+        -1.0
+      ]
+    },
+    {
+      "bufferView": 9,
+      "componentType": 5126,
+      "count": 980,
+      "type": "VEC2",
+      "max": [
+        0.29536154866218567,
+        0.44305211305618286
+      ],
+      "min": [
+        0.14272922277450562,
+        0.060451775789260864
+      ]
+    },
+    {
+      "bufferView": 10,
+      "componentType": 5125,
+      "count": 1638,
+      "type": "SCALAR",
+      "max": [
+        979.0
+      ],
+      "min": [
+        0.0
+      ]
+    }
+  ],
+  "asset": {
+    "generator": "UnityGLTF (2019.1.4f1)",
+    "version": "2.0"
+  },
+  "buffers": [
+    {
+      "uri": "SF_Bld_House_Windmill_01.bin",
+      "byteLength": 174632
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 20400
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 20400,
+      "byteLength": 20400
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 40800,
+      "byteLength": 27200
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 68000,
+      "byteLength": 13600
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 81600,
+      "byteLength": 27200
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 108800,
+      "byteLength": 12240
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 121040,
+      "byteLength": 11760
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 132800,
+      "byteLength": 11760
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 144560,
+      "byteLength": 15680
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 160240,
+      "byteLength": 7840
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 168080,
+      "byteLength": 6552
+    }
+  ],
+  "images": [
+    {
+      "uri": "11662_Fantasy_Texture.jpg",
+      "name": "Fantasy_Texture"
+    }
+  ],
+  "materials": [
+    {
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.5
+      },
+      "name": "Fantasy_Texture"
+    },
+    {
+      "pbrMetallicRoughness": {
+        "metallicFactor": 0.0
+      },
+      "emissiveFactor": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "name": "lambert1"
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1,
+            "TANGENT": 2,
+            "TEXCOORD_0": 3,
+            "COLOR_0": 4
+          },
+          "indices": 5,
+          "material": 0
+        }
+      ],
+      "name": "SF_Bld_House_Windmill_01"
+    },
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 6,
+            "NORMAL": 7,
+            "TANGENT": 8,
+            "TEXCOORD_0": 9
+          },
+          "indices": 10,
+          "material": 1
+        }
+      ],
+      "name": "SF_Bld_HouseAdd_WindmillBlade_01"
+    }
+  ],
+  "nodes": [
+    {
+      "children": [
+        1
+      ],
+      "mesh": 0,
+      "rotation": [
+        0.0,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "name": "SF_Bld_House_Windmill_01"
+    },
+    {
+      "mesh": 1,
+      "rotation": [
+        0.0,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "translation": [
+        -0.04913208,
+        0.124712415,
+        0.0289165489
+      ],
+      "name": "SF_Bld_HouseAdd_WindmillBlade_01"
+    }
+  ],
+  "samplers": [
+    {
+      "minFilter": 9729
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ],
+      "name": "SF_Bld_House_Windmill_01"
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0,
+      "name": "Fantasy_Texture"
+    }
+  ]
+}

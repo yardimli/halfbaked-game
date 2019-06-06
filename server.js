@@ -11,9 +11,7 @@ var webSocketServer = require('websocket').server;
 var http = require('http');
 
 // GLOBALS
-// latest 100 messages
-var history = [];
-// list of currently connected clients (users)
+var message_history = [];
 var clients = [];
 var userPositions = [];
 
@@ -46,18 +44,12 @@ wsServer.on('request', function (request) {
   // we need to know client index to remove them on 'close' event
   var index = clients.push(connection) - 1;
   var userName = false;
-  var userCharacter = "firefox";
-  var userAnimation = "walk_right";
-  var userWidth = 32;
-  var userHeight = 32;
-  var userAnimationRow = 0;
 
 
   console.log((new Date()) + ' Connection accepted.');
 
-  // send back chat history for the first time
-  if (history.length > 0) {
-    connection.sendUTF(JSON.stringify({type: 'history', data: history}));
+  if (message_history.length > 0) {
+    connection.sendUTF(JSON.stringify({type: 'history', data: message_history}));
   }
 
   // user sent some message
@@ -68,22 +60,20 @@ wsServer.on('request', function (request) {
 
       if (NewMessage.type === "join") {
         userName = htmlEntities(NewMessage.userName);
-        userCharacter = htmlEntities(NewMessage.userCharacter);
-        userAnimation = htmlEntities(NewMessage.userAnimation);
-        userWidth = NewMessage.userWidth;
-        userHeight = NewMessage.userHeight;
 
         userPositions[index] = {
           userName: userName,
-          userCharacter: userCharacter,
-          userAnimation: userAnimation,
-          userWidth: userWidth,
-          userHeight: userHeight,
-          animation_row : NewMessage.animation_row,
-          animation_frame : 0,
-          animation_max_frame : NewMessage.animation_max_frame,
-          posX: Math.floor(Math.random() * 450),
-          posY: Math.floor(Math.random() * 150)
+          userCharacter: htmlEntities(NewMessage.userCharacter),
+          userWidth: NewMessage.userWidth,
+          userHeight: NewMessage.userHeight,
+
+          animation_row_name: NewMessage.animation_row_name,
+          animation_length: NewMessage.animation_length,
+          animation_row: NewMessage.animation_row,
+
+          animation_frame: 0,
+          posX: 600,
+          posY: 500
         };
 
         connection.sendUTF(JSON.stringify({type: 'new_user', userPosition: userPositions[index]}));
@@ -96,7 +86,7 @@ wsServer.on('request', function (request) {
           message: htmlEntities("User " + userName + " joined conversation."),
         };
 
-        history.push(obj);
+        message_history.push(obj);
 
         // broadcast message to all connected clients
         var json = JSON.stringify({type: 'message', data: obj});
@@ -111,9 +101,13 @@ wsServer.on('request', function (request) {
       }
 
       else if (NewMessage.type === "userPosition") {
-        if (typeof  userPositions[index] !== "undefined") {
+        if (typeof userPositions[index] !== "undefined") {
           userPositions[index].posX = parseInt(NewMessage.posX);
           userPositions[index].posY = parseInt(NewMessage.posY);
+
+          userPositions[index].animation_row_name = NewMessage.animation_row_name;
+          userPositions[index].animation_length = NewMessage.animation_length;
+          userPositions[index].animation_row = NewMessage.animation_row;
 
           console.log((new Date()) + ' User known as: ' + userName + ' moved to X' + userPositions[index].posX + ", Y: " + userPositions[index].posY);
 
@@ -125,10 +119,8 @@ wsServer.on('request', function (request) {
       }
 
       else if (NewMessage.type === "textMessage") {
-        // log and broadcast the message
         console.log((new Date()) + ' Received Message from ' + userName + ': ' + NewMessage.message);
 
-        // we want to keep history of all sent messages
         var obj = {
           time: (new Date()).getTime(),
           type: "userMessage",
@@ -136,8 +128,8 @@ wsServer.on('request', function (request) {
           author: userName,
         };
 
-        history.push(obj);
-        history = history.slice(-100);
+        message_history.push(obj);
+        message_history = message_history.slice(-100);
 
         // broadcast message to all connected clients
         var json = JSON.stringify({type: 'message', data: obj});
@@ -150,7 +142,7 @@ wsServer.on('request', function (request) {
 
   // user disconnected
   connection.on('close', function (connection) {
-    if (userName !== false ) {
+    if (userName !== false) {
       console.log((new Date()) + " Peer from " + connection.remoteAddress + " with name " + userName + " disconnected.");
 
       var obj = {
@@ -159,7 +151,7 @@ wsServer.on('request', function (request) {
         message: htmlEntities("User " + userName + " has left the conversation."),
       };
 
-      history.push(obj);
+      message_history.push(obj);
 
       // broadcast message to all connected clients
       var json = JSON.stringify({type: 'message', data: obj});

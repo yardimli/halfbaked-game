@@ -15,57 +15,34 @@
 </head>
 <body>
 <!--<main role="main" class="container2" style="position: fixed; z-index: 1000; top: 10px; left:10px; right: 10px;">-->
-
-  <div style="width:100%; height: 660px; background-color: #aaaaff; border-radius: 5px; position: relative; padding: 0px;" id="GameBoard" >
-<canvas id="game_canvas" width="1400" height="660"></canvas>
-  </div>
-
-  <div id="character_1" style="position: fixed; bottom:10px; right:10px;"></div>
-
+<div style="position: absolute; bottom:10px; left:10px; width:1000px; background-color: white; padding: 10px; border-radius: 10px; opacity: 0.8">
   <div id="content"></div>
   <div class="row">
     <div class="col-lg-2 col-md-2">
       <span id="status">Connecting...</span>
     </div>
-    <div class="col-lg-4 col-md-4">
+    <div class="col-lg-7 col-md-7">
       <input type="text" id="input" disabled="disabled" style="width: 100%;"/>
     </div>
 
-    <div class="col-lg-1 col-md-1">
+    <div class="col-lg-2 col-md-2">
       <div class="dropdown" style="margin-top: 8px;">
         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           Character
         </button>
         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton2" id="drop_down_files">
-          <a class="dropdown-item x_file" data-name="firefox" href="#">firefox</a>
-          <a class="dropdown-item x_file" data-name="boss" href="#">boss</a>
-          <a class="dropdown-item x_file" data-name="ogre" href="#">ogre</a>
-          <a class="dropdown-item x_file" data-name="eye" href="#">eye</a>
-          <a class="dropdown-item x_file" data-name="deathknight" href="#">deathknight</a>
-          <a class="dropdown-item x_file" data-name="goldenarmor" href="#">goldenarmor</a>
-          <a class="dropdown-item x_file" data-name="skeleton2" href="#">skeleton2</a>
-          <a class="dropdown-item x_file" data-name="spectre" href="#">spectre</a>
-          <a class="dropdown-item x_file" data-name="redarmor" href="#">redarmor</a>
-          <a class="dropdown-item x_file" data-name="wizard" href="#">wizard</a>
-          <a class="dropdown-item x_file" data-name="leatherarmor" href="#">leatherarmor</a>
-          <a class="dropdown-item x_file" data-name="goblin" href="#">goblin</a>
-          <a class="dropdown-item x_file" data-name="clotharmor" href="#">clotharmor</a>
+          <a class="dropdown-item x_file" data-name="character1" href="#">#1</a>
+          <a class="dropdown-item x_file" data-name="character2" href="#">#2</a>
+          <a class="dropdown-item x_file" data-name="character3" href="#">#3</a>
+          <a class="dropdown-item x_file" data-name="character4" href="#">#4</a>
+          <a class="dropdown-item x_file" data-name="character5" href="#">#5</a>
+          <a class="dropdown-item x_file" data-name="character5" href="#">#6</a>
         </div>
       </div>
     </div>
 
     <div class="col-lg-1 col-md-1" style="margin-top: 8px;">
       <button class="btn btn-primary" type="button" id="joinBtn">Join</button>
-    </div>
-
-    <div class="col-lg-4 col-md-4" style="margin-top: 8px;">
-      <div class="dropdown" style="display: inline-block;">
-        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Animation
-        </button>
-        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" id="drop_down_animations">
-        </div>
-      </div>
     </div>
 
   </div>
@@ -75,19 +52,19 @@
 <!--</main>-->
 
 
-<!--------------------------------->
-<br>
-<br>
-<br>
-<br>
-<br>
-<canvas id="walk_game_canvas" width="1400" height="660"></canvas>
 
 </body>
 
+<script src="threejs/build/three.js"></script>
+<script src="threejs/examples/js/controls/OrbitControls.js"></script>
+<script src="threejs/examples/js/loaders/GLTFLoader.js"></script>
+<script src="threejs/examples/js/loaders/BasisTextureLoader.js"></script>
+
 <script src="js/jquery-3.4.1.min.js"></script>
 <script src="js/bootstrap.bundle.min.js"></script>
-<script src="./client.js"></script>
+<script src="./client_three_js.js"></script>
+
+<script src="./engine_3d.js"></script>
 
 </html>
 

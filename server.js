@@ -44,6 +44,7 @@ wsServer.on('request', function (request) {
   // we need to know client index to remove them on 'close' event
   var index = clients.push(connection) - 1;
   var userName = false;
+  var userCharacter = "";
 
 
   console.log((new Date()) + ' Connection accepted.');
@@ -60,25 +61,20 @@ wsServer.on('request', function (request) {
 
       if (NewMessage.type === "join") {
         userName = htmlEntities(NewMessage.userName);
+        userCharacter = htmlEntities(NewMessage.userCharacter);
 
         userPositions[index] = {
           userName: userName,
-          userCharacter: htmlEntities(NewMessage.userCharacter),
-          userWidth: NewMessage.userWidth,
-          userHeight: NewMessage.userHeight,
-
-          animation_row_name: NewMessage.animation_row_name,
-          animation_length: NewMessage.animation_length,
-          animation_row: NewMessage.animation_row,
-
-          animation_frame: 0,
-          posX: 600,
-          posY: 500
+          userCharacter: userCharacter,
+          ActivePlayer: true,
+          posX: 0,
+          posY: 20,
+          posZ: 0,
         };
 
         connection.sendUTF(JSON.stringify({type: 'new_user', userPosition: userPositions[index]}));
 
-        console.log((new Date()) + ' User is known as: ' + userName + ' with ' + userCharacter + '. At X' + userPositions[index].posX + ", Y: " + userPositions[index].posY);
+        console.log((new Date()) + ' User is known as: ' + userName + ' with ' + userCharacter + '. At X' + userPositions[index].posX + ", Y: " + userPositions[index].posY+ ", Z: " + userPositions[index].posZ);
 
         var obj = {
           time: (new Date()).getTime(),
@@ -104,12 +100,17 @@ wsServer.on('request', function (request) {
         if (typeof userPositions[index] !== "undefined") {
           userPositions[index].posX = parseInt(NewMessage.posX);
           userPositions[index].posY = parseInt(NewMessage.posY);
+          userPositions[index].posZ = parseInt(NewMessage.posZ);
 
-          userPositions[index].animation_row_name = NewMessage.animation_row_name;
-          userPositions[index].animation_length = NewMessage.animation_length;
-          userPositions[index].animation_row = NewMessage.animation_row;
+          console.log((new Date()) + ' User known as: ' + userName + ' moved to X' + userPositions[index].posX + ", Y: " + userPositions[index].posY+ ", Z: " + userPositions[index].posZ);
 
-          console.log((new Date()) + ' User known as: ' + userName + ' moved to X' + userPositions[index].posX + ", Y: " + userPositions[index].posY);
+          for (var i=0; i<userPositions.length; i++) {
+            if (i===index) {
+              userPositions[i].ActivePlayer = true;
+            } else {
+              userPositions[i].ActivePlayer = false;
+            }
+          }
 
           var json = JSON.stringify({type: 'positions', data: userPositions});
           for (var i = 0; i < clients.length; i++) {

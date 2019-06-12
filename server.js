@@ -74,7 +74,7 @@ wsServer.on('request', function (request) {
 
         connection.sendUTF(JSON.stringify({type: 'new_user', userPosition: userPositions[index]}));
 
-        console.log((new Date()) + ' User is known as: ' + userName + ' with ' + userCharacter + '. At X' + userPositions[index].posX + ", Y: " + userPositions[index].posY+ ", Z: " + userPositions[index].posZ);
+        console.log((new Date()) + ' User is known as: ' + userName + ' with ' + userCharacter + '. At X' + userPositions[index].posX + ", Y: " + userPositions[index].posY + ", Z: " + userPositions[index].posZ);
 
         var obj = {
           time: (new Date()).getTime(),
@@ -102,13 +102,16 @@ wsServer.on('request', function (request) {
           userPositions[index].posY = parseInt(NewMessage.posY);
           userPositions[index].posZ = parseInt(NewMessage.posZ);
 
-          console.log((new Date()) + ' User known as: ' + userName + ' moved to X' + userPositions[index].posX + ", Y: " + userPositions[index].posY+ ", Z: " + userPositions[index].posZ);
+          console.log((new Date()) + ' User known as: ' + userName + ' moved to X' + userPositions[index].posX + ", Y: " + userPositions[index].posY + ", Z: " + userPositions[index].posZ);
 
-          for (var i=0; i<userPositions.length; i++) {
-            if (i===index) {
-              userPositions[i].ActivePlayer = true;
-            } else {
-              userPositions[i].ActivePlayer = false;
+          for (var i = 0; i < userPositions.length; i++) {
+            if (typeof userPositions[i] !== "undefined") {
+              if (i === index) {
+                userPositions[i].ActivePlayer = true;
+              }
+              else {
+                userPositions[i].ActivePlayer = false;
+              }
             }
           }
 

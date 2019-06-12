@@ -60,7 +60,7 @@ function calculateCollisionPoints(mesh, scale, type = 'collision') {
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
 function detectCollisions() {
-  if (main_player!==null) {
+  if (main_player !== null) {
     // Get the user's current collision area.
     var bounds = {
       xMin: rotationPoint.position.x - main_player.geometry.parameters.width / 2,
@@ -184,7 +184,6 @@ function loadGLTF(name, model_file, position, scale, rotate, collidable) {
     gltf.scene.position.y = position.y;				    //Position (y = up+, down-)
     gltf.scene.position.z = position.z;				    //Position (z = front +, back-)
 
-  //  gltf.name = name;
     scene.add(gltf.scene);
 
     if (collidable) {
@@ -192,12 +191,29 @@ function loadGLTF(name, model_file, position, scale, rotate, collidable) {
     }
 
     const root = gltf.scene;
+
+    console.log("scan :" + name);
+    var AssignNameToFirst = true;
     root.traverse((obj) => {
+      if (obj.type === "Scene") {
+        // if (obj.userData !== undefined) {
+        //   if (AssignNameToFirst) {
+        // console.log("!!!!!!!!!!!!!!");
+        // console.log(name);
+        // console.log(obj.uuid);
+        obj.userData.object_name = name;
+        AssignNameToFirst = false;
+        // }
+        // }
+      }
+
       if (obj.castShadow !== undefined) {
         obj.castShadow = true;
         obj.receiveShadow = true;
       }
     });
+
+    console.log(gltf.scene);
 
   });
 }
@@ -206,12 +222,24 @@ function loadGLTF(name, model_file, position, scale, rotate, collidable) {
 //------------------------------------------------------------------------------------------------------------------------------------------------
 function createFloor() {
   //ground
-  var groundTexture = loaderTexture.load('./threejs/examples/textures/terrain/grasslight-big.jpg');
-  groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
-  groundTexture.repeat.set(25, 25);
-  groundTexture.anisotropy = 16;
-  var groundMaterial = new THREE.MeshLambertMaterial({map: groundTexture});
-  var plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(20000, 20000), groundMaterial);
+  // var groundTexture = loaderTexture.load('./threejs/examples/textures/terrain/backgrounddetailed6.jpg');
+  // groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
+  // groundTexture.repeat.set(100, 100);
+  // groundTexture.anisotropy = 16;
+  // var groundMaterial = new THREE.MeshLambertMaterial({map: groundTexture});
+  // var plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(20000, 20000), groundMaterial);
+  // plane.position.y = -1;
+  // plane.rotation.x = -Math.PI / 2;
+  // plane.receiveShadow = true;
+  // plane.name = "plane";
+  //
+  // scene.add(plane);
+  // objects.push(plane);
+
+
+  var geo = new THREE.PlaneBufferGeometry(20000, 20000, 8, 8);
+  var mat = new THREE.MeshBasicMaterial({color: 0x5A6450});
+  var plane = new THREE.Mesh(geo, mat);
   plane.position.y = -1;
   plane.rotation.x = -Math.PI / 2;
   plane.receiveShadow = true;
@@ -435,12 +463,37 @@ function init() {
   // createOtherCharacter("char6", "./character6.png", 35, 50, new THREE.Vector3(305, 20, -25), new THREE.Vector3(0, 0, 0), true);
 
   createFloor();
-  loadGLTF('SF_Prop_SignPost_01', './gltf_lib/sign/SF_Prop_SignPost_01.gltf', new THREE.Vector3(105, 0, 5), new THREE.Vector3(1000, 1000, 1000), new THREE.Vector3(0, 0, 0), true);
-  loadGLTF('SF_Veh_HouseWagon_01', './gltf_lib/wagon2/SF_Veh_HouseWagon_01.gltf', new THREE.Vector3(145, 0, -255), new THREE.Vector3(1000, 1000, 1000), new THREE.Vector3(0, 90, 0), true);
-  loadGLTF('SF_Bld_House_Windmill_01', './gltf_lib/windmill/SF_Bld_House_Windmill_01.gltf', new THREE.Vector3(-60, 0, -355), new THREE.Vector3(1000, 1000, 1000), new THREE.Vector3(0, 60, 0), true);
+
+  $.ajax({
+    type: "GET",
+    url: "game_map.json",
+    headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+    dataType: 'json',
+    success: function (response) {
+      for (var i = 0; i < response.length; i++) {
+        console.log(response[i]);
+
+        var RepeatX = 0;
+        var RepeatY = 0;
+        var RepeatZ = 0;
+
+        for (var j=0; j<response[i].Repeat; j++) {
+          loadGLTF(response[i].Name, response[i].FileName, new THREE.Vector3(response[i].Position[0]+RepeatX, response[i].Position[1]+RepeatY, response[i].Position[2]+RepeatZ), new THREE.Vector3(response[i].Scale[0], response[i].Scale[1], response[i].Scale[2]), new THREE.Vector3(response[i].Rotate[0], response[i].Rotate[1], response[i].Rotate[2]), response[i].Collision);
+
+          RepeatX += response[i].RepeatSpacing[0];
+          RepeatY += response[i].RepeatSpacing[1];
+          RepeatZ += response[i].RepeatSpacing[2];
 
 
-  loadGLTF('scene', './gltf_lib/scene/scene.gltf', new THREE.Vector3(0, 300, -1000), new THREE.Vector3(0.1, 0.1, 0.1), new THREE.Vector3(0, 0, 0), true);
+        }
+
+      }
+    }
+  });
+
+  // loadGLTF('Stall', './gltf_lib2/Stall/Stall.gltf', new THREE.Vector3(450, 0, 5), new THREE.Vector3(1000, 1000, 1000), new THREE.Vector3(0, 0, 0), true);
+  // loadGLTF('scene', './gltf_lib/scene/scene.gltf', new THREE.Vector3(0, 300, -1000), new THREE.Vector3(0.1, 0.1, 0.1), new THREE.Vector3(0, 0, 0), true);
+
 
   // Create the camera.
   camera = new THREE.PerspectiveCamera(
@@ -466,7 +519,7 @@ function init() {
   renderer.gammaOutput = true;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.gammaFactor = 3.2;
+//  renderer.gammaFactor = 3.2;
 
   // Build the controls.
   controls = new THREE.OrbitControls(camera, element);
@@ -502,6 +555,7 @@ function update() {
 }
 
 var WindMillRotation = 0;
+var logOnce = 0;
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
 function render() {
@@ -513,9 +567,15 @@ function render() {
   // }
 
   scene.traverse(function (node) {
-    if (node instanceof THREE.Mesh) {
-//      console.log(node.name);
-      if (node.name==="SF_Bld_House_Windmill_01") {
+    if (node instanceof THREE.Scene) {
+      if (logOnce > 0) {
+        console.log("---------------------");
+        console.log(node);
+        console.log(node.userData);
+        logOnce--;
+      }
+
+      if (node.userData.object_name === "WindmillX") {
         WindMillRotation = WindMillRotation + 0.1;
         node.rotation.y = THREE.Math.degToRad(WindMillRotation);
       }

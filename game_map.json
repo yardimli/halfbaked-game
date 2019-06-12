@@ -1,0 +1,331 @@
+[
+  {
+    "Name": "Fence",
+    "FileName": "./gltf_lib2/Fence_Stone/Fence_Stone.gltf",
+    "Position": [
+      0,
+      0,
+      -350
+    ],
+    "Scale": [
+      1000,
+      1000,
+      1000
+    ],
+    "Rotate": [
+      0,
+      90,
+      0
+    ],
+    "Collision": true,
+    "Repeat": 14,
+    "RepeatSpacing": [
+      0,
+      0,
+      50
+    ]
+  },
+
+
+  {
+    "Name": "CounterTop1",
+    "FileName": "./gltf_lib2/Crate/Crate.gltf",
+    "Position": [
+      100,
+      0,
+      -100
+    ],
+    "Scale": [
+      1000,
+      2500,
+      1000
+    ],
+    "Rotate": [
+      0,
+      90,
+      0
+    ],
+    "Collision": true,
+    "Repeat": 20,
+    "RepeatSpacing": [
+      0,
+      0,
+      20
+    ]
+  },
+
+  {
+    "Name": "CounterTop2",
+    "FileName": "./gltf_lib2/Crate_02/Crate_02.gltf",
+    "Position": [
+      250,
+      0,
+      -100
+    ],
+    "Scale": [
+      1500,
+      2500,
+      1500
+    ],
+    "Rotate": [
+      0,
+      90,
+      0
+    ],
+    "Collision": true,
+    "Repeat": 10,
+    "RepeatSpacing": [
+      0,
+      0,
+      40
+    ]
+  },
+
+  {
+    "Name": "CounterTop3",
+    "FileName": "./gltf_lib2/Crate/Crate.gltf",
+    "Position": [
+      400,
+      0,
+      -100
+    ],
+    "Scale": [
+      1000,
+      2500,
+      1000
+    ],
+    "Rotate": [
+      0,
+      90,
+      0
+    ],
+    "Collision": true,
+    "Repeat": 24,
+    "RepeatSpacing": [
+      0,
+      0,
+      20
+    ]
+  },
+
+  {
+    "Name": "Fence2",
+    "FileName": "./gltf_lib2/Fence_Stone/Fence_Stone.gltf",
+    "Position": [
+      600,
+      0,
+      -350
+    ],
+    "Scale": [
+      1000,
+      1000,
+      1000
+    ],
+    "Rotate": [
+      0,
+      90,
+      0
+    ],
+    "Collision": true,
+    "Repeat": 15,
+    "RepeatSpacing": [
+      0,
+      0,
+      50
+    ]
+  },
+
+  {
+    "Name": "Fence3",
+    "FileName": "./gltf_lib2/Fence_Stone/Fence_Stone.gltf",
+    "Position": [
+      42,
+      0,
+      -345
+    ],
+    "Scale": [
+      1000,
+      1000,
+      1000
+    ],
+    "Rotate": [
+      0,
+      0,
+      0
+    ],
+    "Collision": true,
+    "Repeat": 12,
+    "RepeatSpacing": [
+      50,
+      0,
+      0
+    ]
+  },
+
+
+  {
+    "Name": "Dirt",
+    "FileName": "./gltf_lib2/FarmDirt/FarmDirt.gltf",
+    "Position": [
+      0,
+      0,
+      -100
+    ],
+    "Scale": [
+      100000,
+      1000,
+      100000
+    ],
+    "Rotate": [
+      0,
+      0,
+      0
+    ],
+    "Collision": false,
+    "Repeat": 1,
+    "RepeatSpacing": [
+      0,
+      0,
+      0
+    ]
+  },
+
+  {
+    "Name": "Windmill",
+    "FileName": "./gltf_lib2/House_Windmill/House_Windmill.gltf",
+    "Position": [
+      50,
+      0,
+      -300
+    ],
+    "Scale": [
+      1000,
+      1000,
+      1000
+    ],
+    "Rotate": [
+      0,
+      -50,
+      0
+    ],
+    "Collision": true,
+    "Repeat": 1,
+    "RepeatSpacing": [
+      0,
+      0,
+      0
+    ]
+
+  },
+  {
+    "Name": "Tent",
+    "FileName": "./gltf_lib2/Tent_03/Tent_03.gltf",
+    "Position": [
+      550,
+      0,
+      -220
+    ],
+    "Scale": [
+      1000,
+      1000,
+      1000
+    ],
+    "Rotate": [
+      0,
+      -90,
+      0
+    ],
+    "Collision": true,
+    "Repeat": 1,
+    "RepeatSpacing": [
+      0,
+      0,
+      0
+    ]
+
+  },
+  {
+    "Name": "Stall",
+    "FileName": "./gltf_lib2/Stall/Stall.gltf",
+    "Position": [
+      550,
+      0,
+      0
+    ],
+    "Scale": [
+      1000,
+      1000,
+      1000
+    ],
+    "Rotate": [
+      0,
+      -90,
+      0
+    ],
+    "Collision": true,
+    "Repeat": 1,
+    "RepeatSpacing": [
+      0,
+      0,
+      0
+    ]
+
+  },
+
+  {
+    "Name": "Tent",
+    "FileName": "./gltf_lib2/Tent_04/Tent_04.gltf",
+    "Position": [
+      550,
+      0,
+      300
+    ],
+    "Scale": [
+      1000,
+      1000,
+      1000
+    ],
+    "Rotate": [
+      0,
+      -90,
+      0
+    ],
+    "Collision": true,
+    "Repeat": 1,
+    "RepeatSpacing": [
+      0,
+      0,
+      0
+    ]
+
+  },
+
+  {
+    "Name": "Stall2",
+    "FileName": "./gltf_lib2/Stall_02/Stall_02.gltf",
+    "Position": [
+      350,
+      0,
+      -250
+    ],
+    "Scale": [
+      1000,
+      1000,
+      1000
+    ],
+    "Rotate": [
+      0,
+      0,
+      0
+    ],
+    "Collision": true,
+    "Repeat": 1,
+    "RepeatSpacing": [
+      0,
+      0,
+      0
+    ]
+
+  }
+
+]

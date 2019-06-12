@@ -41,9 +41,9 @@
 
   // glTf 2.0 Loader
   var loader = new THREE.GLTFLoader();
-  loader.load( './gltf_lib/scene/scene.gltf', function ( gltf ) {        //      <<--------- Model Path
+  loader.load( './gltf_lib/restaurant/scene.gltf', function ( gltf ) {        //      <<--------- Model Path
     var object = gltf.scene;
-    gltf.scene.scale.set( 2, 2, 2 );
+    gltf.scene.scale.set( 20, 20, 20 );
     gltf.scene.position.x = 0;				    //Position (x = right+ left-)
     gltf.scene.position.y = 0;				    //Position (y = up+, down-)
     gltf.scene.position.z = 0;				    //Position (z = front +, back-)

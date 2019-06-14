@@ -35,8 +35,116 @@ var main_player = null;
 
 var other_players = [];
 
-init();
-animate();
+$(document).ready( function () {
+  init();
+  animate();
+});
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------------
+var HemisphereLight1;
+var DirectionalLight1;
+var DirectionalLight1Helper;
+var PointLight1;
+var PointLight1Helper;
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------------
+function makeXYZGUI(gui, vector3, name, onChangeFn) {
+  const folder = gui.addFolder(name);
+  folder.add(vector3, 'x', -500, 500).onChange(onChangeFn);
+  folder.add(vector3, 'y', 0, 500).onChange(onChangeFn);
+  folder.add(vector3, 'z', -500, 500).onChange(onChangeFn);
+  folder.open();
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------------
+class ColorGUIHelper {
+  constructor(object, prop) {
+    this.object = object;
+    this.prop = prop;
+  }
+  get value() {
+    return `#${this.object[this.prop].getHexString()}`;
+  }
+  set value(hexString) {
+    this.object[this.prop].set(hexString);
+  }
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------------
+function updateLight() {
+  DirectionalLight1.target.updateMatrixWorld();
+  DirectionalLight1Helper.update();
+  PointLight1Helper.update();
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------------
+function AddLights() {
+
+  const skyColor = 0xB1E1FF;  // light blue
+  const groundColor = 0xB97A20;  // brownish orange
+  const HemisphereLight_intensity = 1;
+
+  HemisphereLight1 = new THREE.HemisphereLight(skyColor, groundColor, HemisphereLight_intensity);
+  scene.add(HemisphereLight1);
+
+  const color = 0xFFFFFF;
+  const DirectionalLight_intensity = 1;
+  DirectionalLight1 = new THREE.DirectionalLight(color, DirectionalLight_intensity);
+  DirectionalLight1.position.set(0, 250, 0);
+  DirectionalLight1.target.position.set(-5, 0, 0);
+  scene.add(DirectionalLight1);
+  scene.add(DirectionalLight1.target);
+
+  DirectionalLight1Helper = new THREE.DirectionalLightHelper(DirectionalLight1);
+  scene.add(DirectionalLight1Helper);
+
+
+  const PointLight1_color = 0xFFFFFF;
+  const PointLight1_intensity = 1;
+  PointLight1 = new THREE.PointLight(PointLight1_color, PointLight1_intensity,0,2);
+  PointLight1.position.set(0, 250, 0);
+  PointLight1.castShadow = true;
+  scene.add(PointLight1);
+
+  PointLight1.shadow.mapSize.width = 512;  // default
+  PointLight1.shadow.mapSize.height = 512; // default
+  PointLight1.shadow.camera.near = 0.5;       // default
+  PointLight1.shadow.camera.far = 1000;      // default
+
+  PointLight1Helper = new THREE.PointLightHelper(PointLight1);
+  scene.add(PointLight1Helper);
+
+
+  const gui = new dat.GUI();
+  var folder = gui.addFolder("Hemisphere Light");
+  folder.addColor(new ColorGUIHelper(HemisphereLight1, 'color'), 'value').name('skyColor');
+  folder.addColor(new ColorGUIHelper(HemisphereLight1, 'groundColor'), 'value').name('groundColor');
+  folder.add(HemisphereLight1, 'intensity', 0, 2, 0.01);
+
+  folder = gui.addFolder("Directional Light");
+  folder.addColor(new ColorGUIHelper(DirectionalLight1, 'color'), 'value').name('color');
+  folder.add(DirectionalLight1, 'intensity', 0, 2, 0.01);
+  folder.open();
+
+  makeXYZGUI(gui, DirectionalLight1.position, 'Directional position', updateLight);
+  makeXYZGUI(gui, DirectionalLight1.target.position, 'Directional target', updateLight);
+
+
+  folder = gui.addFolder("Point Light");
+  folder.addColor(new ColorGUIHelper(PointLight1, 'color'), 'value').name('color');
+  folder.add(PointLight1, 'intensity', 0, 2, 0.01);
+  folder.open();
+
+  makeXYZGUI(gui, PointLight1.position, 'Point position', updateLight);
+
+  gui.close();
+
+  updateLight();
+
+}
 
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
@@ -63,12 +171,12 @@ function detectCollisions() {
   if (main_player !== null) {
     // Get the user's current collision area.
     var bounds = {
-      xMin: rotationPoint.position.x - main_player.geometry.parameters.width / 2,
-      xMax: rotationPoint.position.x + main_player.geometry.parameters.width / 2,
-      yMin: rotationPoint.position.y - main_player.geometry.parameters.height / 2,
-      yMax: rotationPoint.position.y + main_player.geometry.parameters.height / 2,
-      zMin: rotationPoint.position.z - main_player.geometry.parameters.width / 2,
-      zMax: rotationPoint.position.z + main_player.geometry.parameters.width / 2,
+      xMin: main_player.position.x - main_player.geometry.parameters.width / 2,
+      xMax: main_player.position.x + main_player.geometry.parameters.width / 2,
+      yMin: main_player.position.y - main_player.geometry.parameters.height / 2,
+      yMax: main_player.position.y + main_player.geometry.parameters.height / 2,
+      zMin: main_player.position.z - main_player.geometry.parameters.width / 2,
+      zMax: main_player.position.z + main_player.geometry.parameters.width / 2,
     };
 
     // Run through each object and detect if there is a collision.
@@ -91,19 +199,19 @@ function detectCollisions() {
 
             // Determine the X axis push.
             if (objectCenterX > playerCenterX) {
-              rotationPoint.position.x -= 1;
+              main_player.position.x -= 1;
             }
             else {
-              rotationPoint.position.x += 1;
+              main_player.position.x += 1;
             }
           }
           if (bounds.zMin <= collisions[index].zMax && bounds.zMax >= collisions[index].zMin) {
             // Determine the Z axis push.
             if (objectCenterZ > playerCenterZ) {
-              rotationPoint.position.z -= 1;
+              main_player.position.z -= 1;
             }
             else {
-              rotationPoint.position.z += 1;
+              main_player.position.z += 1;
             }
           }
         }
@@ -161,14 +269,16 @@ function createCharacter(model_file, width, height, position, rotate) {
 
   main_player.rotation.set(THREE.Math.degToRad(rotate.x), THREE.Math.degToRad(rotate.y), THREE.Math.degToRad(rotate.z));
 
-//    main_player.position.x = position.x;				    //Position (x = right+ left-)
+  main_player.position.x = position.x;				    //Position (x = right+ left-)
   main_player.position.y = position.y;				    //Position (y = up+, down-)
-//    main_player.position.z = position.z;				    //Position (z = front +, back-)
+  main_player.position.z = position.z;				    //Position (z = front +, back-)
 
   main_player.name = "main_player";
 
-//    scene.add( main_player );
-  rotationPoint.add(main_player);
+//  rotationPoint.position.set(position.x, position.y, position.z);
+
+  scene.add( main_player );
+  //rotationPoint.add(main_player);
 }
 
 
@@ -192,7 +302,7 @@ function loadGLTF(name, model_file, position, scale, rotate, collidable) {
 
     const root = gltf.scene;
 
-    console.log("scan :" + name);
+//    console.log("scan :" + name);
     var AssignNameToFirst = true;
     root.traverse((obj) => {
       if (obj.type === "Scene") {
@@ -213,7 +323,7 @@ function loadGLTF(name, model_file, position, scale, rotate, collidable) {
       }
     });
 
-    console.log(gltf.scene);
+//    console.log(gltf.scene);
 
   });
 }
@@ -392,54 +502,9 @@ function init() {
 
   scene.background = new THREE.Color(0xcce0ff);
   scene.fog = new THREE.Fog(0xcce0ff, 500, 10000);
-  scene.add(new THREE.AmbientLight(0x666666));
+ // scene.add(new THREE.AmbientLight(0x666666));
 
-  //lights
-  var light = new THREE.DirectionalLight(0xdfebff, 1);
-  light.position.set(30, 100, 100);
-  light.position.multiplyScalar(1.3);
-  light.castShadow = true;
-
-  light.shadow.bias = -0.4;
-  light.shadow.mapSize.width = 1024;
-  light.shadow.mapSize.height = 1024;
-  var d = 300;
-  light.shadow.camera.left = -d;
-  light.shadow.camera.right = d;
-  light.shadow.camera.top = d;
-  light.shadow.camera.bottom = -d;
-  light.shadow.camera.far = 1000;
-  light.name = "light1";
-  scene.add(light);
-
-  const color = 0xFFFFFF;
-  const intensity = 1;
-  const light2 = new THREE.DirectionalLight(color, intensity);
-  light2.castShadow = true;
-  light2.position.set(-250, 800, -850);
-  light2.target.position.set(-550, 40, -450);
-
-  light2.shadow.bias = -0.004;
-  light2.shadow.mapSize.width = 2048;
-  light2.shadow.mapSize.height = 2048;
-
-  light2.name = "light2";
-
-  scene.add(light2);
-  scene.add(light2.target);
-
-  const cam = light2.shadow.camera;
-  cam.near = 1;
-  cam.far = 2000;
-  cam.left = -1500;
-  cam.right = 1500;
-  cam.top = 1500;
-  cam.bottom = -1500;
-
-  // const dirLightHelper = new THREE.DirectionalLightHelper(light2, 1);
-  // dirLightHelper.name = "light helper";
-  // scene.add(dirLightHelper);
-
+  AddLights();
 
   //skybox
   var urls = ['px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg'];
@@ -449,61 +514,15 @@ function init() {
   });
 
 
-  // Create a rotation point.
-  rotationPoint = new THREE.Object3D();
-  rotationPoint.position.set(0, 0, 0);
-  scene.add(rotationPoint);
+  const fov = 45;
+  const aspect = window.innerWidth / window.innerHeight; //2;  // the canvas default
+  const near = 1; //1
+  const far = 10000; //200000
+  camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+  camera.position.set(300, 75, 600);
+//  camera.lookAt(1500,200,500);
+//  camera.position.set(0, 100, 800);
 
-  // createCharacter('./character1.png', 35, 50, new THREE.Vector3(0, 20, 155), new THREE.Vector3(0, 0, 0));
-  //
-  // createOtherCharacter("char2", "./character2.png", 35, 50, new THREE.Vector3(155, 20, 5), new THREE.Vector3(0, 0, 0), true);
-  // createOtherCharacter("char3", "./character3.png", 35, 50, new THREE.Vector3(-185, 20, 25), new THREE.Vector3(0, 0, 0), true);
-  // createOtherCharacter("char4", "./character4.png", 35, 50, new THREE.Vector3(-255, 20, 115), new THREE.Vector3(0, 0, 0), true);
-  // createOtherCharacter("char5", "./character5.png", 35, 50, new THREE.Vector3(255, 20, 55), new THREE.Vector3(0, 0, 0), true);
-  // createOtherCharacter("char6", "./character6.png", 35, 50, new THREE.Vector3(305, 20, -25), new THREE.Vector3(0, 0, 0), true);
-
-  createFloor();
-
-  $.ajax({
-    type: "GET",
-    url: "game_map.json",
-    headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
-    dataType: 'json',
-    success: function (response) {
-      for (var i = 0; i < response.length; i++) {
-        console.log(response[i]);
-
-        var RepeatX = 0;
-        var RepeatY = 0;
-        var RepeatZ = 0;
-
-        for (var j=0; j<response[i].Repeat; j++) {
-          loadGLTF(response[i].Name, response[i].FileName, new THREE.Vector3(response[i].Position[0]+RepeatX, response[i].Position[1]+RepeatY, response[i].Position[2]+RepeatZ), new THREE.Vector3(response[i].Scale[0], response[i].Scale[1], response[i].Scale[2]), new THREE.Vector3(response[i].Rotate[0], response[i].Rotate[1], response[i].Rotate[2]), response[i].Collision);
-
-          RepeatX += response[i].RepeatSpacing[0];
-          RepeatY += response[i].RepeatSpacing[1];
-          RepeatZ += response[i].RepeatSpacing[2];
-
-
-        }
-
-      }
-    }
-  });
-
-  // loadGLTF('Stall', './gltf_lib2/Stall/Stall.gltf', new THREE.Vector3(450, 0, 5), new THREE.Vector3(1000, 1000, 1000), new THREE.Vector3(0, 0, 0), true);
-  // loadGLTF('scene', './gltf_lib/scene/scene.gltf', new THREE.Vector3(0, 300, -1000), new THREE.Vector3(0.1, 0.1, 0.1), new THREE.Vector3(0, 0, 0), true);
-
-
-  // Create the camera.
-  camera = new THREE.PerspectiveCamera(
-    30, // Angle
-    window.innerWidth / window.innerHeight, // Aspect Ratio.
-    1, // Near view.
-    2000000 // Far view.
-  );
-  // Move the camera away from the center of the scene.
-  camera.position.set(0, 100, 800);
   //    main_player.add(camera);
 
 
@@ -529,10 +548,60 @@ function init() {
   controls.enableZoom = true;
   controls.maxDistance = 5000; // Set our max zoom out distance (mouse scroll)
   controls.minDistance = 300; // Set our min zoom in distance (mouse scroll)
-  controls.target = new THREE.Vector3(0, 2, 0);
+  controls.target = new THREE.Vector3(300, 2, 0);
 
+
+  controls.update();
   //    controls.target.copy(new THREE.Vector3(0, 0, 0));
   // controls.target.copy(new THREE.Vector3(0, characterSize / 2, 0));
+
+
+  // Create a rotation point.
+  // rotationPoint = new THREE.Object3D();
+  // rotationPoint.position.set(0, 0, 0);
+  // scene.add(rotationPoint);
+
+  // createCharacter('./character1.png', 35, 50, new THREE.Vector3(0, 20, 155), new THREE.Vector3(0, 0, 0));
+  //
+  // createOtherCharacter("char2", "./character2.png", 35, 50, new THREE.Vector3(155, 20, 5), new THREE.Vector3(0, 0, 0), true);
+  // createOtherCharacter("char3", "./character3.png", 35, 50, new THREE.Vector3(-185, 20, 25), new THREE.Vector3(0, 0, 0), true);
+  // createOtherCharacter("char4", "./character4.png", 35, 50, new THREE.Vector3(-255, 20, 115), new THREE.Vector3(0, 0, 0), true);
+  // createOtherCharacter("char5", "./character5.png", 35, 50, new THREE.Vector3(255, 20, 55), new THREE.Vector3(0, 0, 0), true);
+  // createOtherCharacter("char6", "./character6.png", 35, 50, new THREE.Vector3(305, 20, -25), new THREE.Vector3(0, 0, 0), true);
+
+  createFloor();
+
+  $.ajax({
+    type: "GET",
+    url: "game_map.json",
+    headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+    dataType: 'json',
+    success: function (response) {
+      for (var i = 0; i < response.length; i++) {
+//        console.log(response[i]);
+
+        var RepeatX = 0;
+        var RepeatY = 0;
+        var RepeatZ = 0;
+
+        for (var j=0; j<response[i].Repeat; j++) {
+          loadGLTF(response[i].Name, response[i].FileName, new THREE.Vector3(response[i].Position[0]+RepeatX, response[i].Position[1]+RepeatY, response[i].Position[2]+RepeatZ), new THREE.Vector3(response[i].Scale[0], response[i].Scale[1], response[i].Scale[2]), new THREE.Vector3(response[i].Rotate[0], response[i].Rotate[1], response[i].Rotate[2]), response[i].Collision);
+
+          RepeatX += response[i].RepeatSpacing[0];
+          RepeatY += response[i].RepeatSpacing[1];
+          RepeatZ += response[i].RepeatSpacing[2];
+
+
+        }
+
+      }
+    }
+  });
+
+  // loadGLTF('Stall', './gltf_lib2/Stall/Stall.gltf', new THREE.Vector3(450, 0, 5), new THREE.Vector3(1000, 1000, 1000), new THREE.Vector3(0, 0, 0), true);
+  // loadGLTF('scene', './gltf_lib/scene/scene.gltf', new THREE.Vector3(0, 300, -1000), new THREE.Vector3(0.1, 0.1, 0.1), new THREE.Vector3(0, 0, 0), true);
+
+
 
 
   $(document).dblclick(function (event) {
@@ -552,6 +621,11 @@ window.onresize = function () {
 //------------------------------------------------------------------------------------------------------------------------------------------------
 function update() {
   camera.updateProjectionMatrix();
+
+  if (main_player!==null) {
+    main_player.lookAt(camera.position);
+//  main_player.quaternion.copy(camera.quaternion);
+  }
 }
 
 var WindMillRotation = 0;
@@ -597,7 +671,7 @@ function render() {
       }
     }
 
-    move(rotationPoint, movements[0]);
+    move(main_player, movements[0]);
   }
 
   // Detect collisions.

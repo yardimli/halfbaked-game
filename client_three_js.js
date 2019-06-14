@@ -63,7 +63,7 @@ $(document).ready(function () {
       myPosY = json.userPosition.posY;
       myPosZ = json.userPosition.posY;
 
-      createCharacter('./'+json.userPosition.userCharacter+'.png', 35, 50, new THREE.Vector3(myPosX, myPosY, myPosZ), new THREE.Vector3(0, 0, 0));
+      createCharacter('./'+json.userPosition.userCharacter+'.png', 25, 35, new THREE.Vector3(myPosX, myPosY, myPosZ), new THREE.Vector3(0, 0, 0));
 
 
       status.text(myName + ': ');

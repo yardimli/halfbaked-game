@@ -67,9 +67,9 @@ wsServer.on('request', function (request) {
           userName: userName,
           userCharacter: userCharacter,
           ActivePlayer: true,
-          posX: 0,
-          posY: 20,
-          posZ: 0,
+          posX: 500,
+          posY: 16,
+          posZ: 500,
         };
 
         connection.sendUTF(JSON.stringify({type: 'new_user', userPosition: userPositions[index]}));

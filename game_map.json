@@ -9,7 +9,7 @@
     ],
     "Scale": [
       1000,
-      1000,
+      2000,
       1000
     ],
     "Rotate": [
@@ -32,13 +32,13 @@
     "FileName": "./gltf_lib2/Crate/Crate.gltf",
     "Position": [
       100,
-      0,
+      10,
       -100
     ],
     "Scale": [
-      1000,
-      2500,
-      1000
+      2000,
+      2000,
+      2000
     ],
     "Rotate": [
       0,
@@ -46,11 +46,11 @@
       0
     ],
     "Collision": true,
-    "Repeat": 20,
+    "Repeat": 10,
     "RepeatSpacing": [
       0,
       0,
-      20
+      25
     ]
   },
 
@@ -63,9 +63,9 @@
       -100
     ],
     "Scale": [
-      1500,
-      2500,
-      1500
+      2000,
+      2000,
+      2000
     ],
     "Rotate": [
       0,
@@ -86,13 +86,13 @@
     "FileName": "./gltf_lib2/Crate/Crate.gltf",
     "Position": [
       400,
-      0,
+      10,
       -100
     ],
     "Scale": [
-      1000,
-      2500,
-      1000
+      2000,
+      2000,
+      2000
     ],
     "Rotate": [
       0,
@@ -100,11 +100,11 @@
       0
     ],
     "Collision": true,
-    "Repeat": 24,
+    "Repeat": 10,
     "RepeatSpacing": [
       0,
       0,
-      20
+      25
     ]
   },
 
@@ -191,12 +191,94 @@
   },
 
   {
-    "Name": "Windmill",
+    "Name": "Dirt",
+    "FileName": "./gltf_lib2/Crops_Bale/Crops_Bale.gltf",
+    "Position": [
+      -200,
+      0,
+      -100
+    ],
+    "Scale": [
+      100000,
+      100,
+      20000
+    ],
+    "Rotate": [
+      0,
+      90,
+      0
+    ],
+    "Collision": false,
+    "Repeat": 1,
+    "RepeatSpacing": [
+      0,
+      0,
+      0
+    ]
+  },
+
+  {
+    "Name": "Dirt",
+    "FileName": "./gltf_lib2/Crops_Bale/Crops_Bale.gltf",
+    "Position": [
+      750,
+      0,
+      -100
+    ],
+    "Scale": [
+      100000,
+      100,
+      20000
+    ],
+    "Rotate": [
+      0,
+      90,
+      0
+    ],
+    "Collision": false,
+    "Repeat": 1,
+    "RepeatSpacing": [
+      0,
+      0,
+      0
+    ]
+  },
+
+  {
+    "Name": "Dirt",
+    "FileName": "./gltf_lib2/Crops_Bale/Crops_Bale.gltf",
+    "Position": [
+      -200,
+      0,
+      -680
+    ],
+    "Scale": [
+      20000,
+      100,
+      100000
+    ],
+    "Rotate": [
+      0,
+      90,
+      0
+    ],
+    "Collision": false,
+    "Repeat": 1,
+    "RepeatSpacing": [
+      0,
+      0,
+      0
+    ]
+  },
+
+
+  {
+    "Name": "House",
     "FileName": "./gltf_lib2/House_Windmill/House_Windmill.gltf",
     "Position": [
-      50,
+      -50,
       0,
-      -300
+      -600
     ],
     "Scale": [
       1000,
@@ -217,6 +299,430 @@
     ]
 
   },
+  {
+    "Name": "House",
+    "FileName": "./gltf_lib2/House_02/House_02.gltf",
+    "Position": [
+      100,
+      0,
+      -600
+    ],
+    "Scale": [
+      1000,
+      1000,
+      1000
+    ],
+    "Rotate": [
+      0,
+      50,
+      0
+    ],
+    "Collision": true,
+    "Repeat": 1,
+    "RepeatSpacing": [
+      0,
+      0,
+      0
+    ]
+
+  },
+  {
+    "Name": "House",
+    "FileName": "./gltf_lib2/House_03/House_03.gltf",
+    "Position": [
+      300,
+      0,
+      -600
+    ],
+    "Scale": [
+      1000,
+      1000,
+      1000
+    ],
+    "Rotate": [
+      0,
+      350,
+      0
+    ],
+    "Collision": true,
+    "Repeat": 1,
+    "RepeatSpacing": [
+      0,
+      0,
+      0
+    ]
+
+  },
+
+  {
+    "Name": "House",
+    "FileName": "./gltf_lib2/House_Blue_03/House_Blue_03.gltf",
+    "Position": [
+      500,
+      0,
+      -600
+    ],
+    "Scale": [
+      1000,
+      1000,
+      1000
+    ],
+    "Rotate": [
+      0,
+      290,
+      0
+    ],
+    "Collision": true,
+    "Repeat": 1,
+    "RepeatSpacing": [
+      0,
+      0,
+      0
+    ]
+
+  },
+
+  {
+    "Name": "House",
+    "FileName": "./gltf_lib2/House_Burntdown/House_Burntdown.gltf",
+    "Position": [
+      750,
+      0,
+      -600
+    ],
+    "Scale": [
+      1000,
+      1000,
+      1000
+    ],
+    "Rotate": [
+      0,
+      290,
+      0
+    ],
+    "Collision": true,
+    "Repeat": 1,
+    "RepeatSpacing": [
+      0,
+      0,
+      0
+    ]
+
+  },
+
+
+
+  {
+    "Name": "House",
+    "FileName": "./gltf_lib2/House/House.gltf",
+    "Position": [
+      750,
+      0,
+      -600
+    ],
+    "Scale": [
+      1000,
+      1000,
+      1000
+    ],
+    "Rotate": [
+      0,
+      -50,
+      0
+    ],
+    "Collision": true,
+    "Repeat": 1,
+    "RepeatSpacing": [
+      0,
+      0,
+      0
+    ]
+
+  },
+  {
+    "Name": "House",
+    "FileName": "./gltf_lib2/House_02/House_02.gltf",
+    "Position": [
+      700,
+      0,
+      -400
+    ],
+    "Scale": [
+      1000,
+      1000,
+      1000
+    ],
+    "Rotate": [
+      0,
+      50,
+      0
+    ],
+    "Collision": true,
+    "Repeat": 1,
+    "RepeatSpacing": [
+      0,
+      0,
+      0
+    ]
+
+  },
+  {
+    "Name": "House",
+    "FileName": "./gltf_lib2/House_03/House_03.gltf",
+    "Position": [
+      780,
+      0,
+      -200
+    ],
+    "Scale": [
+      1000,
+      1000,
+      1000
+    ],
+    "Rotate": [
+      0,
+      350,
+      0
+    ],
+    "Collision": true,
+    "Repeat": 1,
+    "RepeatSpacing": [
+      0,
+      0,
+      0
+    ]
+
+  },
+
+  {
+    "Name": "House",
+    "FileName": "./gltf_lib2/House_Blue_03/House_Blue_03.gltf",
+    "Position": [
+      800,
+      0,
+      0
+    ],
+    "Scale": [
+      1000,
+      1000,
+      1000
+    ],
+    "Rotate": [
+      0,
+      290,
+      0
+    ],
+    "Collision": true,
+    "Repeat": 1,
+    "RepeatSpacing": [
+      0,
+      0,
+      0
+    ]
+
+  },
+
+  {
+    "Name": "House",
+    "FileName": "./gltf_lib2/House_Church/House_Church.gltf",
+    "Position": [
+      759,
+      0,
+      200
+    ],
+    "Scale": [
+      1000,
+      1000,
+      1000
+    ],
+    "Rotate": [
+      0,
+      290,
+      0
+    ],
+    "Collision": true,
+    "Repeat": 1,
+    "RepeatSpacing": [
+      0,
+      0,
+      0
+    ]
+
+  },
+
+
+
+
+
+  {
+    "Name": "House",
+    "FileName": "./gltf_lib2/House/House.gltf",
+    "Position": [
+      -200,
+      0,
+      -600
+    ],
+    "Scale": [
+      1000,
+      1000,
+      1000
+    ],
+    "Rotate": [
+      0,
+      -50,
+      0
+    ],
+    "Collision": true,
+    "Repeat": 1,
+    "RepeatSpacing": [
+      0,
+      0,
+      0
+    ]
+
+  },
+  {
+    "Name": "House",
+    "FileName": "./gltf_lib2/House_02/House_02.gltf",
+    "Position": [
+      -220,
+      0,
+      -400
+    ],
+    "Scale": [
+      1000,
+      1000,
+      1000
+    ],
+    "Rotate": [
+      0,
+      50,
+      0
+    ],
+    "Collision": true,
+    "Repeat": 1,
+    "RepeatSpacing": [
+      0,
+      0,
+      0
+    ]
+
+  },
+  {
+    "Name": "House",
+    "FileName": "./gltf_lib2/House_03/House_03.gltf",
+    "Position": [
+      -250,
+      0,
+      -200
+    ],
+    "Scale": [
+      1000,
+      1000,
+      1000
+    ],
+    "Rotate": [
+      0,
+      350,
+      0
+    ],
+    "Collision": true,
+    "Repeat": 1,
+    "RepeatSpacing": [
+      0,
+      0,
+      0
+    ]
+
+  },
+
+  {
+    "Name": "House",
+    "FileName": "./gltf_lib2/House_Blue_03/House_Blue_03.gltf",
+    "Position": [
+      -150,
+      0,
+      0
+    ],
+    "Scale": [
+      1000,
+      1000,
+      1000
+    ],
+    "Rotate": [
+      0,
+      290,
+      0
+    ],
+    "Collision": true,
+    "Repeat": 1,
+    "RepeatSpacing": [
+      0,
+      0,
+      0
+    ]
+
+  },
+
+  {
+    "Name": "House",
+    "FileName": "./gltf_lib2/House_Large/House_Large.gltf",
+    "Position": [
+      -200,
+      0,
+      200
+    ],
+    "Scale": [
+      1000,
+      1000,
+      1000
+    ],
+    "Rotate": [
+      0,
+      290,
+      0
+    ],
+    "Collision": true,
+    "Repeat": 1,
+    "RepeatSpacing": [
+      0,
+      0,
+      0
+    ]
+
+  },
+
+
+
+
+  {
+    "Name": "Tent",
+    "FileName": "./gltf_lib2/Tent_03/Tent_03.gltf",
+    "Position": [
+      100,
+      0,
+      -220
+    ],
+    "Scale": [
+      1000,
+      1000,
+      1000
+    ],
+    "Rotate": [
+      0,
+      -90,
+      0
+    ],
+    "Collision": true,
+    "Repeat": 1,
+    "RepeatSpacing": [
+      0,
+      0,
+      0
+    ]
+
+  },
+
   {
     "Name": "Tent",
     "FileName": "./gltf_lib2/Tent_03/Tent_03.gltf",

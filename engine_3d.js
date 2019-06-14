@@ -6,7 +6,6 @@ var camera, // We need a camera.
   rotationPoint;  // The point in which our camera will rotate around.
 
 var loader = new THREE.GLTFLoader();
-var loader_texture = new THREE.BasisTextureLoader();
 var loaderTexture = new THREE.TextureLoader();
 
 var characterSize = 30;
@@ -14,7 +13,7 @@ var outlineSize = characterSize * 0.05;
 
 // Track all objects and collisions.
 var objects = [];
-
+var drag_objects = [];
 // Track click intersects.
 var raycaster = new THREE.Raycaster();
 var mouse = new THREE.Vector2();
@@ -35,7 +34,7 @@ var main_player = null;
 
 var other_players = [];
 
-$(document).ready( function () {
+$(document).ready(function () {
   init();
   animate();
 });
@@ -47,6 +46,20 @@ var DirectionalLight1;
 var DirectionalLight1Helper;
 var PointLight1;
 var PointLight1Helper;
+var composer, effectFXAA, outlinePass;
+
+var Outline_mouse = new THREE.Vector2();
+var Outline_selectedObjects = [];
+
+
+var edge_params = {
+  edgeStrength: 3.0,
+  edgeGlow: 0.0,
+  edgeThickness: 1.0,
+  pulsePeriod: 0,
+  rotate: false,
+  usePatternTexture: false
+};
 
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
@@ -65,9 +78,11 @@ class ColorGUIHelper {
     this.object = object;
     this.prop = prop;
   }
+
   get value() {
     return `#${this.object[this.prop].getHexString()}`;
   }
+
   set value(hexString) {
     this.object[this.prop].set(hexString);
   }
@@ -104,7 +119,7 @@ function AddLights() {
 
   const PointLight1_color = 0xFFFFFF;
   const PointLight1_intensity = 1;
-  PointLight1 = new THREE.PointLight(PointLight1_color, PointLight1_intensity,0,2);
+  PointLight1 = new THREE.PointLight(PointLight1_color, PointLight1_intensity, 0, 2);
   PointLight1.position.set(0, 250, 0);
   PointLight1.castShadow = true;
   scene.add(PointLight1);
@@ -277,7 +292,7 @@ function createCharacter(model_file, width, height, position, rotate) {
 
 //  rotationPoint.position.set(position.x, position.y, position.z);
 
-  scene.add( main_player );
+  scene.add(main_player);
   //rotationPoint.add(main_player);
 }
 
@@ -300,11 +315,16 @@ function loadGLTF(name, model_file, position, scale, rotate, collidable) {
       calculateCollisionPoints(gltf.scene);
     }
 
+
     const root = gltf.scene;
 
 //    console.log("scan :" + name);
     var AssignNameToFirst = true;
     root.traverse((obj) => {
+      if (obj.isMesh && collidable) {
+        drag_objects.push(obj);
+      }
+
       if (obj.type === "Scene") {
         // if (obj.userData !== undefined) {
         //   if (AssignNameToFirst) {
@@ -490,6 +510,43 @@ function move(location, destination, speed = playerSpeed) {
   }
 }
 
+//------------------------------------------------------------------------------------------------------------------------------------------------
+function Outline_addSelectedObject( object ) {
+  Outline_selectedObjects= [];
+  Outline_selectedObjects.push( object );
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------------
+function Outline_checkIntersection() {
+  raycaster.setFromCamera( Outline_mouse, camera );
+  var intersects = raycaster.intersectObjects( drag_objects, true );
+  if ( intersects.length > 0 ) {
+
+    var Outline_selectedObjects = intersects[ 0 ].object;
+    Outline_addSelectedObject( Outline_selectedObjects );
+    outlinePass.selectedObjects = Outline_selectedObjects;
+  } else {
+    // outlinePass.selectedObjects = [];
+  }
+}
+
+
+//------------------------------------------------------------------------------------------------------------------------------------------------
+function Outline_onTouchMove( event ) {
+
+    var x, y;
+  if ( event.changedTouches ) {
+    x = event.changedTouches[ 0 ].pageX;
+    y = event.changedTouches[ 0 ].pageY;
+  } else {
+    x = event.clientX;
+    y = event.clientY;
+  }
+  Outline_mouse.x = ( x / window.innerWidth ) * 2 - 1;
+  Outline_mouse.y = - ( y / window.innerHeight ) * 2 + 1;
+  Outline_checkIntersection();
+}
+
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
 function init() {
@@ -502,7 +559,7 @@ function init() {
 
   scene.background = new THREE.Color(0xcce0ff);
   scene.fog = new THREE.Fog(0xcce0ff, 500, 10000);
- // scene.add(new THREE.AmbientLight(0x666666));
+  // scene.add(new THREE.AmbientLight(0x666666));
 
   AddLights();
 
@@ -527,7 +584,7 @@ function init() {
 
 
   // Build the renderer
-  renderer = new THREE.WebGLRenderer({antialias: true});
+  renderer = new THREE.WebGLRenderer(); //{antialias: true}
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -545,6 +602,8 @@ function init() {
 
   controls.maxPolarAngle = Math.PI * 0.5;
   controls.enablePan = true;
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.25;
   controls.enableZoom = true;
   controls.maxDistance = 5000; // Set our max zoom out distance (mouse scroll)
   controls.minDistance = 300; // Set our min zoom in distance (mouse scroll)
@@ -569,6 +628,59 @@ function init() {
   // createOtherCharacter("char5", "./character5.png", 35, 50, new THREE.Vector3(255, 20, 55), new THREE.Vector3(0, 0, 0), true);
   // createOtherCharacter("char6", "./character6.png", 35, 50, new THREE.Vector3(305, 20, -25), new THREE.Vector3(0, 0, 0), true);
 
+
+
+
+  var geometry = new THREE.SphereBufferGeometry( 3, 48, 24 );
+  for ( var i = 0; i < 20; i ++ ) {
+    var material = new THREE.MeshLambertMaterial();
+    material.color.setHSL( Math.random(), 1.0, 0.3 );
+    var mesh = new THREE.Mesh( geometry, material );
+    mesh.position.x = Math.random() * 40 - 2;
+    mesh.position.y = Math.random() * 40 - 2+20;
+    mesh.position.z = Math.random() * 40 - 2;
+    mesh.receiveShadow = true;
+    mesh.castShadow = true;
+    mesh.scale.multiplyScalar( Math.random() * 4.3 + 2.1 );
+    drag_objects.push(mesh);
+    scene.add(mesh);
+  }
+
+
+// postprocessing
+  composer = new THREE.EffectComposer(renderer);
+
+  var renderPass = new THREE.RenderPass(scene, camera);
+  composer.addPass(renderPass);
+
+  outlinePass = new THREE.OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera);
+  composer.addPass(outlinePass);
+
+  outlinePass.edgeStrength = 3;
+  outlinePass.edgeGlow = 1.0;
+  outlinePass.edgeThickness = 30.0;
+  outlinePass.pulsePeriod = 0;
+  outlinePass.usePatternTexture = true;
+  outlinePass.visibleEdgeColor.set( '#ffffff' );
+  outlinePass.hiddenEdgeColor.set( '#190a05' );
+
+  var onLoad = function (texture) {
+    outlinePass.patternTexture = texture;
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+  };
+
+  var loader2 = new THREE.TextureLoader();
+  loader2.load( './threejs/examples/textures/tri_pattern.jpg', onLoad );
+  effectFXAA = new THREE.ShaderPass( THREE.FXAAShader );
+  effectFXAA.uniforms[ 'resolution' ].value.set( 1 / window.innerWidth, 1 / window.innerHeight );
+  composer.addPass( effectFXAA );
+
+
+  window.addEventListener( 'mousemove', Outline_onTouchMove );
+
+
+
   createFloor();
 
   $.ajax({
@@ -584,8 +696,8 @@ function init() {
         var RepeatY = 0;
         var RepeatZ = 0;
 
-        for (var j=0; j<response[i].Repeat; j++) {
-          loadGLTF(response[i].Name, response[i].FileName, new THREE.Vector3(response[i].Position[0]+RepeatX, response[i].Position[1]+RepeatY, response[i].Position[2]+RepeatZ), new THREE.Vector3(response[i].Scale[0], response[i].Scale[1], response[i].Scale[2]), new THREE.Vector3(response[i].Rotate[0], response[i].Rotate[1], response[i].Rotate[2]), response[i].Collision);
+        for (var j = 0; j < response[i].Repeat; j++) {
+          loadGLTF(response[i].Name, response[i].FileName, new THREE.Vector3(response[i].Position[0] + RepeatX, response[i].Position[1] + RepeatY, response[i].Position[2] + RepeatZ), new THREE.Vector3(response[i].Scale[0], response[i].Scale[1], response[i].Scale[2]), new THREE.Vector3(response[i].Rotate[0], response[i].Rotate[1], response[i].Rotate[2]), response[i].Collision);
 
           RepeatX += response[i].RepeatSpacing[0];
           RepeatY += response[i].RepeatSpacing[1];
@@ -602,6 +714,17 @@ function init() {
   // loadGLTF('scene', './gltf_lib/scene/scene.gltf', new THREE.Vector3(0, 300, -1000), new THREE.Vector3(0.1, 0.1, 0.1), new THREE.Vector3(0, 0, 0), true);
 
 
+  var dragControls = new THREE.DragControls(drag_objects, camera, renderer.domElement);
+  dragControls.addEventListener('dragstart', function () {
+    controls.enabled = false;
+  });
+
+
+  dragControls.addEventListener('dragend', function (object) {
+    console.log(object);
+//    object.position.y=0;
+    controls.enabled = true;
+  });
 
 
   $(document).dblclick(function (event) {
@@ -616,13 +739,19 @@ window.onresize = function () {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+  composer.setSize(window.innerWidth, window.innerHeight);
+
+  effectFXAA.uniforms[ 'resolution' ].value.set( 1 / window.innerWidth, 1 / window.innerHeight );
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
 function update() {
   camera.updateProjectionMatrix();
 
-  if (main_player!==null) {
+  controls.update();
+
+
+  if (main_player !== null) {
     main_player.lookAt(camera.position);
 //  main_player.quaternion.copy(camera.quaternion);
   }
@@ -633,7 +762,8 @@ var logOnce = 0;
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
 function render() {
-  renderer.render(scene, camera);
+//  renderer.render(scene, camera);
+  composer.render();
 
   // Don't let the camera go too low.
   // if (camera.position.y < 10) {

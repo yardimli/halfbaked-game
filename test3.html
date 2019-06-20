@@ -5,39 +5,82 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
   <style>
+
     body {
       margin: 0;
-      overflow: hidden;
-      padding: 0;
+      background-color: #000;
+      color: #fff;
+      font-family: Monospace;
+      font-size: 13px;
+      line-height: 24px;
     }
+
+    a {
+      color: #ff0;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    button {
+      cursor: pointer;
+      text-transform: uppercase;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    #info {
+      position: absolute;
+      top: 0px;
+      width: 100%;
+      padding: 10px;
+      box-sizing: border-box;
+      text-align: center;
+      z-index: 1; /* TODO Solve this in HTML */
+    }
+
+    .dg.ac {
+      z-index: 2 !important; /* TODO Solve this in HTML */
+    }
+
+
+    /*body {*/
+    /*  margin: 0;*/
+    /*  overflow: hidden;*/
+    /*  padding: 0;*/
+    /*}*/
 
   </style>
 </head>
 <body>
 
-<script src="threejs/build/three.js"></script>
+<script type="text/javascript" src="threejs/build/three.js"></script>
 
-<script src="threejs/examples/js/controls/OrbitControls.js"></script>
-<script src="threejs/examples/js/controls/DragControls.js"></script>
-<script src="threejs/examples/js/loaders/GLTFLoader.js"></script>
-<script src="threejs/examples/js/loaders/OBJLoader.js"></script>
-<script src="threejs/examples/js/loaders/BasisTextureLoader.js"></script>
+<script type="text/javascript" src="threejs/examples/js/controls/OrbitControls.js"></script>
+<script type="text/javascript" src="threejs/examples/js/controls/DragControls.js"></script>
+<script type="text/javascript" src="threejs/examples/js/loaders/OBJLoader.js"></script>
+<script type="text/javascript" src="threejs/examples/js/loaders/GLTFLoader.js"></script>
+<script type="text/javascript" src="threejs/examples/js/loaders/BasisTextureLoader.js"></script>
 
-<script src="threejs/examples/js/WebGL.js"></script>
+<!--<script src="threejs/examples/js/controls/TransformControls.js"></script>-->
 
-<script src="threejs/examples/js/shaders/CopyShader.js"></script>
-<script src="threejs/examples/js/shaders/FXAAShader.js"></script>
 
-<script src="threejs/examples/js/postprocessing/EffectComposer.js"></script>
-<script src="threejs/examples/js/postprocessing/RenderPass.js"></script>
-<script src="threejs/examples/js/postprocessing/ShaderPass.js"></script>
-<script src="threejs/examples/js/postprocessing/OutlinePass.js"></script>
+<script type="text/javascript" src="threejs/examples/js/WebGL.js"></script>
 
-<script src="js/jquery-3.4.1.js"></script>
+<script type="text/javascript" src="threejs/examples/js/shaders/CopyShader.js"></script>
+<script type="text/javascript" src="threejs/examples/js/shaders/FXAAShader.js"></script>
+<script type="text/javascript" src="threejs/examples/js/postprocessing/EffectComposer.js"></script>
+<script type="text/javascript" src="threejs/examples/js/postprocessing/RenderPass.js"></script>
+<script type="text/javascript" src="threejs/examples/js/postprocessing/ShaderPass.js"></script>
+<script type="text/javascript" src="threejs/examples/js/postprocessing/OutlinePass.js"></script>
 
+<script type="text/javascript" src="js/jquery-3.4.1.js"></script>
 <script type="text/javascript" src="js/dat.gui.js"></script>
-
-<script src="engine_3d.js"></script>
+<script type="text/javascript" src="engine_3d.js"></script>
 
 </body>
 </html>

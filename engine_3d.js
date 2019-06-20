@@ -2,6 +2,7 @@ var camera, // We need a camera.
   scene, // The camera has to see something.
   renderer, // Render our graphics.
   controls, // Our Orbit Controller for camera magic.
+  transform_controls,
   container, // Our HTML container for the program.
   rotationPoint;  // The point in which our camera will rotate around.
 
@@ -50,21 +51,13 @@ var composer, effectFXAA, outlinePass;
 
 var Outline_mouse = new THREE.Vector2();
 var Outline_selectedObjects = [];
+var Outline_selectedObjects_temp;
+var Outline_selectedObjects_temp2;
 
-
-var edge_params = {
-  edgeStrength: 3.0,
-  edgeGlow: 0.0,
-  edgeThickness: 1.0,
-  pulsePeriod: 0,
-  rotate: false,
-  usePatternTexture: false
-};
-
+var Edit_SelectedObject = new THREE.Vector3();
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
-function makeXYZGUI(gui, vector3, name, onChangeFn) {
-  const folder = gui.addFolder(name);
+function makeXYZGUI(folder, vector3, onChangeFn) {
   folder.add(vector3, 'x', -500, 500).onChange(onChangeFn);
   folder.add(vector3, 'y', 0, 500).onChange(onChangeFn);
   folder.add(vector3, 'z', -500, 500).onChange(onChangeFn);
@@ -132,30 +125,44 @@ function AddLights() {
   PointLight1Helper = new THREE.PointLightHelper(PointLight1);
   scene.add(PointLight1Helper);
 
+  if (1 == 2) {
+    //light controls
+    const gui = new dat.GUI();
+    var folder = gui.addFolder("Lights");
 
-  const gui = new dat.GUI();
-  var folder = gui.addFolder("Hemisphere Light");
-  folder.addColor(new ColorGUIHelper(HemisphereLight1, 'color'), 'value').name('skyColor');
-  folder.addColor(new ColorGUIHelper(HemisphereLight1, 'groundColor'), 'value').name('groundColor');
-  folder.add(HemisphereLight1, 'intensity', 0, 2, 0.01);
+    var person = {name: 'Hemisphere Light'};
+    folder.add(person, 'name');
 
-  folder = gui.addFolder("Directional Light");
-  folder.addColor(new ColorGUIHelper(DirectionalLight1, 'color'), 'value').name('color');
-  folder.add(DirectionalLight1, 'intensity', 0, 2, 0.01);
-  folder.open();
+    folder.add(HemisphereLight1, 'intensity', 0, 2, 0.01);
 
-  makeXYZGUI(gui, DirectionalLight1.position, 'Directional position', updateLight);
-  makeXYZGUI(gui, DirectionalLight1.target.position, 'Directional target', updateLight);
+    folder.addColor(new ColorGUIHelper(HemisphereLight1, 'color'), 'value').name('skyColor');
+    folder.addColor(new ColorGUIHelper(HemisphereLight1, 'groundColor'), 'value').name('groundColor');
 
+    var person = {name: 'Directional Light'};
+    folder.add(person, 'name');
 
-  folder = gui.addFolder("Point Light");
-  folder.addColor(new ColorGUIHelper(PointLight1, 'color'), 'value').name('color');
-  folder.add(PointLight1, 'intensity', 0, 2, 0.01);
-  folder.open();
+    folder.addColor(new ColorGUIHelper(DirectionalLight1, 'color'), 'value').name('color');
+    folder.add(DirectionalLight1, 'intensity', 0, 2, 0.01);
 
-  makeXYZGUI(gui, PointLight1.position, 'Point position', updateLight);
+    var person = {name: 'Directional Light Position'};
+    folder.add(person, 'name');
 
-  gui.close();
+    makeXYZGUI(folder, DirectionalLight1.position, updateLight);
+
+    var person = {name: 'Directional Light Target'};
+    folder.add(person, 'name');
+
+    makeXYZGUI(folder, DirectionalLight1.target.position, updateLight);
+
+    var person = {name: 'Point Light'};
+    folder.add(person, 'name');
+
+    folder.addColor(new ColorGUIHelper(PointLight1, 'color'), 'value').name('color');
+    folder.add(PointLight1, 'intensity', 0, 2, 0.01);
+    makeXYZGUI(gui, PointLight1.position, updateLight);
+
+    gui.close();
+  }
 
   updateLight();
 
@@ -511,39 +518,46 @@ function move(location, destination, speed = playerSpeed) {
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
-function Outline_addSelectedObject( object ) {
-  Outline_selectedObjects= [];
-  Outline_selectedObjects.push( object );
+function Outline_addSelectedObject(object) {
+  Outline_selectedObjects = [];
+  Outline_selectedObjects.push(object);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
 function Outline_checkIntersection() {
-  raycaster.setFromCamera( Outline_mouse, camera );
-  var intersects = raycaster.intersectObjects( drag_objects, true );
-  if ( intersects.length > 0 ) {
+  raycaster.setFromCamera(Outline_mouse, camera);
+  var intersects = raycaster.intersectObjects(drag_objects, true);
+  if (intersects.length > 0) {
 
-    var Outline_selectedObjects = intersects[ 0 ].object;
-    Outline_addSelectedObject( Outline_selectedObjects );
+    Outline_selectedObjects_temp = intersects[0].object;
+    Outline_addSelectedObject(Outline_selectedObjects_temp);
     outlinePass.selectedObjects = Outline_selectedObjects;
-  } else {
+
+    Edit_SelectedObject = Outline_selectedObjects_temp.position;
+
+  }
+  else {
+    Outline_selectedObjects_temp = null;
     // outlinePass.selectedObjects = [];
   }
+//  console.log(Outline_selectedObjects);
 }
 
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
-function Outline_onTouchMove( event ) {
+function Outline_onTouchMove(event) {
 
-    var x, y;
-  if ( event.changedTouches ) {
-    x = event.changedTouches[ 0 ].pageX;
-    y = event.changedTouches[ 0 ].pageY;
-  } else {
+  var x, y;
+  if (event.changedTouches) {
+    x = event.changedTouches[0].pageX;
+    y = event.changedTouches[0].pageY;
+  }
+  else {
     x = event.clientX;
     y = event.clientY;
   }
-  Outline_mouse.x = ( x / window.innerWidth ) * 2 - 1;
-  Outline_mouse.y = - ( y / window.innerHeight ) * 2 + 1;
+  Outline_mouse.x = (x / window.innerWidth) * 2 - 1;
+  Outline_mouse.y = -(y / window.innerHeight) * 2 + 1;
   Outline_checkIntersection();
 }
 
@@ -554,21 +568,26 @@ function init() {
   container = document.createElement('div');
   document.body.appendChild(container);
 
+  var width = window.innerWidth;
+  var height = window.innerHeight;
+
+  renderer = new THREE.WebGLRenderer(); //{antialias: true}
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.gammaInput = true;
+  renderer.gammaOutput = true;
+//  renderer.gammaFactor = 3.2;
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(width, height);
+
+  container.appendChild(renderer.domElement);
+
   // Create the scene.
   scene = new THREE.Scene();
 
   scene.background = new THREE.Color(0xcce0ff);
   scene.fog = new THREE.Fog(0xcce0ff, 500, 10000);
   // scene.add(new THREE.AmbientLight(0x666666));
-
-  AddLights();
-
-  //skybox
-  var urls = ['px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg'];
-  var loaderCube = new THREE.CubeTextureLoader().setPath('./threejs/examples/textures/cube/skyboxsun25deg/');
-  loaderCube.load(urls, function (texture) {
-    scene.background = texture;
-  });
 
 
   const fov = 45;
@@ -579,40 +598,32 @@ function init() {
   camera.position.set(300, 75, 600);
 //  camera.lookAt(1500,200,500);
 //  camera.position.set(0, 100, 800);
-
   //    main_player.add(camera);
 
-
-  // Build the renderer
-  renderer = new THREE.WebGLRenderer(); //{antialias: true}
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(window.innerWidth, window.innerHeight);
-
-  var element = renderer.domElement;
-  container.appendChild(element);
-
-  renderer.gammaInput = true;
-  renderer.gammaOutput = true;
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-//  renderer.gammaFactor = 3.2;
-
-  // Build the controls.
-  controls = new THREE.OrbitControls(camera, element);
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.maxDistance = 5000; // Set our max zoom out distance (mouse scroll)
+  controls.minDistance = 300; // Set our min zoom in distance (mouse scroll)
 
   controls.maxPolarAngle = Math.PI * 0.5;
   controls.enablePan = true;
   controls.enableDamping = true;
   controls.dampingFactor = 0.25;
   controls.enableZoom = true;
-  controls.maxDistance = 5000; // Set our max zoom out distance (mouse scroll)
-  controls.minDistance = 300; // Set our min zoom in distance (mouse scroll)
   controls.target = new THREE.Vector3(300, 2, 0);
 
-
   controls.update();
-  //    controls.target.copy(new THREE.Vector3(0, 0, 0));
-  // controls.target.copy(new THREE.Vector3(0, characterSize / 2, 0));
+//    controls.target.copy(new THREE.Vector3(0, 0, 0));
+//    controls.target.copy(new THREE.Vector3(0, characterSize / 2, 0));
+
+
+  AddLights();
+
+  //skybox
+  var urls = ['px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg'];
+  var loaderCube = new THREE.CubeTextureLoader().setPath('./threejs/examples/textures/cube/skyboxsun25deg/');
+  loaderCube.load(urls, function (texture) {
+    scene.background = texture;
+  });
 
 
   // Create a rotation point.
@@ -627,58 +638,6 @@ function init() {
   // createOtherCharacter("char4", "./character4.png", 35, 50, new THREE.Vector3(-255, 20, 115), new THREE.Vector3(0, 0, 0), true);
   // createOtherCharacter("char5", "./character5.png", 35, 50, new THREE.Vector3(255, 20, 55), new THREE.Vector3(0, 0, 0), true);
   // createOtherCharacter("char6", "./character6.png", 35, 50, new THREE.Vector3(305, 20, -25), new THREE.Vector3(0, 0, 0), true);
-
-
-
-
-  var geometry = new THREE.SphereBufferGeometry( 3, 48, 24 );
-  for ( var i = 0; i < 20; i ++ ) {
-    var material = new THREE.MeshLambertMaterial();
-    material.color.setHSL( Math.random(), 1.0, 0.3 );
-    var mesh = new THREE.Mesh( geometry, material );
-    mesh.position.x = Math.random() * 40 - 2;
-    mesh.position.y = Math.random() * 40 - 2+20;
-    mesh.position.z = Math.random() * 40 - 2;
-    mesh.receiveShadow = true;
-    mesh.castShadow = true;
-    mesh.scale.multiplyScalar( Math.random() * 4.3 + 2.1 );
-    drag_objects.push(mesh);
-    scene.add(mesh);
-  }
-
-
-// postprocessing
-  composer = new THREE.EffectComposer(renderer);
-
-  var renderPass = new THREE.RenderPass(scene, camera);
-  composer.addPass(renderPass);
-
-  outlinePass = new THREE.OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera);
-  composer.addPass(outlinePass);
-
-  outlinePass.edgeStrength = 3;
-  outlinePass.edgeGlow = 1.0;
-  outlinePass.edgeThickness = 30.0;
-  outlinePass.pulsePeriod = 0;
-  outlinePass.usePatternTexture = true;
-  outlinePass.visibleEdgeColor.set( '#ffffff' );
-  outlinePass.hiddenEdgeColor.set( '#190a05' );
-
-  var onLoad = function (texture) {
-    outlinePass.patternTexture = texture;
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-  };
-
-  var loader2 = new THREE.TextureLoader();
-  loader2.load( './threejs/examples/textures/tri_pattern.jpg', onLoad );
-  effectFXAA = new THREE.ShaderPass( THREE.FXAAShader );
-  effectFXAA.uniforms[ 'resolution' ].value.set( 1 / window.innerWidth, 1 / window.innerHeight );
-  composer.addPass( effectFXAA );
-
-
-  window.addEventListener( 'mousemove', Outline_onTouchMove );
-
 
 
   createFloor();
@@ -703,50 +662,177 @@ function init() {
           RepeatY += response[i].RepeatSpacing[1];
           RepeatZ += response[i].RepeatSpacing[2];
 
-
         }
-
       }
     }
   });
+
 
   // loadGLTF('Stall', './gltf_lib2/Stall/Stall.gltf', new THREE.Vector3(450, 0, 5), new THREE.Vector3(1000, 1000, 1000), new THREE.Vector3(0, 0, 0), true);
   // loadGLTF('scene', './gltf_lib/scene/scene.gltf', new THREE.Vector3(0, 300, -1000), new THREE.Vector3(0.1, 0.1, 0.1), new THREE.Vector3(0, 0, 0), true);
 
 
-  var dragControls = new THREE.DragControls(drag_objects, camera, renderer.domElement);
-  dragControls.addEventListener('dragstart', function () {
-    controls.enabled = false;
-  });
+  // postprocessing
+  composer = new THREE.EffectComposer(renderer);
+
+  var renderPass = new THREE.RenderPass(scene, camera);
+  composer.addPass(renderPass);
+
+  outlinePass = new THREE.OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera);
+  composer.addPass(outlinePass);
+
+  outlinePass.edgeStrength = 3;
+  outlinePass.edgeGlow = 1.0;
+  outlinePass.edgeThickness = 1.0;
+  outlinePass.pulsePeriod = 0;
+  outlinePass.usePatternTexture = true;
+  outlinePass.visibleEdgeColor.set('#ffffff');
+  outlinePass.hiddenEdgeColor.set('#190a05');
+
+  var onLoad = function (texture) {
+    outlinePass.patternTexture = texture;
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+  };
+
+  var loader2 = new THREE.TextureLoader();
+  loader2.load('./threejs/examples/textures/tri_pattern.jpg', onLoad);
+  effectFXAA = new THREE.ShaderPass(THREE.FXAAShader);
+  effectFXAA.uniforms['resolution'].value.set(1 / window.innerWidth, 1 / window.innerHeight);
+  composer.addPass(effectFXAA);
+
+  window.addEventListener('resize', onWindowResize, false);
+
+  window.addEventListener('mousemove', Outline_onTouchMove);
+  window.addEventListener('touchmove', Outline_onTouchMove);
+
+  if (1 == 2) {
+
+    // <div id="info">
+    //     <a href="javascript:control.setMode( 'translate' );">"W" translate</a> |
+    //   <a href="javascript:control.setMode( 'rotate' );">"E" rotate</a> |
+    //   <a href="javascript:control.setMode( 'scale' );">"R" scale</a> |
+    //   <a href="javascript:control.setSize( control.size + 0.1 );">"+" increase size</a> |
+    //   <a href="javascript:control.setSize( Math.max( control.size - 0.1, 0.1 ) );">"-" decrease size</a><br />
+    //   <a href="javascript:control.setSpace( control.space === 'local' ? 'world' : 'local' );">"Q" toggle world/local space</a> | Hold "Ctrl" down to snap to grid<br />
+    //   <a href="javascript:control.showX = !control.showX">"X" toggle X</a> |
+    //   <a href="javascript:control.showY = !control.showY">"Y" toggle Y</a> |
+    //   <a href="javascript:control.showZ = !control.showZ">"Z" toggle Z</a> |
+    //   <a href="javascript:control.enabled = !control.enabled">"Spacebar" toggle enabled</a><br />
+    //   </div>
+
+    transform_controls = new THREE.TransformControls(camera, renderer.domElement);
+    transform_controls.addEventListener('change', render);
+    transform_controls.addEventListener('dragging-changed', function (event) {
+      controls.enabled = !event.value;
+    });
+
+    window.addEventListener('keydown', function (event) {
+      switch (event.keyCode) {
+        case 81: // Q
+          transform_controls.setSpace(transform_controls.space === "local" ? "world" : "local");
+          break;
+        case 17: // Ctrl
+          transform_controls.setTranslationSnap(100);
+          transform_controls.setRotationSnap(THREE.Math.degToRad(15));
+          break;
+        case 87: // W
+          transform_controls.setMode("translate");
+          break;
+        case 69: // E
+          transform_controls.setMode("rotate");
+          break;
+        case 82: // R
+          transform_controls.setMode("scale");
+          break;
+        case 187:
+        case 107: // +, =, num+
+          transform_controls.setSize(transform_controls.size + 0.1);
+          break;
+        case 189:
+        case 109: // -, _, num-
+          transform_controls.setSize(Math.max(transform_controls.size - 0.1, 0.1));
+          break;
+        case 88: // X
+          transform_controls.showX = !transform_controls.showX;
+          break;
+        case 89: // Y
+          transform_controls.showY = !transform_controls.showY;
+          break;
+        case 90: // Z
+          transform_controls.showZ = !transform_controls.showZ;
+          break;
+        case 32: // Spacebar
+          transform_controls.enabled = !transform_controls.enabled;
+          break;
+      }
+    });
 
 
-  dragControls.addEventListener('dragend', function (object) {
-    console.log(object);
+  }
+
+  if (1 == 1) {
+    var dragControls = new THREE.DragControls(drag_objects, camera, renderer.domElement);
+    dragControls.addEventListener('dragstart', function () {
+      controls.enabled = false;
+    });
+
+
+    dragControls.addEventListener('dragend', function (object) {
+      console.log(object);
 //    object.position.y=0;
-    controls.enabled = true;
-  });
+      controls.enabled = true;
+    });
+  }
+
+  if (1 == 2) {
+    $(document).click(function (event) {
+
+      if (Outline_selectedObjects_temp === null) {
+        transform_controls.detach(Outline_selectedObjects_temp2);
+        scene.remove(transform_controls);
+      }
+      else {
+        Outline_selectedObjects_temp2 = Outline_selectedObjects_temp;
+        scene.add(transform_controls);
+        transform_controls.attach(Outline_selectedObjects_temp2);
+      }
+
+    });
+  }
 
 
   $(document).dblclick(function (event) {
     onDocumentMouseDown(event);
   });
-
 }
 
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
-window.onresize = function () {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  composer.setSize(window.innerWidth, window.innerHeight);
+function onWindowResize() {
 
-  effectFXAA.uniforms[ 'resolution' ].value.set( 1 / window.innerWidth, 1 / window.innerHeight );
-};
+  var width = window.innerWidth;
+  var height = window.innerHeight;
+
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+
+  renderer.setSize(width, height);
+  composer.setSize(width, height);
+
+//  effectFXAA.uniforms[ 'resolution' ].value.set( 1 / window.innerWidth, 1 / window.innerHeight );
+
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------------
+
+var WindMillRotation = 0;
+var logOnce = 0;
+
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
 function update() {
-  camera.updateProjectionMatrix();
+//  camera.updateProjectionMatrix();
 
   controls.update();
 
@@ -756,9 +842,6 @@ function update() {
 //  main_player.quaternion.copy(camera.quaternion);
   }
 }
-
-var WindMillRotation = 0;
-var logOnce = 0;
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
 function render() {
@@ -770,21 +853,23 @@ function render() {
   //   camera.position.y = 10;
   // }
 
-  scene.traverse(function (node) {
-    if (node instanceof THREE.Scene) {
-      if (logOnce > 0) {
-        console.log("---------------------");
-        console.log(node);
-        console.log(node.userData);
-        logOnce--;
-      }
+  if (1 == 2) {
+    scene.traverse(function (node) {
+      if (node instanceof THREE.Scene) {
+        if (logOnce > 0) {
+          console.log("---------------------");
+          console.log(node);
+          console.log(node.userData);
+          logOnce--;
+        }
 
-      if (node.userData.object_name === "WindmillX") {
-        WindMillRotation = WindMillRotation + 0.1;
-        node.rotation.y = THREE.Math.degToRad(WindMillRotation);
+        if (node.userData.object_name === "WindmillX") {
+          WindMillRotation = WindMillRotation + 0.1;
+          node.rotation.y = THREE.Math.degToRad(WindMillRotation);
+        }
       }
-    }
-  });
+    });
+  }
 
   // If any movement was added, run it!
   if (movements.length > 0) {

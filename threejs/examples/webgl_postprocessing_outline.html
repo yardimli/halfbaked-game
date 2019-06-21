@@ -1,264 +1,286 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<title>three.js webgl - post processing - Outline Pass</title>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<link type="text/css" rel="stylesheet" href="main.css">
-	</head>
-	<body>
-		<script src="../build/three.js"></script>
-		<script src="js/controls/OrbitControls.js"></script>
-		<script src="js/loaders/OBJLoader.js"></script>
+<head>
+  <title>three.js webgl - post processing - Outline Pass</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <link type="text/css" rel="stylesheet" href="main.css">
+</head>
+<body>
+<script src="../build/three.js"></script>
+<script src="js/controls/OrbitControls.js"></script>
+<script src="js/controls/DragControls.js"></script>
+<script src="js/loaders/OBJLoader.js"></script>
+<script src="js/loaders/GLTFLoader.js"></script>
 
-		<script src="js/WebGL.js"></script>
+<script src="js/WebGL.js"></script>
 
-		<script src="js/shaders/CopyShader.js"></script>
-		<script src="js/shaders/FXAAShader.js"></script>
-		<script src="js/postprocessing/EffectComposer.js"></script>
-		<script src="js/postprocessing/RenderPass.js"></script>
-		<script src="js/postprocessing/ShaderPass.js"></script>
-		<script src="js/postprocessing/OutlinePass.js"></script>
-		<script src="js/libs/stats.min.js"></script>
-		<script src='js/libs/dat.gui.min.js'></script>
+<script src="js/shaders/CopyShader.js"></script>
+<script src="js/shaders/FXAAShader.js"></script>
+<script src="js/postprocessing/EffectComposer.js"></script>
+<script src="js/postprocessing/RenderPass.js"></script>
+<script src="js/postprocessing/ShaderPass.js"></script>
+<script src="js/postprocessing/OutlinePass.js"></script>
+<script src='js/libs/dat.gui.min.js'></script>
 
-		<div id="info">
-			<a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> - Outline Pass by <a href="http://eduperiment.com" target="_blank" rel="noopener">Prashant Sharma</a> and <a href="https://clara.io" target="_blank" rel="noopener">Ben Houston</a><br/><br/>
-		</div>
+<script type="text/javascript" src="../../js/jquery-3.4.1.js"></script>
 
-		<script>
 
-			if ( WEBGL.isWebGLAvailable() === false ) {
+<script>
 
-				document.body.appendChild( WEBGL.getWebGLErrorMessage() );
+  if (WEBGL.isWebGLAvailable() === false) {
 
-			}
+    document.body.appendChild(WEBGL.getWebGLErrorMessage());
 
+  }
 
-			var objects = [];
 
-			var container, stats;
-			var camera, scene, renderer, controls;
-			var raycaster = new THREE.Raycaster();
+  var objects = [];
 
-			var mouse = new THREE.Vector2();
-			var selectedObjects = [];
+  var container, stats;
+  var camera, scene, renderer, controls;
+  var raycaster = new THREE.Raycaster();
 
-			var composer, effectFXAA, outlinePass;
-			var obj3d = new THREE.Object3D();
+  var mouse = new THREE.Vector2();
+  var selectedObjects = [];
 
-			var group = new THREE.Group();
+  var composer, outlinePass;
+  var obj3d = new THREE.Object3D();
 
+  var group = new THREE.Group();
 
-			init();
-			animate();
 
-			function init() {
+  $(document).ready(function () {
+    init();
+    animate();
+  });
 
-				container = document.createElement( 'div' );
-				document.body.appendChild( container );
+  function init() {
 
-				var width = window.innerWidth;
-				var height = window.innerHeight;
+    container = document.createElement('div');
+    document.body.appendChild(container);
 
-				renderer = new THREE.WebGLRenderer();
-				renderer.shadowMap.enabled = true;
-				// todo - support pixelRatio in this demo
-				renderer.setSize( width, height );
-				document.body.appendChild( renderer.domElement );
+    var width = window.innerWidth;
+    var height = window.innerHeight;
 
-				scene = new THREE.Scene();
+    renderer = new THREE.WebGLRenderer();
+    renderer.shadowMap.enabled = true;
+    // todo - support pixelRatio in this demo
+    renderer.setSize(width, height);
+    document.body.appendChild(renderer.domElement);
 
-				const fov = 45;
-				const aspect = window.innerWidth / window.innerHeight; //2;  // the canvas default
-				const near = 1; //1
-				const far = 10000; //200000
-				camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-				camera.position.set(300, 75, 600);
+    scene = new THREE.Scene();
 
-				controls = new THREE.OrbitControls( camera, renderer.domElement );
-				controls.maxDistance = 5000; // Set our max zoom out distance (mouse scroll)
-				controls.minDistance = 3; // Set our min zoom in distance (mouse scroll)
-				// controls.enablePan = false;
-				// controls.enableDamping = true;
-				// controls.dampingFactor = 0.25;
+    const fov = 45;
+    const aspect = window.innerWidth / window.innerHeight; //2;  // the canvas default
+    const near = 1; //1
+    const far = 10000; //200000
+    camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+    camera.position.set(30, 75, 60);
 
-				//
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.maxDistance = 5000; // Set our max zoom out distance (mouse scroll)
+    controls.minDistance = 3; // Set our min zoom in distance (mouse scroll)
+    // controls.enablePan = false;
+    // controls.enableDamping = true;
+    // controls.dampingFactor = 0.25;
 
-				scene.add( new THREE.AmbientLight( 0xaaaaaa, 0.2 ) );
+    //
 
-				var light = new THREE.DirectionalLight( 0xddffdd, 0.6 );
-				light.position.set( 1, 1, 1 );
+    scene.add(new THREE.AmbientLight(0xaaaaaa, 0.2));
 
-				light.castShadow = true;
+    var light = new THREE.DirectionalLight(0xddffdd, 0.6);
+    light.position.set(1, 1, 1);
 
-				light.shadow.mapSize.width = 1024;
-				light.shadow.mapSize.height = 1024;
+    light.castShadow = true;
 
-				var d = 10;
+    light.shadow.mapSize.width = 1024;
+    light.shadow.mapSize.height = 1024;
 
-				light.shadow.camera.left = - d;
-				light.shadow.camera.right = d;
-				light.shadow.camera.top = d;
-				light.shadow.camera.bottom = - d;
+    var d = 10;
 
-				light.shadow.camera.far = 1000;
+    light.shadow.camera.left = -d;
+    light.shadow.camera.right = d;
+    light.shadow.camera.top = d;
+    light.shadow.camera.bottom = -d;
 
-				scene.add( light );
+    light.shadow.camera.far = 1000;
 
-				// model
+    scene.add(light);
 
-				scene.add( group );
+    // model
 
-				//
+    scene.add(group);
 
-				var geometry = new THREE.SphereBufferGeometry( 3, 48, 24 );
+    //
 
-				for ( var i = 0; i < 20; i ++ ) {
+    var urls = ['px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg'];
+    var loaderCube = new THREE.CubeTextureLoader().setPath('textures/cube/skyboxsun25deg/');
+    loaderCube.load(urls, function (texture) {
+      scene.background = texture;
+    });
 
-					var material = new THREE.MeshLambertMaterial();
-					material.color.setHSL( Math.random(), 1.0, 0.3 );
 
-					var mesh = new THREE.Mesh( geometry, material );
-					mesh.position.x = Math.random() * 4 - 2;
-					mesh.position.y = Math.random() * 4 - 2;
-					mesh.position.z = Math.random() * 4 - 2;
-					mesh.receiveShadow = true;
-					mesh.castShadow = true;
-					mesh.scale.multiplyScalar( Math.random() * 0.3 + 0.1 );
-					group.add( mesh );
-					objects.push(mesh);
+    var geometry = new THREE.SphereBufferGeometry(3, 48, 24);
 
-				}
+    for (var i = 0; i < 20; i++) {
 
-				var floorMaterial = new THREE.MeshLambertMaterial( { side: THREE.DoubleSide } );
+      var material = new THREE.MeshLambertMaterial();
+      material.color.setHSL(Math.random(), 1.0, 0.3);
 
-				var floorGeometry = new THREE.PlaneBufferGeometry( 12, 12 );
-				var floorMesh = new THREE.Mesh( floorGeometry, floorMaterial );
-				floorMesh.rotation.x -= Math.PI * 0.5;
-				floorMesh.position.y -= 1.5;
-				group.add( floorMesh );
-				floorMesh.receiveShadow = true;
+      var mesh = new THREE.Mesh(geometry, material);
+      mesh.position.x = Math.random() * 4 - 2;
+      mesh.position.y = Math.random() * 4 - 2;
+      mesh.position.z = Math.random() * 4 - 2;
+      mesh.receiveShadow = true;
+      mesh.castShadow = true;
+      mesh.scale.multiplyScalar(Math.random() * 0.3 + 0.1);
+      group.add(mesh);
+      objects.push(mesh);
 
-				var geometry = new THREE.TorusBufferGeometry( 1, 0.3, 16, 100 );
-				var material = new THREE.MeshPhongMaterial( { color: 0xffaaff } );
-				var torus = new THREE.Mesh( geometry, material );
-				torus.position.z = - 4;
-				group.add( torus );
-				objects.push(torus);
-				torus.receiveShadow = true;
-				torus.castShadow = true;
+    }
 
-				//
+    var floorMaterial = new THREE.MeshLambertMaterial({side: THREE.DoubleSide});
 
-				stats = new Stats();
-				container.appendChild( stats.dom );
+    var floorGeometry = new THREE.PlaneBufferGeometry(12, 12);
+    var floorMesh = new THREE.Mesh(floorGeometry, floorMaterial);
+    floorMesh.rotation.x -= Math.PI * 0.5;
+    floorMesh.position.y -= 1.5;
+    group.add(floorMesh);
+    floorMesh.receiveShadow = true;
 
-				// postprocessing
+    var geometry = new THREE.TorusBufferGeometry(1, 0.3, 16, 100);
+    var material = new THREE.MeshPhongMaterial({color: 0xffaaff});
+    var torus = new THREE.Mesh(geometry, material);
+    torus.position.z = -4;
+    group.add(torus);
+    objects.push(torus);
+    torus.receiveShadow = true;
+    torus.castShadow = true;
 
-				composer = new THREE.EffectComposer( renderer );
+    //
 
-				var renderPass = new THREE.RenderPass( scene, camera );
-				composer.addPass( renderPass );
+    // postprocessing
 
-				outlinePass = new THREE.OutlinePass( new THREE.Vector2( window.innerWidth, window.innerHeight ), scene, camera );
-				composer.addPass( outlinePass );
+    composer = new THREE.EffectComposer(renderer);
 
+    var renderPass = new THREE.RenderPass(scene, camera);
+    composer.addPass(renderPass);
 
-				window.addEventListener( 'resize', onWindowResize, false );
+    outlinePass = new THREE.OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera);
+    composer.addPass(outlinePass);
 
-				window.addEventListener( 'mousemove', onTouchMove );
-				window.addEventListener( 'touchmove', onTouchMove );
 
-				function onTouchMove( event ) {
+    window.addEventListener('resize', onWindowResize, false);
 
-					var x, y;
+    window.addEventListener('mousemove', onTouchMove);
+    window.addEventListener('touchmove', onTouchMove);
 
-					if ( event.changedTouches ) {
 
-						x = event.changedTouches[ 0 ].pageX;
-						y = event.changedTouches[ 0 ].pageY;
 
-					} else {
+    var dragControls = new THREE.DragControls(objects, camera, renderer.domElement);
+    dragControls.addEventListener('dragstart', function () {
+      controls.enabled = false;
+    });
 
-						x = event.clientX;
-						y = event.clientY;
 
-					}
+    dragControls.addEventListener('dragend', function (object) {
+      console.log(object);
+//    object.position.y=0;
+      controls.enabled = true;
+    });
 
-					mouse.x = ( x / window.innerWidth ) * 2 - 1;
-					mouse.y = - ( y / window.innerHeight ) * 2 + 1;
 
-					checkIntersection();
+  }
 
-				}
+  function onTouchMove(event) {
 
-				function addSelectedObject( object ) {
+    var x, y;
 
-					selectedObjects = [];
-					selectedObjects.push( object );
+    if (event.changedTouches) {
 
-				}
+      x = event.changedTouches[0].pageX;
+      y = event.changedTouches[0].pageY;
 
-				function checkIntersection() {
+    }
+    else {
 
-					raycaster.setFromCamera( mouse, camera );
+      x = event.clientX;
+      y = event.clientY;
 
-					var intersects = raycaster.intersectObjects( objects, true );
+    }
 
-					if ( intersects.length > 0 ) {
+    mouse.x = (x / window.innerWidth) * 2 - 1;
+    mouse.y = -(y / window.innerHeight) * 2 + 1;
 
-						var selectedObject = intersects[ 0 ].object;
-						addSelectedObject( selectedObject );
-						outlinePass.selectedObjects = selectedObjects;
+    checkIntersection();
 
-					} else {
+  }
 
-						// outlinePass.selectedObjects = [];
+  function addSelectedObject(object) {
 
-					}
+    selectedObjects = [];
+    selectedObjects.push(object);
 
-				}
+  }
 
-			}
 
-			function onWindowResize() {
+  function checkIntersection() {
 
-				var width = window.innerWidth;
-				var height = window.innerHeight;
+    raycaster.setFromCamera(mouse, camera);
 
-				camera.aspect = width / height;
-				camera.updateProjectionMatrix();
+    var intersects = raycaster.intersectObjects(objects, true);
 
-				renderer.setSize( width, height );
-				composer.setSize( width, height );
+    if (intersects.length > 0) {
 
-				effectFXAA.uniforms[ 'resolution' ].value.set( 1 / window.innerWidth, 1 / window.innerHeight );
+      var selectedObject = intersects[0].object;
+      addSelectedObject(selectedObject);
+      outlinePass.selectedObjects = selectedObjects;
+      console.log(selectedObject);
 
-			}
+    }
+    else {
 
-			function animate() {
+      // outlinePass.selectedObjects = [];
 
-				requestAnimationFrame( animate );
+    }
 
-				stats.begin();
+  }
 
-				var timer = performance.now();
+  function onWindowResize() {
 
-				// if ( params.rotate ) {
-				//
-				// 	group.rotation.y = timer * 0.0001;
-				//
-				// }
+    var width = window.innerWidth;
+    var height = window.innerHeight;
 
-				controls.update();
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
 
-				composer.render();
+    renderer.setSize(width, height);
+    composer.setSize(width, height);
 
-				stats.end();
 
-			}
+  }
 
-		</script>
-	</body>
+  function animate() {
+
+    requestAnimationFrame(animate);
+
+
+    var timer = performance.now();
+
+    // if ( params.rotate ) {
+    //
+    // 	group.rotation.y = timer * 0.0001;
+    //
+    // }
+
+    controls.update();
+
+    composer.render();
+
+
+  }
+
+</script>
+</body>
 </html>

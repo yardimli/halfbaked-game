@@ -35,8 +35,6 @@ var main_player = null;
 
 var other_players = [];
 
-var json_objects;
-
 $(document).ready(function () {
   init();
   animate();
@@ -49,11 +47,14 @@ var DirectionalLight1;
 var DirectionalLight1Helper;
 var PointLight1;
 var PointLight1Helper;
-var composer, effectFXAA, outlinePass, outlinePassSelected;
+var composer, effectFXAA, outlinePass;
 
 var Outline_mouse = new THREE.Vector2();
 var Outline_selectedObjects = [];
-var Outline_selectedObject_temp;
+var Outline_selectedObjects_temp;
+var Outline_selectedObjects_temp2;
+
+var Edit_SelectedObject = new THREE.Vector3();
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
 function makeXYZGUI(folder, vector3, onChangeFn) {
@@ -324,6 +325,7 @@ function loadGLTF(name, model_file, position, scale, rotate, collidable) {
 
     const root = gltf.scene;
 
+//    console.log("scan :" + name);
     var AssignNameToFirst = true;
     root.traverse((obj) => {
       if (obj.isMesh && collidable) {
@@ -356,6 +358,22 @@ function loadGLTF(name, model_file, position, scale, rotate, collidable) {
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
 function createFloor() {
+  //ground
+  // var groundTexture = loaderTexture.load('./threejs/examples/textures/terrain/backgrounddetailed6.jpg');
+  // groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
+  // groundTexture.repeat.set(100, 100);
+  // groundTexture.anisotropy = 16;
+  // var groundMaterial = new THREE.MeshLambertMaterial({map: groundTexture});
+  // var plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(20000, 20000), groundMaterial);
+  // plane.position.y = -1;
+  // plane.rotation.x = -Math.PI / 2;
+  // plane.receiveShadow = true;
+  // plane.name = "plane";
+  //
+  // scene.add(plane);
+  // objects.push(plane);
+
+
   var geo = new THREE.PlaneBufferGeometry(20000, 20000, 8, 8);
   var mat = new THREE.MeshBasicMaterial({color: 0x5A6450});
   var plane = new THREE.Mesh(geo, mat);
@@ -511,14 +529,18 @@ function Outline_checkIntersection() {
   var intersects = raycaster.intersectObjects(drag_objects, true);
   if (intersects.length > 0) {
 
-    Outline_selectedObject_temp = intersects[0].object;
-    Outline_addSelectedObject(Outline_selectedObject_temp);
+    Outline_selectedObjects_temp = intersects[0].object;
+    Outline_addSelectedObject(Outline_selectedObjects_temp);
     outlinePass.selectedObjects = Outline_selectedObjects;
+
+    Edit_SelectedObject = Outline_selectedObjects_temp.position;
+
   }
   else {
-    Outline_selectedObject_temp = null;
+    Outline_selectedObjects_temp = null;
     // outlinePass.selectedObjects = [];
   }
+//  console.log(Outline_selectedObjects);
 }
 
 
@@ -575,7 +597,8 @@ function init() {
   camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
   camera.position.set(300, 75, 600);
 //  camera.lookAt(1500,200,500);
-//    main_player.add(camera);
+//  camera.position.set(0, 100, 800);
+  //    main_player.add(camera);
 
   controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.maxDistance = 5000; // Set our max zoom out distance (mouse scroll)
@@ -589,6 +612,9 @@ function init() {
   controls.target = new THREE.Vector3(300, 2, 0);
 
   controls.update();
+//    controls.target.copy(new THREE.Vector3(0, 0, 0));
+//    controls.target.copy(new THREE.Vector3(0, characterSize / 2, 0));
+
 
   AddLights();
 
@@ -606,7 +632,12 @@ function init() {
   // scene.add(rotationPoint);
 
   // createCharacter('./character1.png', 35, 50, new THREE.Vector3(0, 20, 155), new THREE.Vector3(0, 0, 0));
+  //
   // createOtherCharacter("char2", "./character2.png", 35, 50, new THREE.Vector3(155, 20, 5), new THREE.Vector3(0, 0, 0), true);
+  // createOtherCharacter("char3", "./character3.png", 35, 50, new THREE.Vector3(-185, 20, 25), new THREE.Vector3(0, 0, 0), true);
+  // createOtherCharacter("char4", "./character4.png", 35, 50, new THREE.Vector3(-255, 20, 115), new THREE.Vector3(0, 0, 0), true);
+  // createOtherCharacter("char5", "./character5.png", 35, 50, new THREE.Vector3(255, 20, 55), new THREE.Vector3(0, 0, 0), true);
+  // createOtherCharacter("char6", "./character6.png", 35, 50, new THREE.Vector3(305, 20, -25), new THREE.Vector3(0, 0, 0), true);
 
 
   createFloor();
@@ -618,34 +649,20 @@ function init() {
     dataType: 'json',
     success: function (response) {
       for (var i = 0; i < response.length; i++) {
+//        console.log(response[i]);
+
         var RepeatX = 0;
         var RepeatY = 0;
         var RepeatZ = 0;
 
-        response[i].Repeat = 1;
         for (var j = 0; j < response[i].Repeat; j++) {
-
           loadGLTF(response[i].Name, response[i].FileName, new THREE.Vector3(response[i].Position[0] + RepeatX, response[i].Position[1] + RepeatY, response[i].Position[2] + RepeatZ), new THREE.Vector3(response[i].Scale[0], response[i].Scale[1], response[i].Scale[2]), new THREE.Vector3(response[i].Rotate[0], response[i].Rotate[1], response[i].Rotate[2]), response[i].Collision);
 
           RepeatX += response[i].RepeatSpacing[0];
           RepeatY += response[i].RepeatSpacing[1];
           RepeatZ += response[i].RepeatSpacing[2];
+
         }
-      }
-    }
-  });
-
-
-  $.ajax({
-    type: "GET",
-    url: "objects.json",
-    headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
-    dataType: 'json',
-    success: function (response) {
-      json_objects = response;
-
-      for (var i = 0; i < response.length; i++) {
-        $("#object_file").append("<option id='" + response[i].Folder + "/" + response[i].Name + "'>" + response[i].Name + "</option>");
       }
     }
   });
@@ -672,19 +689,6 @@ function init() {
   outlinePass.visibleEdgeColor.set('#ffffff');
   outlinePass.hiddenEdgeColor.set('#190a05');
 
-
-  outlinePassSelected = new THREE.OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera);
-  composer.addPass(outlinePassSelected);
-
-  outlinePassSelected.edgeStrength = 4;
-  outlinePassSelected.edgeGlow = 1.0;
-  outlinePassSelected.edgeThickness = 1.0;
-  outlinePassSelected.pulsePeriod = 1;
-  outlinePassSelected.usePatternTexture = false;
-  outlinePassSelected.visibleEdgeColor.set('#00ffff');
-  outlinePassSelected.hiddenEdgeColor.set('#190a05');
-
-
   var onLoad = function (texture) {
     outlinePass.patternTexture = texture;
     texture.wrapS = THREE.RepeatWrapping;
@@ -702,72 +706,105 @@ function init() {
   window.addEventListener('mousemove', Outline_onTouchMove);
   window.addEventListener('touchmove', Outline_onTouchMove);
 
-  var dragControls = new THREE.DragControls(drag_objects, camera, renderer.domElement);
-  dragControls.addEventListener('dragstart', function () {
-    controls.enabled = false;
-  });
+  if (1 == 2) {
+
+    // <div id="info">
+    //     <a href="javascript:control.setMode( 'translate' );">"W" translate</a> |
+    //   <a href="javascript:control.setMode( 'rotate' );">"E" rotate</a> |
+    //   <a href="javascript:control.setMode( 'scale' );">"R" scale</a> |
+    //   <a href="javascript:control.setSize( control.size + 0.1 );">"+" increase size</a> |
+    //   <a href="javascript:control.setSize( Math.max( control.size - 0.1, 0.1 ) );">"-" decrease size</a><br />
+    //   <a href="javascript:control.setSpace( control.space === 'local' ? 'world' : 'local' );">"Q" toggle world/local space</a> | Hold "Ctrl" down to snap to grid<br />
+    //   <a href="javascript:control.showX = !control.showX">"X" toggle X</a> |
+    //   <a href="javascript:control.showY = !control.showY">"Y" toggle Y</a> |
+    //   <a href="javascript:control.showZ = !control.showZ">"Z" toggle Z</a> |
+    //   <a href="javascript:control.enabled = !control.enabled">"Spacebar" toggle enabled</a><br />
+    //   </div>
+
+    transform_controls = new THREE.TransformControls(camera, renderer.domElement);
+    transform_controls.addEventListener('change', render);
+    transform_controls.addEventListener('dragging-changed', function (event) {
+      controls.enabled = !event.value;
+    });
+
+    window.addEventListener('keydown', function (event) {
+      switch (event.keyCode) {
+        case 81: // Q
+          transform_controls.setSpace(transform_controls.space === "local" ? "world" : "local");
+          break;
+        case 17: // Ctrl
+          transform_controls.setTranslationSnap(100);
+          transform_controls.setRotationSnap(THREE.Math.degToRad(15));
+          break;
+        case 87: // W
+          transform_controls.setMode("translate");
+          break;
+        case 69: // E
+          transform_controls.setMode("rotate");
+          break;
+        case 82: // R
+          transform_controls.setMode("scale");
+          break;
+        case 187:
+        case 107: // +, =, num+
+          transform_controls.setSize(transform_controls.size + 0.1);
+          break;
+        case 189:
+        case 109: // -, _, num-
+          transform_controls.setSize(Math.max(transform_controls.size - 0.1, 0.1));
+          break;
+        case 88: // X
+          transform_controls.showX = !transform_controls.showX;
+          break;
+        case 89: // Y
+          transform_controls.showY = !transform_controls.showY;
+          break;
+        case 90: // Z
+          transform_controls.showZ = !transform_controls.showZ;
+          break;
+        case 32: // Spacebar
+          transform_controls.enabled = !transform_controls.enabled;
+          break;
+      }
+    });
 
 
-  dragControls.addEventListener('dragend', function (object) {
-    console.log(object);
+  }
+
+  if (1 == 1) {
+    var dragControls = new THREE.DragControls(drag_objects, camera, renderer.domElement);
+    dragControls.addEventListener('dragstart', function () {
+      controls.enabled = false;
+    });
+
+
+    dragControls.addEventListener('dragend', function (object) {
+      console.log(object);
 //    object.position.y=0;
-    controls.enabled = true;
-  });
+      controls.enabled = true;
+    });
+  }
+
+  if (1 == 2) {
+    $(document).click(function (event) {
+
+      if (Outline_selectedObjects_temp === null) {
+        transform_controls.detach(Outline_selectedObjects_temp2);
+        scene.remove(transform_controls);
+      }
+      else {
+        Outline_selectedObjects_temp2 = Outline_selectedObjects_temp;
+        scene.add(transform_controls);
+        transform_controls.attach(Outline_selectedObjects_temp2);
+      }
+
+    });
+  }
+
 
   $(document).dblclick(function (event) {
     onDocumentMouseDown(event);
   });
-
-  $(document).click(function () {
-    if (Outline_selectedObject_temp !== null) {
-      outlinePassSelected.selectedObjects = [];
-      outlinePassSelected.selectedObjects = [Outline_selectedObject_temp];
-
-      console.log("update");
-
-      var position = new THREE.Vector3();
-      position.setFromMatrixPosition(Outline_selectedObject_temp.matrixWorld);
-
-      $("#position_x").html(Math.round(position.x * 10000) / 10000);
-      $("#position_y").html(Math.round(position.y * 10000) / 10000);
-      $("#position_z").html(Math.round(position.z * 10000) / 10000);
-
-      $("#scale_x").html(Outline_selectedObject_temp.scale.x);
-      $("#scale_y").html(Outline_selectedObject_temp.scale.y);
-      $("#scale_z").html(Outline_selectedObject_temp.scale.z);
-
-
-      $("#rotate_x").html(Outline_selectedObject_temp.rotation.x);
-      $("#rotate_y").html(Outline_selectedObject_temp.rotation.y);
-      $("#rotate_z").html(Outline_selectedObject_temp.rotation.z);
-
-    }
-    else {
-      outlinePassSelected.selectedObjects = [];
-      outlinePass.selectedObjects = [];
-
-      $("#position_x").html("");
-      $("#position_y").html("");
-      $("#position_z").html("");
-
-      $("#scale_x").html("");
-      $("#scale_y").html("");
-      $("#scale_z").html("");
-
-
-      $("#rotate_x").html("");
-      $("#rotate_y").html("");
-      $("#rotate_z").html("");
-
-    }
-
-  });
-
-  $("#add_house").on("click", function () {
-//    console.log("add new "+$("#object_file").val()+" "+$("#object_file option:selected").attr("id"));
-    loadGLTF($("#object_file").val(), "./gltf_lib2/"+$("#object_file option:selected").attr("id")+".gltf", new THREE.Vector3(0, 0, 0), new THREE.Vector3(1000, 1000, 1000), new THREE.Vector3(0, 0, 0), true);
-  });
-
 }
 
 
@@ -796,7 +833,9 @@ var logOnce = 0;
 //------------------------------------------------------------------------------------------------------------------------------------------------
 function update() {
 //  camera.updateProjectionMatrix();
+
   controls.update();
+
 
   if (main_player !== null) {
     main_player.lookAt(camera.position);

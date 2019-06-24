@@ -309,8 +309,6 @@ function loadGLTF(name, model_file, position, scale, rotate, collidable) {
     var object = gltf.scene;
     gltf.scene.scale.set(scale.x, scale.y, scale.z);
 
-    gltf.scene.rotation.set(THREE.Math.degToRad(rotate.x), THREE.Math.degToRad(rotate.y), THREE.Math.degToRad(rotate.z));
-
     gltf.scene.position.x = position.x;				    //Position (x = right+ left-)
     gltf.scene.position.y = position.y;				    //Position (y = up+, down-)
     gltf.scene.position.z = position.z;				    //Position (z = front +, back-)
@@ -328,6 +326,11 @@ function loadGLTF(name, model_file, position, scale, rotate, collidable) {
     root.traverse((obj) => {
       if (obj.isMesh && collidable) {
         drag_objects.push(obj);
+
+        obj.rotation.x = THREE.Math.degToRad(rotate.x);
+        obj.rotation.y = THREE.Math.degToRad(rotate.y);
+        obj.rotation.z = THREE.Math.degToRad(rotate.z);
+
       }
 
       if (obj.type === "Scene") {
@@ -534,19 +537,24 @@ function Outline_onTouchMove(event) {
     x = event.clientX;
     y = event.clientY;
   }
-  Outline_mouse.x = (x / window.innerWidth) * 2 - 1;
+  Outline_mouse.x = (x / (window.innerWidth-250)) * 2 - 1;
   Outline_mouse.y = -(y / window.innerHeight) * 2 + 1;
   Outline_checkIntersection();
 }
 
+function radians_to_degrees(radians) {
+  var pi = Math.PI;
+  return radians * (180 / pi);
+}
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
 function init() {
   // Build the container
-  container = document.createElement('div');
-  document.body.appendChild(container);
+  container = $("#GameContainer");
+  // document.createElement('div');
+  // document.body.appendChild(container);
 
-  var width = window.innerWidth;
+  var width = window.innerWidth-250;
   var height = window.innerHeight;
 
   renderer = new THREE.WebGLRenderer(); //{antialias: true}
@@ -558,7 +566,7 @@ function init() {
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(width, height);
 
-  container.appendChild(renderer.domElement);
+  container.append(renderer.domElement);
 
   // Create the scene.
   scene = new THREE.Scene();
@@ -569,7 +577,7 @@ function init() {
 
 
   const fov = 45;
-  const aspect = window.innerWidth / window.innerHeight; //2;  // the canvas default
+  const aspect = (window.innerWidth-250) / window.innerHeight; //2;  // the canvas default
   const near = 1; //1
   const far = 10000; //200000
   camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
@@ -661,7 +669,7 @@ function init() {
   var renderPass = new THREE.RenderPass(scene, camera);
   composer.addPass(renderPass);
 
-  outlinePass = new THREE.OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera);
+  outlinePass = new THREE.OutlinePass(new THREE.Vector2((window.innerWidth-250), window.innerHeight), scene, camera);
   composer.addPass(outlinePass);
 
   outlinePass.edgeStrength = 3;
@@ -673,7 +681,7 @@ function init() {
   outlinePass.hiddenEdgeColor.set('#190a05');
 
 
-  outlinePassSelected = new THREE.OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera);
+  outlinePassSelected = new THREE.OutlinePass(new THREE.Vector2((window.innerWidth-250), window.innerHeight), scene, camera);
   composer.addPass(outlinePassSelected);
 
   outlinePassSelected.edgeStrength = 4;
@@ -694,7 +702,7 @@ function init() {
   var loader2 = new THREE.TextureLoader();
   loader2.load('./threejs/examples/textures/tri_pattern.jpg', onLoad);
   effectFXAA = new THREE.ShaderPass(THREE.FXAAShader);
-  effectFXAA.uniforms['resolution'].value.set(1 / window.innerWidth, 1 / window.innerHeight);
+  effectFXAA.uniforms['resolution'].value.set(1 / (window.innerWidth-250), 1 / window.innerHeight);
   composer.addPass(effectFXAA);
 
   window.addEventListener('resize', onWindowResize, false);
@@ -725,6 +733,9 @@ function init() {
 
       console.log("update");
 
+      $("#object_name").html(Outline_selectedObject_temp.userData.name);
+
+
       var position = new THREE.Vector3();
       position.setFromMatrixPosition(Outline_selectedObject_temp.matrixWorld);
 
@@ -732,14 +743,19 @@ function init() {
       $("#position_y").html(Math.round(position.y * 10000) / 10000);
       $("#position_z").html(Math.round(position.z * 10000) / 10000);
 
-      $("#scale_x").html(Outline_selectedObject_temp.scale.x);
-      $("#scale_y").html(Outline_selectedObject_temp.scale.y);
-      $("#scale_z").html(Outline_selectedObject_temp.scale.z);
+
+      var box = new THREE.Box3().setFromObject(Outline_selectedObject_temp);
+//      console.log( box.min, box.max, box.getSize() );
+      var boxsize = new THREE.Vector3();
+      box.getSize(boxsize);
+      $("#size_x").html(Math.round(boxsize.x * 10000) / 10000);
+      $("#size_y").html(Math.round(boxsize.y * 10000) / 10000);
+      $("#size_z").html(Math.round(boxsize.z * 10000) / 10000);
 
 
-      $("#rotate_x").html(Outline_selectedObject_temp.rotation.x);
-      $("#rotate_y").html(Outline_selectedObject_temp.rotation.y);
-      $("#rotate_z").html(Outline_selectedObject_temp.rotation.z);
+      $("#rotate_x").html(radians_to_degrees(Outline_selectedObject_temp.rotation.x));
+      $("#rotate_y").html(radians_to_degrees(Outline_selectedObject_temp.rotation.y));
+      $("#rotate_z").html(radians_to_degrees(Outline_selectedObject_temp.rotation.z));
 
     }
     else {
@@ -750,9 +766,9 @@ function init() {
       $("#position_y").html("");
       $("#position_z").html("");
 
-      $("#scale_x").html("");
-      $("#scale_y").html("");
-      $("#scale_z").html("");
+      $("#size_x").html("");
+      $("#size_y").html("");
+      $("#size_z").html("");
 
 
       $("#rotate_x").html("");
@@ -765,7 +781,7 @@ function init() {
 
   $("#add_house").on("click", function () {
 //    console.log("add new "+$("#object_file").val()+" "+$("#object_file option:selected").attr("id"));
-    loadGLTF($("#object_file").val(), "./gltf_lib2/"+$("#object_file option:selected").attr("id")+".gltf", new THREE.Vector3(0, 0, 0), new THREE.Vector3(1000, 1000, 1000), new THREE.Vector3(0, 0, 0), true);
+    loadGLTF($("#object_file").val(), "./gltf_lib2/" + $("#object_file option:selected").attr("id") + ".gltf", new THREE.Vector3(0, 0, 0), new THREE.Vector3(1000, 1000, 1000), new THREE.Vector3(0, 0, 0), true);
   });
 
 }
@@ -774,7 +790,7 @@ function init() {
 //------------------------------------------------------------------------------------------------------------------------------------------------
 function onWindowResize() {
 
-  var width = window.innerWidth;
+  var width = window.innerWidth-250;
   var height = window.innerHeight;
 
   camera.aspect = width / height;
@@ -814,9 +830,9 @@ function render() {
   //   camera.position.y = 10;
   // }
 
-  if (1 == 2) {
+  if (1 == 1) {
     scene.traverse(function (node) {
-      if (node instanceof THREE.Scene) {
+      if (node instanceof THREE.Mesh) {
         if (logOnce > 0) {
           console.log("---------------------");
           console.log(node);
@@ -824,8 +840,8 @@ function render() {
           logOnce--;
         }
 
-        if (node.userData.object_name === "WindmillX") {
-          WindMillRotation = WindMillRotation + 0.1;
+        if (node.userData.name === "SF_Bld_House_Windmill_01") {
+          WindMillRotation = WindMillRotation + 1;
           node.rotation.y = THREE.Math.degToRad(WindMillRotation);
         }
       }

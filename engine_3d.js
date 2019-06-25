@@ -350,6 +350,7 @@ function loadGLTF(name, model_file, position, scale, rotate, collidable) {
         obj.receiveShadow = true;
       }
     });
+    logOnce = 1;
 
 //    console.log(gltf.scene);
 
@@ -537,7 +538,7 @@ function Outline_onTouchMove(event) {
     x = event.clientX;
     y = event.clientY;
   }
-  Outline_mouse.x = (x / (window.innerWidth-250)) * 2 - 1;
+  Outline_mouse.x = (x / (window.innerWidth - 250)) * 2 - 1;
   Outline_mouse.y = -(y / window.innerHeight) * 2 + 1;
   Outline_checkIntersection();
 }
@@ -554,7 +555,7 @@ function init() {
   // document.createElement('div');
   // document.body.appendChild(container);
 
-  var width = window.innerWidth-250;
+  var width = window.innerWidth - 250;
   var height = window.innerHeight;
 
   renderer = new THREE.WebGLRenderer(); //{antialias: true}
@@ -577,7 +578,7 @@ function init() {
 
 
   const fov = 45;
-  const aspect = (window.innerWidth-250) / window.innerHeight; //2;  // the canvas default
+  const aspect = (window.innerWidth - 250) / window.innerHeight; //2;  // the canvas default
   const near = 1; //1
   const far = 10000; //200000
   camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
@@ -653,7 +654,7 @@ function init() {
       json_objects = response;
 
       for (var i = 0; i < response.length; i++) {
-        $("#object_file").append("<option id='" + response[i].Folder + "/" + response[i].Name + "'>" + response[i].Name + "</option>");
+        $("#object_file").append("<option id='obj_" + i + "' data-folder='" + response[i].Folder + "' data-name='" + response[i].Name + "'>" + response[i].Name + "</option>");
       }
     }
   });
@@ -669,7 +670,7 @@ function init() {
   var renderPass = new THREE.RenderPass(scene, camera);
   composer.addPass(renderPass);
 
-  outlinePass = new THREE.OutlinePass(new THREE.Vector2((window.innerWidth-250), window.innerHeight), scene, camera);
+  outlinePass = new THREE.OutlinePass(new THREE.Vector2((window.innerWidth - 250), window.innerHeight), scene, camera);
   composer.addPass(outlinePass);
 
   outlinePass.edgeStrength = 3;
@@ -681,7 +682,7 @@ function init() {
   outlinePass.hiddenEdgeColor.set('#190a05');
 
 
-  outlinePassSelected = new THREE.OutlinePass(new THREE.Vector2((window.innerWidth-250), window.innerHeight), scene, camera);
+  outlinePassSelected = new THREE.OutlinePass(new THREE.Vector2((window.innerWidth - 250), window.innerHeight), scene, camera);
   composer.addPass(outlinePassSelected);
 
   outlinePassSelected.edgeStrength = 4;
@@ -702,7 +703,7 @@ function init() {
   var loader2 = new THREE.TextureLoader();
   loader2.load('./threejs/examples/textures/tri_pattern.jpg', onLoad);
   effectFXAA = new THREE.ShaderPass(THREE.FXAAShader);
-  effectFXAA.uniforms['resolution'].value.set(1 / (window.innerWidth-250), 1 / window.innerHeight);
+  effectFXAA.uniforms['resolution'].value.set(1 / (window.innerWidth - 250), 1 / window.innerHeight);
   composer.addPass(effectFXAA);
 
   window.addEventListener('resize', onWindowResize, false);
@@ -781,7 +782,20 @@ function init() {
 
   $("#add_house").on("click", function () {
 //    console.log("add new "+$("#object_file").val()+" "+$("#object_file option:selected").attr("id"));
-    loadGLTF($("#object_file").val(), "./gltf_lib2/" + $("#object_file option:selected").attr("id") + ".gltf", new THREE.Vector3(0, 0, 0), new THREE.Vector3(1000, 1000, 1000), new THREE.Vector3(0, 0, 0), true);
+
+
+    for (var key in json_objects) {
+      if (json_objects.hasOwnProperty(key)) {
+        if ( json_objects[key].Folder === $("#object_file option:selected").data("folder") && json_objects[key].Name === $("#object_file option:selected").data("name") ) {
+          console.log(key + " -> " + json_objects[key].Scale);
+
+          loadGLTF($("#object_file").val(), "./gltf_lib2/" + json_objects[key].Folder + "/" + json_objects[key].Name + ".gltf", new THREE.Vector3(0, 0, 0), new THREE.Vector3(json_objects[key].Scale[0], json_objects[key].Scale[1], json_objects[key].Scale[2]), new THREE.Vector3(0, 0, 0), true);
+
+        }
+      }
+    }
+
+
   });
 
 }
@@ -790,7 +804,7 @@ function init() {
 //------------------------------------------------------------------------------------------------------------------------------------------------
 function onWindowResize() {
 
-  var width = window.innerWidth-250;
+  var width = window.innerWidth - 250;
   var height = window.innerHeight;
 
   camera.aspect = width / height;
@@ -806,7 +820,7 @@ function onWindowResize() {
 //------------------------------------------------------------------------------------------------------------------------------------------------
 
 var WindMillRotation = 0;
-var logOnce = 0;
+var logOnce = 1;
 
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
@@ -837,7 +851,6 @@ function render() {
           console.log("---------------------");
           console.log(node);
           console.log(node.userData);
-          logOnce--;
         }
 
         if (node.userData.name === "SF_Bld_House_Windmill_01") {
@@ -846,6 +859,9 @@ function render() {
         }
       }
     });
+
+    logOnce--;
+
   }
 
   // If any movement was added, run it!

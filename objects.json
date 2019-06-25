@@ -1537,5 +1537,34 @@
       1000,
       1000
     ]
+  },
+  {
+    "Folder": "Stove_02",
+    "Name": "Stove_02",
+    "Scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "Folder": "Stove_01",
+    "Name": "Stove_01",
+    "Scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "Folder": "Bed02",
+    "Name": "Bed02",
+    "Scale": [
+      1,
+      1,
+      1
+    ]
   }
+
+
 ]

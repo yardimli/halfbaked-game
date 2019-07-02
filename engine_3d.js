@@ -1,3 +1,26 @@
+/*
+TODO:
+
+- dropdown with all scene objects, auto select and focus on dropdown selected object ....ok
+- make objects fixed (mouse move wont work) .............................................ok
+- edit name of scene objects save it to the mesh
+
+- save scene to php => json file
+- load scene from json file
+
+- collision checkbox for items
+- load one player into editor scene (allow to move around and enable/disable collision detection)
+
+- popup json editor for light sources, camera and camera controls. background, add update button. save/load with scene
+
+
+
+
+
+
+ */
+
+
 var camera, // We need a camera.
   scene, // The camera has to see something.
   renderer, // Render our graphics.
@@ -36,6 +59,8 @@ var main_player = null;
 var other_players = [];
 
 var json_objects;
+
+var IgnoreThisClick = false;
 
 $(document).ready(function () {
   init();
@@ -307,11 +332,8 @@ function createCharacter(model_file, width, height, position, rotate) {
 function loadGLTF(name, model_file, position, scale, rotate, collidable) {
   loader.load(model_file, function (gltf) {             // <<--------- Model Path
     var object = gltf.scene;
-    gltf.scene.scale.set(scale.x, scale.y, scale.z);
 
-    gltf.scene.position.x = position.x;				    //Position (x = right+ left-)
-    gltf.scene.position.y = position.y;				    //Position (y = up+, down-)
-    gltf.scene.position.z = position.z;				    //Position (z = front +, back-)
+//    gltf.geometry.center();
 
     scene.add(gltf.scene);
 
@@ -324,12 +346,30 @@ function loadGLTF(name, model_file, position, scale, rotate, collidable) {
 
     var AssignNameToFirst = true;
     root.traverse((obj) => {
-      if (obj.isMesh && collidable) {
+      if (obj.isMesh) {
         drag_objects.push(obj);
+
+        obj.scale.set(scale.x, scale.y, scale.z);
+        obj.geometry.center();
+
+        var box = new THREE.Box3().setFromObject(obj);
+        var boxsize = new THREE.Vector3();
+        box.getSize(boxsize);
+
+        obj.position.x = position.x;				    //Position (x = right+ left-)
+        obj.position.y = position.y + ((Math.round(boxsize.y * 10000) / 10000) / 2);				    //Position (y = up+, down-)
+        obj.position.z = position.z;				    //Position (z = front +, back-)
 
         obj.rotation.x = THREE.Math.degToRad(rotate.x);
         obj.rotation.y = THREE.Math.degToRad(rotate.y);
         obj.rotation.z = THREE.Math.degToRad(rotate.z);
+
+        obj.userData.canMove = "can_move";
+
+        Outline_selectedObject_temp = obj;
+        Outline_addSelectedObject(Outline_selectedObject_temp);
+        // outlinePass.selectedObjects = Outline_selectedObjects;
+        SelectObject();
 
       }
 
@@ -351,6 +391,14 @@ function loadGLTF(name, model_file, position, scale, rotate, collidable) {
       }
     });
     logOnce = 1;
+
+    $("#all_objects").find('option').remove();
+    for (var i=0; i<drag_objects.length; i++) {
+      $("#all_objects").append('<option value="' + drag_objects[i].id + '" data-userdata_name="' + drag_objects[i].userData.name + '" >' + drag_objects[i].userData.name + "(" + drag_objects[i].id+ ")" + '</option>');
+    }
+    SelectObject();
+
+
 
 //    console.log(gltf.scene);
 
@@ -506,22 +554,39 @@ function move(location, destination, speed = playerSpeed) {
 //------------------------------------------------------------------------------------------------------------------------------------------------
 function Outline_addSelectedObject(object) {
   Outline_selectedObjects = [];
-  Outline_selectedObjects.push(object);
+
+  if (object.userData.canMove !== "fixed") {
+    Outline_selectedObjects.push(object);
+  }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
-function Outline_checkIntersection() {
+function Outline_checkIntersection(event) {
+
+  var x, y;
+  if (event.changedTouches) {
+    x = event.changedTouches[0].pageX;
+    y = event.changedTouches[0].pageY;
+  }
+  else {
+    x = event.clientX;
+    y = event.clientY;
+  }
+  Outline_mouse.x = (x / (window.innerWidth - 250)) * 2 - 1;
+  Outline_mouse.y = -(y / window.innerHeight) * 2 + 1;
+
   raycaster.setFromCamera(Outline_mouse, camera);
   var intersects = raycaster.intersectObjects(drag_objects, true);
   if (intersects.length > 0) {
 
     Outline_selectedObject_temp = intersects[0].object;
     Outline_addSelectedObject(Outline_selectedObject_temp);
-    outlinePass.selectedObjects = Outline_selectedObjects;
+    // outlinePass.selectedObjects = Outline_selectedObjects;
   }
   else {
+    // console.log("set selected object to null");
     Outline_selectedObject_temp = null;
-    // outlinePass.selectedObjects = [];
+    Outline_selectedObjects = [];
   }
 }
 
@@ -546,6 +611,146 @@ function Outline_onTouchMove(event) {
 function radians_to_degrees(radians) {
   var pi = Math.PI;
   return radians * (180 / pi);
+}
+
+function degrees_to_radians(degrees) {
+  var pi = Math.PI;
+  return degrees * (pi / 180);
+}
+
+function fitCameraToSelection(camera, controls, selection, fitOffset = 1.2) {
+
+  const box = new THREE.Box3();
+
+  for (const object of selection) box.expandByObject(object);
+
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+
+  const maxSize = Math.max(size.x, size.y, size.z);
+  const fitHeightDistance = maxSize / (2 * Math.atan(Math.PI * camera.fov / 360));
+  const fitWidthDistance = fitHeightDistance / camera.aspect;
+  const distance = fitOffset * Math.max(fitHeightDistance, fitWidthDistance);
+
+  const direction = controls.target.clone()
+    .sub(camera.position)
+    .normalize()
+    .multiplyScalar(distance);
+
+//  controls.maxDistance = distance * 10;
+  controls.target.copy(center);
+
+  camera.near = distance / 100;
+  camera.far = distance * 100;
+  camera.updateProjectionMatrix();
+
+  camera.position.copy(controls.target).sub(direction);
+
+  controls.update();
+}
+
+
+function updateSet(setName) {
+  $("#object_file").find('option').remove();
+  $("#object_group").find('option').remove();
+
+  for (var key in sets) {
+    if (sets[key].name === setName) {
+      for (var key2 in sets[key].groups) {
+        $("#object_group").append('<option value="' + sets[key].groups[key2].name + '">' + sets[key].groups[key2].name + '</option>');
+//          console.log(sets[key].groups[key2].name);
+      }
+    }
+  }
+}
+
+function updateSetGroup() {
+  $("#object_file").find('option').remove();
+  for (var key in sets) {
+    if (sets[key].name === $("#object_set").val()) {
+
+      for (var key2 in sets[key].groups) {
+        if (sets[key].groups[key2].name === $("#object_group").val()) {
+          // console.log(sets[key].groups[key2].name);
+          // console.log(sets[key].groups[key2]);
+
+          for (var key3 in sets[key].groups[key2].folders) {
+
+            $("#object_file").append('<option value="' + sets[key].groups[key2].folders[key3] + '">' + sets[key].groups[key2].folders[key3] + '</option>');
+            // console.log(sets[key].groups[key2].folders[key3]);
+          }
+        }
+      }
+    }
+  }
+}
+
+function SelectObject() {
+  if (Outline_selectedObject_temp !== null) {
+    outlinePassSelected.selectedObjects = [];
+    outlinePassSelected.selectedObjects = [Outline_selectedObject_temp];
+
+    console.log("select object");
+
+    $("#object_name").val(Outline_selectedObject_temp.userData.name);
+
+    $('#all_objects option[value="'+Outline_selectedObject_temp.id+'"]').prop('selected', true);
+
+
+
+
+    var position = new THREE.Vector3();
+    position.setFromMatrixPosition(Outline_selectedObject_temp.matrixWorld);
+
+    $("#position_x").val(Math.round(position.x * 10000) / 10000);
+    $("#position_y").val(Math.round(position.y * 10000) / 10000);
+    $("#position_z").val(Math.round(position.z * 10000) / 10000);
+
+
+    var box = new THREE.Box3().setFromObject(Outline_selectedObject_temp);
+//      console.log( box.min, box.max, box.getSize() );
+    var boxsize = new THREE.Vector3();
+    box.getSize(boxsize);
+
+
+    $("#size_x").val(Math.round(Outline_selectedObject_temp.scale.x * 100) / 100);
+    $("#size_y").val(Math.round(Outline_selectedObject_temp.scale.y * 100) / 100);
+    $("#size_z").val(Math.round(Outline_selectedObject_temp.scale.z * 100) / 100);
+
+    $("#size_x_hint").html(Math.round(boxsize.x * 10000) / 10000);
+    $("#size_y_hint").html(Math.round(boxsize.y * 10000) / 10000);
+    $("#size_z_hint").html(Math.round(boxsize.z * 10000) / 10000);
+
+
+    $("#rotate_x").val(radians_to_degrees(Outline_selectedObject_temp.rotation.x));
+    $("#rotate_y").val(radians_to_degrees(Outline_selectedObject_temp.rotation.y));
+    $("#rotate_z").val(radians_to_degrees(Outline_selectedObject_temp.rotation.z));
+
+    $('#object_fixed option[value="'+Outline_selectedObject_temp.userData.canMove+'"]').prop('selected', true);
+  }
+  else {
+    outlinePassSelected.selectedObjects = [];
+    outlinePass.selectedObjects = [];
+
+    $("#object_name").val("");
+
+    $("#position_x").val("");
+    $("#position_y").val("");
+    $("#position_z").val("");
+
+    $("#size_x").val("");
+    $("#size_y").val("");
+    $("#size_z").val("");
+
+    $("#size_x_hint").html("");
+    $("#size_y_hint").html("");
+    $("#size_z_hint").html("");
+
+    $("#rotate_x").val("");
+    $("#rotate_y").val("");
+    $("#rotate_z").val("");
+
+  }
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
@@ -587,14 +792,19 @@ function init() {
 //    main_player.add(camera);
 
   controls = new THREE.OrbitControls(camera, renderer.domElement);
-  controls.maxDistance = 5000; // Set our max zoom out distance (mouse scroll)
-  controls.minDistance = 300; // Set our min zoom in distance (mouse scroll)
+  // controls.maxDistance = 5000; // Set our max zoom out distance (mouse scroll)
+  // controls.minDistance = 300; // Set our min zoom in distance (mouse scroll)
+
+  controls.rotateSpeed = 0.05;
 
   controls.maxPolarAngle = Math.PI * 0.5;
   controls.enablePan = true;
+  controls.panSpeed = 0.3;
   controls.enableDamping = true;
   controls.dampingFactor = 0.25;
   controls.enableZoom = true;
+  controls.zoomSpeed = 0.6;
+
   controls.target = new THREE.Vector3(300, 2, 0);
 
   controls.update();
@@ -644,22 +854,6 @@ function init() {
     }
   });
 
-
-  $.ajax({
-    type: "GET",
-    url: "objects.json",
-    headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
-    dataType: 'json',
-    success: function (response) {
-      json_objects = response;
-
-      for (var i = 0; i < response.length; i++) {
-        $("#object_file").append("<option id='obj_" + i + "' data-folder='" + response[i].Folder + "' data-name='" + response[i].Name + "'>" + response[i].Name + "</option>");
-      }
-    }
-  });
-
-
   // loadGLTF('Stall', './gltf_lib2/Stall/Stall.gltf', new THREE.Vector3(450, 0, 5), new THREE.Vector3(1000, 1000, 1000), new THREE.Vector3(0, 0, 0), true);
   // loadGLTF('scene', './gltf_lib/scene/scene.gltf', new THREE.Vector3(0, 300, -1000), new THREE.Vector3(0.1, 0.1, 0.1), new THREE.Vector3(0, 0, 0), true);
 
@@ -685,10 +879,10 @@ function init() {
   outlinePassSelected = new THREE.OutlinePass(new THREE.Vector2((window.innerWidth - 250), window.innerHeight), scene, camera);
   composer.addPass(outlinePassSelected);
 
-  outlinePassSelected.edgeStrength = 4;
-  outlinePassSelected.edgeGlow = 1.0;
+  outlinePassSelected.edgeStrength = 1;
+  outlinePassSelected.edgeGlow = 0.5;
   outlinePassSelected.edgeThickness = 1.0;
-  outlinePassSelected.pulsePeriod = 1;
+  outlinePassSelected.pulsePeriod = 2;
   outlinePassSelected.usePatternTexture = false;
   outlinePassSelected.visibleEdgeColor.set('#00ffff');
   outlinePassSelected.hiddenEdgeColor.set('#190a05');
@@ -708,14 +902,23 @@ function init() {
 
   window.addEventListener('resize', onWindowResize, false);
 
-  window.addEventListener('mousemove', Outline_onTouchMove);
-  window.addEventListener('touchmove', Outline_onTouchMove);
-
-  var dragControls = new THREE.DragControls(drag_objects, camera, renderer.domElement);
+  // window.addEventListener('mousemove', Outline_onTouchMove);
+  // window.addEventListener('touchmove', Outline_onTouchMove);
+//  Outline_selectedObjects
+  var dragControls = new THREE.DragControls(Outline_selectedObjects, camera, renderer.domElement);
   dragControls.addEventListener('dragstart', function () {
+    if (Outline_selectedObject_temp!==null) {
+
+      if (Outline_selectedObject_temp.userData.canMove === "fixed") {
+        return false;
+      }
+
+    } else {
+      return false;
+    }
+    IgnoreThisClick = true;
     controls.enabled = false;
   });
-
 
   dragControls.addEventListener('dragend', function (object) {
     console.log(object);
@@ -727,76 +930,147 @@ function init() {
     onDocumentMouseDown(event);
   });
 
-  $(document).click(function () {
-    if (Outline_selectedObject_temp !== null) {
-      outlinePassSelected.selectedObjects = [];
-      outlinePassSelected.selectedObjects = [Outline_selectedObject_temp];
-
-      console.log("update");
-
-      $("#object_name").html(Outline_selectedObject_temp.userData.name);
-
-
-      var position = new THREE.Vector3();
-      position.setFromMatrixPosition(Outline_selectedObject_temp.matrixWorld);
-
-      $("#position_x").html(Math.round(position.x * 10000) / 10000);
-      $("#position_y").html(Math.round(position.y * 10000) / 10000);
-      $("#position_z").html(Math.round(position.z * 10000) / 10000);
-
-
-      var box = new THREE.Box3().setFromObject(Outline_selectedObject_temp);
-//      console.log( box.min, box.max, box.getSize() );
-      var boxsize = new THREE.Vector3();
-      box.getSize(boxsize);
-      $("#size_x").html(Math.round(boxsize.x * 10000) / 10000);
-      $("#size_y").html(Math.round(boxsize.y * 10000) / 10000);
-      $("#size_z").html(Math.round(boxsize.z * 10000) / 10000);
-
-
-      $("#rotate_x").html(radians_to_degrees(Outline_selectedObject_temp.rotation.x));
-      $("#rotate_y").html(radians_to_degrees(Outline_selectedObject_temp.rotation.y));
-      $("#rotate_z").html(radians_to_degrees(Outline_selectedObject_temp.rotation.z));
-
+  $("#rotate_camera").on('click',function () {
+    if (controls.enableRotate) {
+      $("#rotate_camera").html("Enable Rotate");
+      controls.enableRotate = false;
+    } else
+    {
+      $("#rotate_camera").html("Disable Rotate");
+      controls.enableRotate = true;
     }
-    else {
-      outlinePassSelected.selectedObjects = [];
-      outlinePass.selectedObjects = [];
+  });
 
-      $("#position_x").html("");
-      $("#position_y").html("");
-      $("#position_z").html("");
+  $("#object_set").on("change", function () {
+    updateSet($(this).val());
+    updateSetGroup();
+  });
 
-      $("#size_x").html("");
-      $("#size_y").html("");
-      $("#size_z").html("");
+  $("#object_group").on("change", function () {
+    updateSetGroup()
+  });
 
+  $("#all_objects").on("change", function () {
+    console.log($(this).val());
 
-      $("#rotate_x").html("");
-      $("#rotate_y").html("");
-      $("#rotate_z").html("");
-
-    }
+    Outline_selectedObject_temp = scene.getObjectById( parseInt( $(this).val(),10), true );
+    Outline_addSelectedObject(Outline_selectedObject_temp);
+    // outlinePass.selectedObjects = Outline_selectedObjects;
+    SelectObject();
 
   });
 
-  $("#add_house").on("click", function () {
+  updateSet("set1");
+  updateSetGroup();
+
+  $("#add_object").on("click", function () {
 //    console.log("add new "+$("#object_file").val()+" "+$("#object_file option:selected").attr("id"));
 
-
-    for (var key in json_objects) {
-      if (json_objects.hasOwnProperty(key)) {
-        if ( json_objects[key].Folder === $("#object_file option:selected").data("folder") && json_objects[key].Name === $("#object_file option:selected").data("name") ) {
-          console.log(key + " -> " + json_objects[key].Scale);
-
-          loadGLTF($("#object_file").val(), "./gltf_lib2/" + json_objects[key].Folder + "/" + json_objects[key].Name + ".gltf", new THREE.Vector3(0, 0, 0), new THREE.Vector3(json_objects[key].Scale[0], json_objects[key].Scale[1], json_objects[key].Scale[2]), new THREE.Vector3(0, 0, 0), true);
-
-        }
-      }
+    var scaleFactor = "";
+    if ($("#object_set").val() === "set1") {
+      scaleFactor = new THREE.Vector3(1000, 1000, 1000);
     }
 
+    if ($("#object_set").val() === "set2") {
+      scaleFactor = new THREE.Vector3(50, 50, 50);
+    }
+
+    if ($("#object_set").val() === "set3") {
+      scaleFactor = new THREE.Vector3(0.5, 0.5, 0.5);
+    }
+
+    loadGLTF($("#object_file").val(), "./library/" + $("#object_set").val() + "/" + $("#object_group").val() + "/" + $("#object_file").val() + "/" + $("#object_file").val() + ".gltf", new THREE.Vector3(0, 0, 0), scaleFactor, new THREE.Vector3(0, 0, 0), true);
 
   });
+
+  $("#object_fixed").on("change", function () {
+    if (Outline_selectedObject_temp !== null) {
+      Outline_selectedObject_temp.userData.canMove = $(this).val();
+      console.log($(this).val());
+    }
+  });
+
+  $("#object_name").on('change',function () {
+    if (Outline_selectedObject_temp !== null) {
+      Outline_selectedObject_temp.userData.name = $(this).val();
+      $('#all_objects option[value="'+ Outline_selectedObject_temp.id +'"]').html($(this).val() + "(" +Outline_selectedObject_temp.id+")" );
+    }
+  });
+
+
+
+    $(".edit_object_prop").TouchSpin({
+    min: -10000000,
+    max: 10000000,
+    decimals: 2,
+    stepinterval: 50,
+    maxboostedstep: 10000000,
+    buttondown_class: "btn btn-outline-info",
+    buttonup_class: "btn btn-outline-info"
+  });
+
+  $("#focus_object").on('click', function () {
+
+    console.log(outlinePassSelected.selectedObjects.length);
+    if (outlinePassSelected.selectedObjects.length > 0) {
+      fitCameraToSelection(camera, controls, outlinePassSelected.selectedObjects, 1.2);
+    } else
+    {
+      controls.reset();
+    }
+
+    // var bb = new THREE.Box3();
+    // bb.setFromObject(outlinePassSelected.selectedObjects[0]);
+    // bb.center(controls.target);
+  })
+
+  $(".edit_object_prop").on('change', function () {
+
+    var edit_id = $(this).attr('id');
+    console.log($(this).attr('id') + " " + $(this).val());
+
+    if (edit_id === "position_x") {
+      outlinePassSelected.selectedObjects[0].position.x = parseFloat($(this).val());
+    }
+    if (edit_id === "position_y") {
+      outlinePassSelected.selectedObjects[0].position.y = parseFloat($(this).val());
+    }
+    if (edit_id === "position_z") {
+      outlinePassSelected.selectedObjects[0].position.z = parseFloat($(this).val());
+    }
+
+    if (edit_id === "size_x") {
+      outlinePassSelected.selectedObjects[0].scale.x = parseFloat($(this).val());
+    }
+    if (edit_id === "size_y") {
+      outlinePassSelected.selectedObjects[0].scale.y = parseFloat($(this).val());
+    }
+    if (edit_id === "size_z") {
+      outlinePassSelected.selectedObjects[0].scale.z = parseFloat($(this).val());
+    }
+
+    if (edit_id === "rotate_x") {
+      outlinePassSelected.selectedObjects[0].rotation.x = degrees_to_radians(parseFloat($(this).val()));
+    }
+    if (edit_id === "rotate_y") {
+      outlinePassSelected.selectedObjects[0].rotation.y = degrees_to_radians(parseFloat($(this).val()));
+    }
+    if (edit_id === "rotate_z") {
+      outlinePassSelected.selectedObjects[0].rotation.z = degrees_to_radians(parseFloat($(this).val()));
+    }
+  });
+
+
+  $(document).click(function (event) {
+    if (event.target.nodeName === "CANVAS") {
+      if (!IgnoreThisClick) {
+        Outline_checkIntersection(event);
+        SelectObject();
+      }
+      IgnoreThisClick = false;
+    }
+  });
+
 
 }
 

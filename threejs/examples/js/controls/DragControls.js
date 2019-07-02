@@ -119,12 +119,13 @@ THREE.DragControls = function ( _objects, _camera, _domElement ) {
 	}
 
 	function onDocumentMouseDown( event ) {
-
+		// console.log(_objects);
 		event.preventDefault();
+		console.log(Outline_selectedObjects);
 
 		_raycaster.setFromCamera( _mouse, _camera );
 
-		var intersects = _raycaster.intersectObjects( _objects );
+		var intersects = _raycaster.intersectObjects( Outline_selectedObjects );
 
 		if ( intersects.length > 0 ) {
 

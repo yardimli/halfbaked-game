@@ -3,15 +3,21 @@ TODO:
 
 - dropdown with all scene objects, auto select and focus on dropdown selected object ....ok
 - make objects fixed (mouse move wont work) .............................................ok
-- edit name of scene objects save it to the mesh
+- edit name of scene objects save it to the mesh ........................................ok
 
-- save scene to php => json file
-- load scene from json file
-
+- save scene to php => json file ........................................................ok
+- delete scene object ...................................................................ok
+- delete all scene objects ..............................................................ok
+- load scene from json file .............................................................ok
+- add new object x,z on last mouse click position
+- add clone scene object function
 - collision checkbox for items
-- load one player into editor scene (allow to move around and enable/disable collision detection)
 
+- load one player into editor scene (allow to move around and enable/disable collision detection)
 - popup json editor for light sources, camera and camera controls. background, add update button. save/load with scene
+- add hierarchy for objects in scene with drag and drop
+
+- merge the nodejs server (characters and chat) into test3.php
 
 
 
@@ -37,7 +43,10 @@ var outlineSize = characterSize * 0.05;
 
 // Track all objects and collisions.
 var objects = [];
-var drag_objects = [];
+//var drag_objects = [];
+
+var scene_objects = new THREE.Group();
+
 // Track click intersects.
 var raycaster = new THREE.Raycaster();
 var mouse = new THREE.Vector2();
@@ -329,13 +338,12 @@ function createCharacter(model_file, width, height, position, rotate) {
 
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
-function loadGLTF(name, model_file, position, scale, rotate, collidable) {
+function loadGLTF(name, model_file, position, scale, rotate, collidable, can_move, load_from_scene) {
   loader.load(model_file, function (gltf) {             // <<--------- Model Path
     var object = gltf.scene;
 
 //    gltf.geometry.center();
 
-    scene.add(gltf.scene);
 
     if (collidable) {
       calculateCollisionPoints(gltf.scene);
@@ -344,10 +352,17 @@ function loadGLTF(name, model_file, position, scale, rotate, collidable) {
 
     const root = gltf.scene;
 
+    root.userData.canMove = can_move;
+    root.userData.collision = true;
+    root.userData.name = name;
+    root.userData.filePath = model_file;
+
+    Outline_selectedObject_temp = root;
+
     var AssignNameToFirst = true;
     root.traverse((obj) => {
       if (obj.isMesh) {
-        drag_objects.push(obj);
+//        drag_objects.push(obj);
 
         obj.scale.set(scale.x, scale.y, scale.z);
         obj.geometry.center();
@@ -357,20 +372,27 @@ function loadGLTF(name, model_file, position, scale, rotate, collidable) {
         box.getSize(boxsize);
 
         obj.position.x = position.x;				    //Position (x = right+ left-)
-        obj.position.y = position.y + ((Math.round(boxsize.y * 10000) / 10000) / 2);				    //Position (y = up+, down-)
+        if (load_from_scene) {
+          obj.position.y = position.y;
+        } else
+        {
+          obj.position.y = position.y + ((Math.round(boxsize.y * 10000) / 10000) / 2);				    //Position (y = up+, down-)
+        }
         obj.position.z = position.z;				    //Position (z = front +, back-)
 
-        obj.rotation.x = THREE.Math.degToRad(rotate.x);
-        obj.rotation.y = THREE.Math.degToRad(rotate.y);
-        obj.rotation.z = THREE.Math.degToRad(rotate.z);
+        if (load_from_scene) {
+          obj.rotation.x = rotate.x;
+          obj.rotation.y = rotate.y;
+          obj.rotation.z = rotate.z;
+        } else {
+          obj.rotation.x = THREE.Math.degToRad(rotate.x);
+          obj.rotation.y = THREE.Math.degToRad(rotate.y);
+          obj.rotation.z = THREE.Math.degToRad(rotate.z);
+        }
 
-        obj.userData.canMove = "can_move";
-
-        Outline_selectedObject_temp = obj;
-        Outline_addSelectedObject(Outline_selectedObject_temp);
+        Outline_addSelectedObject(obj, root);
         // outlinePass.selectedObjects = Outline_selectedObjects;
         SelectObject();
-
       }
 
       if (obj.type === "Scene") {
@@ -379,7 +401,6 @@ function loadGLTF(name, model_file, position, scale, rotate, collidable) {
         // console.log("!!!!!!!!!!!!!!");
         // console.log(name);
         // console.log(obj.uuid);
-        obj.userData.object_name = name;
         AssignNameToFirst = false;
         // }
         // }
@@ -391,13 +412,14 @@ function loadGLTF(name, model_file, position, scale, rotate, collidable) {
       }
     });
     logOnce = 1;
+    scene_objects.add(gltf.scene);
+
 
     $("#all_objects").find('option').remove();
-    for (var i=0; i<drag_objects.length; i++) {
-      $("#all_objects").append('<option value="' + drag_objects[i].id + '" data-userdata_name="' + drag_objects[i].userData.name + '" >' + drag_objects[i].userData.name + "(" + drag_objects[i].id+ ")" + '</option>');
+    for (var i = 0; i < scene_objects.children.length; i++) {
+      $("#all_objects").append('<option value="' + scene_objects.children[i].id + '" data-userdata_name="' + scene_objects.children[i].userData.name + '" >' + scene_objects.children[i].userData.name + "(" + scene_objects.children[i].id + ")" + '</option>');
     }
     SelectObject();
-
 
 
 //    console.log(gltf.scene);
@@ -552,10 +574,11 @@ function move(location, destination, speed = playerSpeed) {
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
-function Outline_addSelectedObject(object) {
+function Outline_addSelectedObject(object, parent) {
   Outline_selectedObjects = [];
 
-  if (object.userData.canMove !== "fixed") {
+  console.log(parent.userData);
+  if (parent.userData.canMove !== "fixed") {
     Outline_selectedObjects.push(object);
   }
 }
@@ -576,11 +599,18 @@ function Outline_checkIntersection(event) {
   Outline_mouse.y = -(y / window.innerHeight) * 2 + 1;
 
   raycaster.setFromCamera(Outline_mouse, camera);
-  var intersects = raycaster.intersectObjects(drag_objects, true);
+  var intersects = raycaster.intersectObjects(scene_objects.children, true);
   if (intersects.length > 0) {
 
-    Outline_selectedObject_temp = intersects[0].object;
-    Outline_addSelectedObject(Outline_selectedObject_temp);
+    if (intersects[0].object.parent.isScene) {
+      Outline_selectedObject_temp = intersects[0].object.parent;
+    } else
+    if (intersects[0].object.parent.parent.isScene) {
+      Outline_selectedObject_temp = intersects[0].object.parent.parent;
+    }
+
+    console.log(Outline_selectedObject_temp);
+    Outline_addSelectedObject(intersects[0].object, Outline_selectedObject_temp);
     // outlinePass.selectedObjects = Outline_selectedObjects;
   }
   else {
@@ -693,40 +723,47 @@ function SelectObject() {
     console.log("select object");
 
     $("#object_name").val(Outline_selectedObject_temp.userData.name);
+    console.log(Outline_selectedObject_temp);
 
-    $('#all_objects option[value="'+Outline_selectedObject_temp.id+'"]').prop('selected', true);
-
-
+    $('#all_objects option[value="' + Outline_selectedObject_temp.id + '"]').prop('selected', true);
 
 
     var position = new THREE.Vector3();
-    position.setFromMatrixPosition(Outline_selectedObject_temp.matrixWorld);
+    console.log(Outline_selectedObject_temp);
 
-    $("#position_x").val(Math.round(position.x * 10000) / 10000);
-    $("#position_y").val(Math.round(position.y * 10000) / 10000);
-    $("#position_z").val(Math.round(position.z * 10000) / 10000);
+    var MeshChild = null;
+    if (Outline_selectedObject_temp.children[0].isMesh)  { MeshChild = Outline_selectedObject_temp.children[0]; } else
+    if (Outline_selectedObject_temp.children[0].children[0].isMesh)  { MeshChild = Outline_selectedObject_temp.children[0].children[0]; }
+
+    if (MeshChild !== null) {
+      position.setFromMatrixPosition(MeshChild.matrixWorld);
+
+      $("#position_x").val(Math.round(position.x * 10000) / 10000);
+      $("#position_y").val(Math.round(position.y * 10000) / 10000);
+      $("#position_z").val(Math.round(position.z * 10000) / 10000);
 
 
-    var box = new THREE.Box3().setFromObject(Outline_selectedObject_temp);
+      var box = new THREE.Box3().setFromObject(MeshChild);
 //      console.log( box.min, box.max, box.getSize() );
-    var boxsize = new THREE.Vector3();
-    box.getSize(boxsize);
+      var boxsize = new THREE.Vector3();
+      box.getSize(boxsize);
 
 
-    $("#size_x").val(Math.round(Outline_selectedObject_temp.scale.x * 100) / 100);
-    $("#size_y").val(Math.round(Outline_selectedObject_temp.scale.y * 100) / 100);
-    $("#size_z").val(Math.round(Outline_selectedObject_temp.scale.z * 100) / 100);
+      $("#size_x").val(Math.round(MeshChild.scale.x * 100) / 100);
+      $("#size_y").val(Math.round(MeshChild.scale.y * 100) / 100);
+      $("#size_z").val(Math.round(MeshChild.scale.z * 100) / 100);
 
-    $("#size_x_hint").html(Math.round(boxsize.x * 10000) / 10000);
-    $("#size_y_hint").html(Math.round(boxsize.y * 10000) / 10000);
-    $("#size_z_hint").html(Math.round(boxsize.z * 10000) / 10000);
+      $("#size_x_hint").html(Math.round(boxsize.x * 10000) / 10000);
+      $("#size_y_hint").html(Math.round(boxsize.y * 10000) / 10000);
+      $("#size_z_hint").html(Math.round(boxsize.z * 10000) / 10000);
 
 
-    $("#rotate_x").val(radians_to_degrees(Outline_selectedObject_temp.rotation.x));
-    $("#rotate_y").val(radians_to_degrees(Outline_selectedObject_temp.rotation.y));
-    $("#rotate_z").val(radians_to_degrees(Outline_selectedObject_temp.rotation.z));
+      $("#rotate_x").val(radians_to_degrees(MeshChild.rotation.x));
+      $("#rotate_y").val(radians_to_degrees(MeshChild.rotation.y));
+      $("#rotate_z").val(radians_to_degrees(MeshChild.rotation.z));
 
-    $('#object_fixed option[value="'+Outline_selectedObject_temp.userData.canMove+'"]').prop('selected', true);
+      $('#object_fixed option[value="' + Outline_selectedObject_temp.userData.canMove + '"]').prop('selected', true);
+    }
   }
   else {
     outlinePassSelected.selectedObjects = [];
@@ -804,6 +841,7 @@ function init() {
   controls.dampingFactor = 0.25;
   controls.enableZoom = true;
   controls.zoomSpeed = 0.6;
+  controls.enableKeys = false;
 
   controls.target = new THREE.Vector3(300, 2, 0);
 
@@ -830,32 +868,8 @@ function init() {
 
   createFloor();
 
-  $.ajax({
-    type: "GET",
-    url: "game_map.json",
-    headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
-    dataType: 'json',
-    success: function (response) {
-      for (var i = 0; i < response.length; i++) {
-        var RepeatX = 0;
-        var RepeatY = 0;
-        var RepeatZ = 0;
+  scene.add(scene_objects);
 
-        response[i].Repeat = 1;
-        for (var j = 0; j < response[i].Repeat; j++) {
-
-          loadGLTF(response[i].Name, response[i].FileName, new THREE.Vector3(response[i].Position[0] + RepeatX, response[i].Position[1] + RepeatY, response[i].Position[2] + RepeatZ), new THREE.Vector3(response[i].Scale[0], response[i].Scale[1], response[i].Scale[2]), new THREE.Vector3(response[i].Rotate[0], response[i].Rotate[1], response[i].Rotate[2]), response[i].Collision);
-
-          RepeatX += response[i].RepeatSpacing[0];
-          RepeatY += response[i].RepeatSpacing[1];
-          RepeatZ += response[i].RepeatSpacing[2];
-        }
-      }
-    }
-  });
-
-  // loadGLTF('Stall', './gltf_lib2/Stall/Stall.gltf', new THREE.Vector3(450, 0, 5), new THREE.Vector3(1000, 1000, 1000), new THREE.Vector3(0, 0, 0), true);
-  // loadGLTF('scene', './gltf_lib/scene/scene.gltf', new THREE.Vector3(0, 300, -1000), new THREE.Vector3(0.1, 0.1, 0.1), new THREE.Vector3(0, 0, 0), true);
 
 
   // postprocessing
@@ -907,13 +921,15 @@ function init() {
 //  Outline_selectedObjects
   var dragControls = new THREE.DragControls(Outline_selectedObjects, camera, renderer.domElement);
   dragControls.addEventListener('dragstart', function () {
-    if (Outline_selectedObject_temp!==null) {
+    if (Outline_selectedObject_temp !== null) {
 
+      console.log(Outline_selectedObject_temp.userData.canMove);
       if (Outline_selectedObject_temp.userData.canMove === "fixed") {
         return false;
       }
 
-    } else {
+    }
+    else {
       return false;
     }
     IgnoreThisClick = true;
@@ -930,12 +946,12 @@ function init() {
     onDocumentMouseDown(event);
   });
 
-  $("#rotate_camera").on('click',function () {
+  $("#rotate_camera").on('click', function () {
     if (controls.enableRotate) {
       $("#rotate_camera").html("Enable Rotate");
       controls.enableRotate = false;
-    } else
-    {
+    }
+    else {
       $("#rotate_camera").html("Disable Rotate");
       controls.enableRotate = true;
     }
@@ -953,8 +969,8 @@ function init() {
   $("#all_objects").on("change", function () {
     console.log($(this).val());
 
-    Outline_selectedObject_temp = scene.getObjectById( parseInt( $(this).val(),10), true );
-    Outline_addSelectedObject(Outline_selectedObject_temp);
+    Outline_selectedObject_temp = scene.getObjectById(parseInt($(this).val(), 10), true);
+    Outline_addSelectedObject(Outline_selectedObject_temp, Outline_selectedObject_temp);
     // outlinePass.selectedObjects = Outline_selectedObjects;
     SelectObject();
 
@@ -972,14 +988,14 @@ function init() {
     }
 
     if ($("#object_set").val() === "set2") {
-      scaleFactor = new THREE.Vector3(50, 50, 50);
+      scaleFactor = new THREE.Vector3(20, 20, 20);
     }
 
     if ($("#object_set").val() === "set3") {
       scaleFactor = new THREE.Vector3(0.5, 0.5, 0.5);
     }
 
-    loadGLTF($("#object_file").val(), "./library/" + $("#object_set").val() + "/" + $("#object_group").val() + "/" + $("#object_file").val() + "/" + $("#object_file").val() + ".gltf", new THREE.Vector3(0, 0, 0), scaleFactor, new THREE.Vector3(0, 0, 0), true);
+    loadGLTF($("#object_file").val(), "./library/" + $("#object_set").val() + "/" + $("#object_group").val() + "/" + $("#object_file").val() + "/" + $("#object_file").val() + ".gltf", new THREE.Vector3(0, 0, 0), scaleFactor, new THREE.Vector3(0, 0, 0), true, "can_move",false);
 
   });
 
@@ -990,16 +1006,155 @@ function init() {
     }
   });
 
-  $("#object_name").on('change',function () {
+  $("#object_name").on('change', function () {
     if (Outline_selectedObject_temp !== null) {
       Outline_selectedObject_temp.userData.name = $(this).val();
-      $('#all_objects option[value="'+ Outline_selectedObject_temp.id +'"]').html($(this).val() + "(" +Outline_selectedObject_temp.id+")" );
+      $('#all_objects option[value="' + Outline_selectedObject_temp.id + '"]').html($(this).val() + "(" + Outline_selectedObject_temp.id + ")");
     }
   });
 
+  $("#load_scene_dialog_button").on('click', function (e) {
+    $("#loadSceneModal").modal("show");
+
+    var UrlToGet = "load_scenes.php";
+    var data = {};
+    $("#scene_list").html("");
+
+    $.ajax({
+      url: UrlToGet,
+      data: data,
+      dataType: "json",
+      success: function (data, status) {
+        for (scene_file in data) {
+          $("#scene_list").append('<li><a href="#" class="load_scene" data-scene_name="' + data[scene_file] + '">' + data[scene_file] + '</a></li>\n');
+        }
+
+        $(".load_scene").off('click').on('click', function () {
+
+          var UrlToGet = "load_scene.php";
+          var data = {"scene_name": $(this).data("scene_name")};
+
+          $.ajax({
+            url: UrlToGet,
+            data: data,
+            dataType: "json",
+            success: function (data, status) {
+              console.log(data);
+
+              $("#loadSceneModal").modal("hide");
+
+              for (var i = scene_objects.children.length - 1; i >= 0; i--) {
+                scene_objects.remove(scene_objects.children[i]);
+              }
+
+              for (var i=0; i<data.length; i++) {
+
+                loadGLTF(data[i].userName, data[i].filePath, new THREE.Vector3(data[i].position.x, data[i].position.y, data[i].position.z), new THREE.Vector3(data[i].scale.x, data[i].scale.y, data[i].scale.z), new THREE.Vector3(data[i].rotation._x, data[i].rotation._y, data[i].rotation._z), data[i].collision, data[i].canMove, true);
 
 
-    $(".edit_object_prop").TouchSpin({
+              }
+
+              console.log("Status: " + status);
+            },
+            error: function (data, status) {
+              console.log("error Status: " + status);
+              alert("error " + status);
+            }
+
+          });
+
+        });
+
+        $("#loadSceneModal").modal("show");
+        console.log("Status: " + status);
+      },
+      error: function (data, status) {
+        console.log("error Status: " + status);
+        alert("error " + status);
+      }
+    });
+
+    e.preventDefault();
+  });
+
+  $("#saveSceneButton").on('click', function (e) {
+
+    var saveObjects = [];
+
+    for (var i = 0; i < scene_objects.children.length; i++) {
+      console.log(scene_objects.children[i]);
+
+      // console.log(drag_objects[i].id);
+      // console.log(drag_objects[i].name);
+      // console.log(drag_objects[i].userData.name);
+      // console.log(drag_objects[i].userData.filePath);
+
+      var MeshChild = null;
+      if (scene_objects.children[i].children[0].isMesh)  { MeshChild = scene_objects.children[i].children[0]; } else
+      if (scene_objects.children[i].children[0].children[0].isMesh)  { MeshChild = scene_objects.children[i].children[0].children[0]; }
+
+      if (MeshChild !== null) {
+
+        var position = new THREE.Vector3();
+        position.setFromMatrixPosition(MeshChild.matrixWorld);
+        // console.log(JSON.stringify(position));
+
+        var box = new THREE.Box3().setFromObject(MeshChild);
+        var boxsize = new THREE.Vector3();
+        box.getSize(boxsize);
+
+        // console.log(JSON.stringify(drag_objects[i].scale));
+        //
+        // $("#size_x_hint").html(Math.round(boxsize.x * 10000) / 10000);
+        // $("#size_y_hint").html(Math.round(boxsize.y * 10000) / 10000);
+        // $("#size_z_hint").html(Math.round(boxsize.z * 10000) / 10000);
+
+        saveObjects.push({
+          "id": scene_objects.children[i].id,
+          "name": scene_objects.children[i].name,
+          "canMove": scene_objects.children[i].userData.canMove,
+          "collision": scene_objects.children[i].userData.collision,
+          "userName": scene_objects.children[i].userData.name,
+          "filePath": scene_objects.children[i].userData.filePath,
+          "position": position,
+          "scale": MeshChild.scale,
+          "rotation": MeshChild.rotation
+        });
+      }
+    }
+    console.log(saveObjects);
+    console.log(JSON.stringify(saveObjects));
+
+
+    console.log("save scene press");
+    if ($("#saveSceneName").val() !== "") {
+      console.log("save scene");
+
+      var UrlToGet = "save_scene.php";
+      var data = {"scene_data": JSON.stringify(saveObjects), "scene_name": $("#saveSceneName").val()};
+
+      $.ajax({
+        type: "post",
+        url: UrlToGet,
+        data: data,
+        dataType: "json",
+        success: function (data, status) {
+          console.log("Status: " + status);
+        },
+        error: function (data, status) {
+          console.log("error Status: " + status);
+        }
+      });
+      $("#saveSceneModal").modal('hide');
+    }
+    else {
+      alert("scene name?");
+    }
+    e.preventDefault();
+  });
+
+
+  $(".edit_object_prop").TouchSpin({
     min: -10000000,
     max: 10000000,
     decimals: 2,
@@ -1014,49 +1169,88 @@ function init() {
     console.log(outlinePassSelected.selectedObjects.length);
     if (outlinePassSelected.selectedObjects.length > 0) {
       fitCameraToSelection(camera, controls, outlinePassSelected.selectedObjects, 1.2);
-    } else
-    {
+    }
+    else {
       controls.reset();
     }
 
     // var bb = new THREE.Box3();
     // bb.setFromObject(outlinePassSelected.selectedObjects[0]);
     // bb.center(controls.target);
-  })
+  });
+
+  $("#delete_object").on('click', function (e) {
+    $("#deleteObjectModal").modal('show');
+    e.preventDefault();
+  });
+
+  $("#deleteObjectButton").on('click', function (e) {
+
+    if (Outline_selectedObject_temp !== null) {
+      console.log("trying to delete");
+
+      for (var i = scene_objects.children.length - 1; i >= 0; i--) {
+        console.log((Outline_selectedObject_temp.id === scene_objects.children[i].id));
+
+        console.log((Outline_selectedObject_temp.id + "===" + scene_objects.children[i].id));
+        if (Outline_selectedObject_temp.id === scene_objects.children[i].id) {
+          scene_objects.remove(scene_objects.children[i]);
+        }
+      }
+
+    }
+
+    $("#all_objects").find('option').remove();
+    for (var i = 0; i < scene_objects.children.length; i++) {
+      $("#all_objects").append('<option value="' + scene_objects.children[i].id + '" data-userdata_name="' + scene_objects.children[i].userData.name + '" >' + scene_objects.children[i].userData.name + "(" + scene_objects.children[i].id + ")" + '</option>');
+    }
+
+    $("#deleteObjectModal").modal('hide');
+    e.preventDefault();
+  });
+
 
   $(".edit_object_prop").on('change', function () {
 
     var edit_id = $(this).attr('id');
     console.log($(this).attr('id') + " " + $(this).val());
 
-    if (edit_id === "position_x") {
-      outlinePassSelected.selectedObjects[0].position.x = parseFloat($(this).val());
-    }
-    if (edit_id === "position_y") {
-      outlinePassSelected.selectedObjects[0].position.y = parseFloat($(this).val());
-    }
-    if (edit_id === "position_z") {
-      outlinePassSelected.selectedObjects[0].position.z = parseFloat($(this).val());
-    }
 
-    if (edit_id === "size_x") {
-      outlinePassSelected.selectedObjects[0].scale.x = parseFloat($(this).val());
-    }
-    if (edit_id === "size_y") {
-      outlinePassSelected.selectedObjects[0].scale.y = parseFloat($(this).val());
-    }
-    if (edit_id === "size_z") {
-      outlinePassSelected.selectedObjects[0].scale.z = parseFloat($(this).val());
-    }
+    var MeshChild = null;
+    if (outlinePassSelected.selectedObjects[0].children[0].isMesh)  { MeshChild = outlinePassSelected.selectedObjects[0].children[0]; } else
+    if (outlinePassSelected.selectedObjects[0].children[0].children[0].isMesh)  { MeshChild = outlinePassSelected.selectedObjects[0].children[0].children[0]; }
 
-    if (edit_id === "rotate_x") {
-      outlinePassSelected.selectedObjects[0].rotation.x = degrees_to_radians(parseFloat($(this).val()));
-    }
-    if (edit_id === "rotate_y") {
-      outlinePassSelected.selectedObjects[0].rotation.y = degrees_to_radians(parseFloat($(this).val()));
-    }
-    if (edit_id === "rotate_z") {
-      outlinePassSelected.selectedObjects[0].rotation.z = degrees_to_radians(parseFloat($(this).val()));
+    if (MeshChild !== null) {
+
+      if (edit_id === "position_x") {
+        MeshChild.position.x = parseFloat($(this).val());
+      }
+      if (edit_id === "position_y") {
+        MeshChild.position.y = parseFloat($(this).val());
+      }
+      if (edit_id === "position_z") {
+        MeshChild.position.z = parseFloat($(this).val());
+      }
+
+      if (edit_id === "size_x") {
+        MeshChild.scale.x = parseFloat($(this).val());
+      }
+      if (edit_id === "size_y") {
+        MeshChild.scale.y = parseFloat($(this).val());
+      }
+      if (edit_id === "size_z") {
+        MeshChild.scale.z = parseFloat($(this).val());
+      }
+
+      if (edit_id === "rotate_x") {
+        MeshChild.rotation.x = degrees_to_radians(parseFloat($(this).val()));
+      }
+      if (edit_id === "rotate_y") {
+        MeshChild.rotation.y = degrees_to_radians(parseFloat($(this).val()));
+      }
+      if (edit_id === "rotate_z") {
+        MeshChild.rotation.z = degrees_to_radians(parseFloat($(this).val()));
+      }
     }
   });
 

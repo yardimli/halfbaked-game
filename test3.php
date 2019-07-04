@@ -78,6 +78,7 @@
   <script type="text/javascript" src="threejs/examples/js/postprocessing/ShaderPass.js"></script>
   <script type="text/javascript" src="threejs/examples/js/postprocessing/OutlinePass.js"></script>
 
+
   <script type="text/javascript" src="js/jquery-3.4.1.js"></script>
   <script type="text/javascript" src="js/dat.gui.js"></script>
   <script type="text/javascript" src="engine_3d.js"></script>
@@ -167,6 +168,7 @@
 </div>
 <div
   style="position: fixed; right:0px; top:0px; width:250px; height: 100%; background-color: white; border-color: black; border-radius: 1px; color:black; padding: 5px; box-sizing: border-box; overflow-y: auto; overflow-x: hidden;">
+  <button id="rotate_camera" class="form-control btn-danger" style="margin-bottom: 3px;">Disable Rotate</button>
 
   <select id="object_set" class="form-control">
     <option value="set1">Set #1</option>
@@ -178,20 +180,31 @@
   <select id="object_group" class="form-control">
   </select>
 
-  <select id="object_file" class="form-control"></select>
-  <button id="add_object" class="form-control btn-success">Add Object</button>
+  <select id="object_file" class="form-control" style="margin-bottom: 3px;"></select>
+  <button id="add_object" class="form-control btn-success" style="margin-bottom: 3px;">Add Object</button>
 
   <hr>
-  <select id="all_objects" class="form-control">
+
+
+  <button id="load_scene_dialog_button" class="form-control btn-dark" style="margin-bottom: 3px;">Load Scene</button>
+  <button id="save_scene" class="form-control btn-danger"  data-toggle="modal" data-target="#saveSceneModal">Save Scene</button>
+
+  <hr>
+  <select id="all_objects" class="form-control" style="margin-bottom: 3px;">
   </select>
 
-  <button id="rotate_camera" class="form-control btn-danger">Disable Rotate</button>
-  <hr>
-
-  <div class="row">
-    <div class="col-9">  <input id="object_name" class="form-control" placeholder="name">
+  <div class="row" style="margin-bottom: 3px;">
+    <div class="col-7">  <input id="object_name" class="form-control" placeholder="name">
     </div>
-    <div class="col-3"> <button id="focus_object" class="form-control btn-outline-info">F</button></div>
+    <div class="col-2" style="padding: 0px;"> <button id="focus_object" class="form-control btn-outline-info">F</button></div>
+    <div class="col-2" style="padding: 0px;"> <button id="delete_object" class="form-control btn-outline-info">D</button></div>
+    <div class="col-1"></div>
+  </div>
+  <div class="form-group">
+    <select class="form-control" id="object_fixed">
+      <option value="fixed">Fixed</option>
+      <option value="can_move">Can Move</option>
+    </select>
   </div>
 
   <input id="position_x" class="form-control edit_object_prop" placeholder="X Position">
@@ -210,16 +223,77 @@
   <input id="rotate_z" class="form-control edit_object_prop" placeholder="Z Rotation">
   <br>
 
-  <div class="form-group">
-    <label for="exampleFormControlSelect1">Anchor</label>
-    <select class="form-control" id="object_fixed">
-      <option value="fixed">Fixed</option>
-      <option value="can_move">Can Move</option>
-    </select>
+
+
+
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="loadSceneModal" tabindex="-1" role="dialog" aria-labelledby="loadSceneModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="loadSceneModalTitle">Load scene</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="scene_list"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
   </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="deleteObjectModal" tabindex="-1" role="dialog" aria-labelledby="deleteObjectModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteObjectModalTitle">Delete Object</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Are you sure?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="deleteObjectButton">Yes, Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 
-
+<!-- Modal -->
+<div class="modal fade" id="saveSceneModal" tabindex="-1" role="dialog" aria-labelledby="saveSceneModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="saveSceneModalTitle">Save scene</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <input type="text" class="form-control" id="saveSceneName" placeholder="Scene name">
+          <small id="emailHelp" class="form-text text-muted">If file already exists it will be overwritten.</small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="saveSceneButton">Save scene</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 </body>

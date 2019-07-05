@@ -71,6 +71,9 @@ var json_objects;
 
 var IgnoreThisClick = false;
 
+
+var connection = null;
+
 $(document).ready(function () {
   init();
   animate();
@@ -504,12 +507,14 @@ function onDocumentMouseDown(event, bypass = false) {
   var intersects = raycaster.intersectObjects(objects);
   if (intersects.length > 0) {
 
-    connection.send(JSON.stringify({
-      type: "userPosition",
-      posX: intersects[0].point.x,
-      posY: intersects[0].point.y,
-      posZ: intersects[0].point.z
-    }));
+    if (connection!== null) {
+      connection.send(JSON.stringify({
+        type: "userPosition",
+        posX: intersects[0].point.x,
+        posY: intersects[0].point.y,
+        posZ: intersects[0].point.z
+      }));
+    }
 
     movements.push(intersects[0].point);
   }
@@ -732,6 +737,7 @@ function SelectObject() {
     console.log(Outline_selectedObject_temp);
 
     var MeshChild = null;
+    if (Outline_selectedObject_temp.isMesh)  { MeshChild = Outline_selectedObject_temp; } else
     if (Outline_selectedObject_temp.children[0].isMesh)  { MeshChild = Outline_selectedObject_temp.children[0]; } else
     if (Outline_selectedObject_temp.children[0].children[0].isMesh)  { MeshChild = Outline_selectedObject_temp.children[0].children[0]; }
 
@@ -862,7 +868,7 @@ function init() {
   // rotationPoint.position.set(0, 0, 0);
   // scene.add(rotationPoint);
 
-  // createCharacter('./character1.png', 35, 50, new THREE.Vector3(0, 20, 155), new THREE.Vector3(0, 0, 0));
+  createCharacter('./character1.png', 15, 25, new THREE.Vector3(0, 14.5, 155), new THREE.Vector3(0, 0, 0));
   // createOtherCharacter("char2", "./character2.png", 35, 50, new THREE.Vector3(155, 20, 5), new THREE.Vector3(0, 0, 0), true);
 
 
@@ -944,6 +950,16 @@ function init() {
 
   $(document).dblclick(function (event) {
     onDocumentMouseDown(event);
+    if (outlinePassSelected.selectedObjects.length > 0) {
+
+      if (Outline_selectedObject_temp !== null) {
+        if (Outline_selectedObject_temp.userData.canMove !== "fixed") {
+
+          fitCameraToSelection(camera, controls, outlinePassSelected.selectedObjects, 1.2);
+        }
+      }
+    }
+
   });
 
   $("#rotate_camera").on('click', function () {

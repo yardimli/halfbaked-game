@@ -352,8 +352,16 @@ function loadGLTF(name, model_file, position, scale, rotate, collidable, can_mov
       calculateCollisionPoints(gltf.scene);
     }
 
-
     const root = gltf.scene;
+
+    var mS = (new THREE.Matrix4()).identity();
+    //set -1 to the corresponding axis
+    mS.elements[0] = -1;
+    //mS.elements[5] = -1;
+    //mS.elements[10] = -1;
+
+    // root.applyMatrix(mS);
+
 
     root.userData.canMove = can_move;
     root.userData.collision = true;
@@ -365,10 +373,14 @@ function loadGLTF(name, model_file, position, scale, rotate, collidable, can_mov
     var AssignNameToFirst = true;
     root.traverse((obj) => {
       if (obj.isMesh) {
+
+        // obj.applyMatrix(mS);
+
 //        drag_objects.push(obj);
 
         obj.scale.set(scale.x, scale.y, scale.z);
         obj.geometry.center();
+
 
         var box = new THREE.Box3().setFromObject(obj);
         var boxsize = new THREE.Vector3();
@@ -377,20 +389,23 @@ function loadGLTF(name, model_file, position, scale, rotate, collidable, can_mov
         obj.position.x = position.x;				    //Position (x = right+ left-)
         if (load_from_scene) {
           obj.position.y = position.y;
-        } else
-        {
+        }
+        else {
           obj.position.y = position.y + ((Math.round(boxsize.y * 10000) / 10000) / 2);				    //Position (y = up+, down-)
         }
         obj.position.z = position.z;				    //Position (z = front +, back-)
 
-        if (load_from_scene) {
-          obj.rotation.x = rotate.x;
-          obj.rotation.y = rotate.y;
-          obj.rotation.z = rotate.z;
-        } else {
-          obj.rotation.x = THREE.Math.degToRad(rotate.x);
-          obj.rotation.y = THREE.Math.degToRad(rotate.y);
-          obj.rotation.z = THREE.Math.degToRad(rotate.z);
+        if (rotate !== null) {
+          if (load_from_scene) {
+            obj.rotation.x = rotate.x;
+            obj.rotation.y = rotate.y;
+            obj.rotation.z = rotate.z;
+          }
+          else {
+            obj.rotation.x = THREE.Math.degToRad(rotate.x);
+            obj.rotation.y = THREE.Math.degToRad(rotate.y);
+            obj.rotation.z = THREE.Math.degToRad(rotate.z);
+          }
         }
 
         Outline_addSelectedObject(obj, root);
@@ -507,7 +522,7 @@ function onDocumentMouseDown(event, bypass = false) {
   var intersects = raycaster.intersectObjects(objects);
   if (intersects.length > 0) {
 
-    if (connection!== null) {
+    if (connection !== null) {
       connection.send(JSON.stringify({
         type: "userPosition",
         posX: intersects[0].point.x,
@@ -582,7 +597,9 @@ function move(location, destination, speed = playerSpeed) {
 function Outline_addSelectedObject(object, parent) {
   Outline_selectedObjects = [];
 
-  console.log(parent.userData);
+  // console.log(parent);
+  // console.log(parent.userData);
+
   if (parent.userData.canMove !== "fixed") {
     Outline_selectedObjects.push(object);
   }
@@ -609,12 +626,24 @@ function Outline_checkIntersection(event) {
 
     if (intersects[0].object.parent.isScene) {
       Outline_selectedObject_temp = intersects[0].object.parent;
-    } else
-    if (intersects[0].object.parent.parent.isScene) {
+    }
+    else if (intersects[0].object.parent.parent.isScene) {
       Outline_selectedObject_temp = intersects[0].object.parent.parent;
     }
+    else if (intersects[0].object.parent.parent.parent.isScene) {
+      Outline_selectedObject_temp = intersects[0].object.parent.parent.parent;
+    }
+    else if (intersects[0].object.parent.parent.parent.parent.isScene) {
+      Outline_selectedObject_temp = intersects[0].object.parent.parent.parent.parent;
+    }
+    else if (intersects[0].object.parent.parent.parent.parent.parent.isScene) {
+      Outline_selectedObject_temp = intersects[0].object.parent.parent.parent.parent.parent;
+    }
 
-    console.log(Outline_selectedObject_temp);
+
+    // console.log("--------------");
+    // console.log(intersects);
+    // console.log(Outline_selectedObject_temp);
     Outline_addSelectedObject(intersects[0].object, Outline_selectedObject_temp);
     // outlinePass.selectedObjects = Outline_selectedObjects;
   }
@@ -734,15 +763,32 @@ function SelectObject() {
 
 
     var position = new THREE.Vector3();
-    console.log(Outline_selectedObject_temp);
+//    console.log(Outline_selectedObject_temp);
 
     var MeshChild = null;
-    if (Outline_selectedObject_temp.isMesh)  { MeshChild = Outline_selectedObject_temp; } else
-    if (Outline_selectedObject_temp.children[0].isMesh)  { MeshChild = Outline_selectedObject_temp.children[0]; } else
-    if (Outline_selectedObject_temp.children[0].children[0].isMesh)  { MeshChild = Outline_selectedObject_temp.children[0].children[0]; }
+    if (Outline_selectedObject_temp.isMesh) {
+      MeshChild = Outline_selectedObject_temp;
+    }
+    else if (Outline_selectedObject_temp.children[0].isMesh) {
+      MeshChild = Outline_selectedObject_temp.children[0];
+    }
+    else if (Outline_selectedObject_temp.children[0].children[0].isMesh) {
+      MeshChild = Outline_selectedObject_temp.children[0].children[0];
+    }
+    else if (Outline_selectedObject_temp.children[0].children[0].children[0].isMesh) {
+      MeshChild = Outline_selectedObject_temp.children[0].children[0].children[0];
+    }
+    else if (Outline_selectedObject_temp.children[0].children[0].children[0].children[0].isMesh) {
+      MeshChild = Outline_selectedObject_temp.children[0].children[0].children[0].children[0];
+    }
+    else if (Outline_selectedObject_temp.children[0].children[0].children[0].children[0].children[0].isMesh) {
+      MeshChild = Outline_selectedObject_temp.children[0].children[0].children[0].children[0].children[0];
+    }
+
 
     if (MeshChild !== null) {
       position.setFromMatrixPosition(MeshChild.matrixWorld);
+      console.log(position);
 
       $("#position_x").val(Math.round(position.x * 10000) / 10000);
       $("#position_y").val(Math.round(position.y * 10000) / 10000);
@@ -877,7 +923,6 @@ function init() {
   scene.add(scene_objects);
 
 
-
   // postprocessing
   composer = new THREE.EffectComposer(renderer);
 
@@ -949,17 +994,18 @@ function init() {
   });
 
   $(document).dblclick(function (event) {
-    onDocumentMouseDown(event);
-    if (outlinePassSelected.selectedObjects.length > 0) {
+    if (event.target.nodeName === "CANVAS") {
+      onDocumentMouseDown(event);
+      if (outlinePassSelected.selectedObjects.length > 0) {
 
-      if (Outline_selectedObject_temp !== null) {
-        if (Outline_selectedObject_temp.userData.canMove !== "fixed") {
+        if (Outline_selectedObject_temp !== null) {
+          if (Outline_selectedObject_temp.userData.canMove !== "fixed") {
 
-          fitCameraToSelection(camera, controls, outlinePassSelected.selectedObjects, 1.2);
+            fitCameraToSelection(camera, controls, outlinePassSelected.selectedObjects, 1.2);
+          }
         }
       }
     }
-
   });
 
   $("#rotate_camera").on('click', function () {
@@ -1011,7 +1057,11 @@ function init() {
       scaleFactor = new THREE.Vector3(0.5, 0.5, 0.5);
     }
 
-    loadGLTF($("#object_file").val(), "./library/" + $("#object_set").val() + "/" + $("#object_group").val() + "/" + $("#object_file").val() + "/" + $("#object_file").val() + ".gltf", new THREE.Vector3(0, 0, 0), scaleFactor, new THREE.Vector3(0, 0, 0), true, "can_move",false);
+    if ($("#object_set").val() === "set4") {
+      scaleFactor = new THREE.Vector3(10, 10, 1);
+    }
+
+    loadGLTF($("#object_file").val(), "./library/" + $("#object_set").val() + "/" + $("#object_group").val() + "/" + $("#object_file").val() + "/" + $("#object_file").val() + ".gltf", new THREE.Vector3(0, 0, 0), scaleFactor, null, true, "can_move", false);
 
   });
 
@@ -1063,7 +1113,7 @@ function init() {
                 scene_objects.remove(scene_objects.children[i]);
               }
 
-              for (var i=0; i<data.length; i++) {
+              for (var i = 0; i < data.length; i++) {
 
                 loadGLTF(data[i].userName, data[i].filePath, new THREE.Vector3(data[i].position.x, data[i].position.y, data[i].position.z), new THREE.Vector3(data[i].scale.x, data[i].scale.y, data[i].scale.z), new THREE.Vector3(data[i].rotation._x, data[i].rotation._y, data[i].rotation._z), data[i].collision, data[i].canMove, true);
 
@@ -1106,8 +1156,24 @@ function init() {
       // console.log(drag_objects[i].userData.filePath);
 
       var MeshChild = null;
-      if (scene_objects.children[i].children[0].isMesh)  { MeshChild = scene_objects.children[i].children[0]; } else
-      if (scene_objects.children[i].children[0].children[0].isMesh)  { MeshChild = scene_objects.children[i].children[0].children[0]; }
+      if (scene_objects.children[i].children[0].isMesh) {
+        MeshChild = scene_objects.children[i].children[0];
+      }
+      else if (scene_objects.children[i].children[0].children[0].isMesh) {
+        MeshChild = scene_objects.children[i].children[0].children[0];
+      }
+      else if (scene_objects.children[i].children[0].children[0].children[0].isMesh) {
+        MeshChild = scene_objects.children[i].children[0].children[0].children[0];
+      }
+      else if (scene_objects.children[i].children[0].children[0].children[0].children[0].isMesh) {
+        MeshChild = scene_objects.children[i].children[0].children[0].children[0].children[0];
+      }
+      else if (scene_objects.children[i].children[0].children[0].children[0].children[0].children[0].isMesh) {
+        MeshChild = scene_objects.children[i].children[0].children[0].children[0].children[0].children[0];
+      }
+      else if (scene_objects.children[i].children[0].children[0].children[0].children[0].children[0].children[0].isMesh) {
+        MeshChild = scene_objects.children[i].children[0].children[0].children[0].children[0].children[0].children[0];
+      }
 
       if (MeshChild !== null) {
 
@@ -1171,11 +1237,11 @@ function init() {
 
 
   $(".edit_object_prop").TouchSpin({
-    min: -10000000,
-    max: 10000000,
+    min: -1000000,
+    max: 1000000,
     decimals: 2,
     stepinterval: 50,
-    maxboostedstep: 10000000,
+    maxboostedstep: 1000000,
     buttondown_class: "btn btn-outline-info",
     buttonup_class: "btn btn-outline-info"
   });
@@ -1226,15 +1292,32 @@ function init() {
   });
 
 
+  //--------- update object position
   $(".edit_object_prop").on('change', function () {
 
     var edit_id = $(this).attr('id');
     console.log($(this).attr('id') + " " + $(this).val());
 
-
+    console.log(outlinePassSelected);
     var MeshChild = null;
-    if (outlinePassSelected.selectedObjects[0].children[0].isMesh)  { MeshChild = outlinePassSelected.selectedObjects[0].children[0]; } else
-    if (outlinePassSelected.selectedObjects[0].children[0].children[0].isMesh)  { MeshChild = outlinePassSelected.selectedObjects[0].children[0].children[0]; }
+    if (outlinePassSelected.selectedObjects[0].children[0].isMesh) {
+      MeshChild = outlinePassSelected.selectedObjects[0].children[0];
+    }
+    else if (outlinePassSelected.selectedObjects[0].children[0].children[0].isMesh) {
+      MeshChild = outlinePassSelected.selectedObjects[0].children[0].children[0];
+    }
+    else if (outlinePassSelected.selectedObjects[0].children[0].children[0].children[0].isMesh) {
+      MeshChild = outlinePassSelected.selectedObjects[0].children[0].children[0].children[0];
+    }
+    else if (outlinePassSelected.selectedObjects[0].children[0].children[0].children[0].children[0].isMesh) {
+      MeshChild = outlinePassSelected.selectedObjects[0].children[0].children[0].children[0].children[0];
+    }
+    else if (outlinePassSelected.selectedObjects[0].children[0].children[0].children[0].children[0].children[0].isMesh) {
+      MeshChild = outlinePassSelected.selectedObjects[0].children[0].children[0].children[0].children[0].children[0];
+    }
+    else if (outlinePassSelected.selectedObjects[0].children[0].children[0].children[0].children[0].children[0].children[0].isMesh) {
+      MeshChild = outlinePassSelected.selectedObjects[0].children[0].children[0].children[0].children[0].children[0].children[0];
+    }
 
     if (MeshChild !== null) {
 

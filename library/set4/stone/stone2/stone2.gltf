@@ -15,36 +15,47 @@
     "nodes" : [
         {
             "mesh" : 0,
-            "name" : "Kitchen_Cabinet_01",
+            "name" : "wall5",
             "rotation" : [
-                0.7071068286895752,
+                0.7071067690849304,
                 0,
                 0,
-                0.7071067094802856
+                0.7071067690849304
+            ],
+            "scale" : [
+                2,
+                2,
+                0.5
             ],
             "translation" : [
-                1.6814122200012207,
-                0.0753658264875412,
-                1.496620774269104
+                -5,
+                2,
+                0
             ]
         }
     ],
     "materials" : [
         {
-            "name" : "Farm_Interior 1",
+            "doubleSided" : true,
+            "name" : "wall5",
+            "normalTexture" : {
+                "index" : 0,
+                "scale" : 0.1400168091058731,
+                "texCoord" : 0
+            },
             "pbrMetallicRoughness" : {
                 "baseColorTexture" : {
-                    "index" : 0,
+                    "index" : 1,
                     "texCoord" : 0
                 },
                 "metallicFactor" : 0,
-                "roughnessFactor" : 0.5
+                "roughnessFactor" : 0.27374178171157837
             }
         }
     ],
     "meshes" : [
         {
-            "name" : "Kitchen_Cabinet_01",
+            "name" : "Cube.009",
             "primitives" : [
                 {
                     "attributes" : {
@@ -61,77 +72,80 @@
     "textures" : [
         {
             "source" : 0
+        },
+        {
+            "source" : 0
         }
     ],
     "images" : [
         {
             "mimeType" : "image/png",
-            "name" : "10916_Farm_Interior",
-            "uri" : "10916_Farm_Interior.png"
+            "name" : "0ff0ce94a81c9295a3dd266a6194b72f",
+            "uri" : "0ff0ce94a81c9295a3dd266a6194b72f.png"
         }
     ],
     "accessors" : [
         {
             "bufferView" : 0,
             "componentType" : 5126,
-            "count" : 842,
+            "count" : 24,
             "max" : [
-                10.969123840332031,
-                43.23688888549805,
-                -0.019611358642578125
+                1.0000004768371582,
+                1,
+                1.0000005960464478
             ],
             "min" : [
-                -11.589208602905273,
-                -42.77031707763672,
-                -36.18475341796875
+                -1.0000003576278687,
+                -1,
+                -1.0000003576278687
             ],
             "type" : "VEC3"
         },
         {
             "bufferView" : 1,
             "componentType" : 5126,
-            "count" : 842,
+            "count" : 24,
             "type" : "VEC3"
         },
         {
             "bufferView" : 2,
             "componentType" : 5126,
-            "count" : 842,
+            "count" : 24,
             "type" : "VEC2"
         },
         {
             "bufferView" : 3,
             "componentType" : 5123,
-            "count" : 1446,
+            "count" : 36,
             "type" : "SCALAR"
         }
     ],
     "bufferViews" : [
         {
             "buffer" : 0,
-            "byteLength" : 10104,
+            "byteLength" : 288,
             "byteOffset" : 0
         },
         {
             "buffer" : 0,
-            "byteLength" : 10104,
-            "byteOffset" : 10104
+            "byteLength" : 288,
+            "byteOffset" : 288
         },
         {
             "buffer" : 0,
-            "byteLength" : 6736,
-            "byteOffset" : 20208
+            "byteLength" : 192,
+            "byteOffset" : 576
         },
         {
             "buffer" : 0,
-            "byteLength" : 2892,
-            "byteOffset" : 26944
+            "byteLength" : 72,
+            "byteOffset" : 768
         }
     ],
     "buffers" : [
         {
-            "byteLength" : 29836,
-            "uri" : "Kitchen_Cabinet_012.bin"
+            "byteLength" : 840,
+            "uri" : "stone2.bin"
         }
     ]
 }

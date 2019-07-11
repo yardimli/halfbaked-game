@@ -193,13 +193,17 @@
   <hr>
   <select id="all_objects" class="form-control" style="margin-bottom: 3px;">
   </select>
+  <div class="row" style="margin-bottom: 3px; margin-left: 0px; margin-right: 0px;">
+    <div class="col-6" style="padding: 0px;"> <button id="clone_object" class="form-control btn-outline-info">Clone</button></div>
+    <div class="col-1" style="padding: 0px;"></div>
+    <div class="col-5" style="padding: 0px;"> <button id="delete_object" class="form-control btn-outline-info">Delete</button></div>
+  </div>
 
-  <div class="row" style="margin-bottom: 3px;">
-    <div class="col-7">  <input id="object_name" class="form-control" placeholder="name">
+  <div class="row" style="margin-bottom: 3px;  margin-left: 0px; margin-right: 0px;">
+    <div class="col-8" style="padding: 0px;"><input id="object_name" class="form-control" placeholder="name">
     </div>
-    <div class="col-2" style="padding: 0px;"> <button id="focus_object" class="form-control btn-outline-info">F</button></div>
-    <div class="col-2" style="padding: 0px;"> <button id="delete_object" class="form-control btn-outline-info">D</button></div>
-    <div class="col-1"></div>
+    <div class="col-1" style="padding: 0px;"></div>
+    <div class="col-3" style="padding: 0px;"><button id="focus_object" class="form-control btn-outline-info">focus</button></div>
   </div>
   <div class="form-group">
     <select class="form-control" id="object_fixed">

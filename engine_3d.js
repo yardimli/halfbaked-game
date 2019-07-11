@@ -9,13 +9,24 @@ TODO:
 - delete scene object ...................................................................ok
 - delete all scene objects ..............................................................ok
 - load scene from json file .............................................................ok
+- add clone scene object function .......................................................ok
 - add new object x,z on last mouse click position
-- add clone scene object function
 - collision checkbox for items
 
-- load one player into editor scene (allow to move around and enable/disable collision detection)
-- popup json editor for light sources, camera and camera controls. background, add update button. save/load with scene
+- load one player into editor scene to move around ......................................ok
+- allow test player and enable/disable collision detection
+
+- popup json editor for light sources
+- popup json editor camera and camera controls.
+- popup json editor background
+- save/load light,camera,background with scene
+
+- allow to select multiple objects and move, scale and rotate them
+
 - add hierarchy for objects in scene with drag and drop
+- add scripted position, size and scale animation for objects
+
+- add visual object library
 
 - merge the nodejs server (characters and chat) into test3.php
 
@@ -448,8 +459,29 @@ function loadGLTF(name, model_file, position, scale, rotate, collidable, can_mov
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
 function createFloor() {
+
+
+  var geometry = new THREE.Geometry();
+  geometry.vertices.push(new THREE.Vector3(-1500, 0, 0));
+  geometry.vertices.push(new THREE.Vector3(1500, 0, 0));
+
+  linesMaterial = new THREE.LineBasicMaterial({color: 0x787878, opacity: .2, linewidth: .1});
+
+  for (var i = 0; i <= 60; i++) {
+
+    var line = new THREE.Line(geometry, linesMaterial);
+    line.position.z = (i * 50) - 1500;
+    scene.add(line);
+
+    var line = new THREE.Line(geometry, linesMaterial);
+    line.position.x = (i * 50) - 1500;
+    line.rotation.y = 90 * Math.PI / 180;
+    scene.add(line);
+  }
+
   var geo = new THREE.PlaneBufferGeometry(20000, 20000, 8, 8);
-  var mat = new THREE.MeshBasicMaterial({color: 0x5A6450});
+  var mat = new THREE.MeshBasicMaterial({color: 0xffffff, opacity: 0, wireframe: false});
+  mat.transparent = true;
   var plane = new THREE.Mesh(geo, mat);
   plane.position.y = -1;
   plane.rotation.x = -Math.PI / 2;
@@ -866,8 +898,8 @@ function init() {
   // Create the scene.
   scene = new THREE.Scene();
 
-  scene.background = new THREE.Color(0xcce0ff);
-  scene.fog = new THREE.Fog(0xcce0ff, 500, 10000);
+  scene.background = new THREE.Color(0xcccccc);
+  scene.fog = new THREE.Fog(0xcccccc, 500, 10000);
   // scene.add(new THREE.AmbientLight(0x666666));
 
 
@@ -886,7 +918,7 @@ function init() {
 
   controls.rotateSpeed = 0.05;
 
-  controls.maxPolarAngle = Math.PI * 0.5;
+//  controls.maxPolarAngle = Math.PI * 0.5; //limit so cant go bellow surface
   controls.enablePan = true;
   controls.panSpeed = 0.3;
   controls.enableDamping = true;
@@ -902,11 +934,13 @@ function init() {
   AddLights();
 
   //skybox
-  var urls = ['px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg'];
-  var loaderCube = new THREE.CubeTextureLoader().setPath('./threejs/examples/textures/cube/skyboxsun25deg/');
-  loaderCube.load(urls, function (texture) {
-    scene.background = texture;
-  });
+  if (1 == 2) {
+    var urls = ['px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg'];
+    var loaderCube = new THREE.CubeTextureLoader().setPath('./threejs/examples/textures/cube/skyboxsun25deg/');
+    loaderCube.load(urls, function (texture) {
+      scene.background = texture;
+    });
+  }
 
 
   // Create a rotation point.
@@ -1265,6 +1299,59 @@ function init() {
     $("#deleteObjectModal").modal('show');
     e.preventDefault();
   });
+
+  $("#clone_object").on('click', function (e) {
+
+    if (Outline_selectedObject_temp !== null) {
+      console.log("trying to clone");
+
+
+      for (var i = scene_objects.children.length - 1; i >= 0; i--) {
+        console.log((Outline_selectedObject_temp.id === scene_objects.children[i].id));
+
+        console.log((Outline_selectedObject_temp.id + "===" + scene_objects.children[i].id));
+        if (Outline_selectedObject_temp.id === scene_objects.children[i].id) {
+//          scene_objects.remove(scene_objects.children[i]);
+
+
+          var MeshChild = null;
+          if (scene_objects.children[i].children[0].isMesh) {
+            MeshChild = scene_objects.children[i].children[0];
+          }
+          else if (scene_objects.children[i].children[0].children[0].isMesh) {
+            MeshChild = scene_objects.children[i].children[0].children[0];
+          }
+          else if (scene_objects.children[i].children[0].children[0].children[0].isMesh) {
+            MeshChild = scene_objects.children[i].children[0].children[0].children[0];
+          }
+          else if (scene_objects.children[i].children[0].children[0].children[0].children[0].isMesh) {
+            MeshChild = scene_objects.children[i].children[0].children[0].children[0].children[0];
+          }
+          else if (scene_objects.children[i].children[0].children[0].children[0].children[0].children[0].isMesh) {
+            MeshChild = scene_objects.children[i].children[0].children[0].children[0].children[0].children[0];
+          }
+          else if (scene_objects.children[i].children[0].children[0].children[0].children[0].children[0].children[0].isMesh) {
+            MeshChild = scene_objects.children[i].children[0].children[0].children[0].children[0].children[0].children[0];
+          }
+
+          if (MeshChild !== null) {
+
+            var position = new THREE.Vector3();
+            position.setFromMatrixPosition(MeshChild.matrixWorld);
+            // console.log(JSON.stringify(position));
+
+            var box = new THREE.Box3().setFromObject(MeshChild);
+            var boxsize = new THREE.Vector3();
+            box.getSize(boxsize);
+
+            loadGLTF(scene_objects.children[i].name+ " Clone", scene_objects.children[i]  .userData.filePath, position, MeshChild.scale, MeshChild.rotation, scene_objects.children[i].userData.collision, true, true);
+          }
+        }
+      }
+    }
+    e.preventDefault();
+  });
+
 
   $("#deleteObjectButton").on('click', function (e) {
 

@@ -1,61 +1,18 @@
-/*
-TODO:
-
-- dropdown with all scene objects, auto select and focus on dropdown selected object ....ok
-- make objects fixed (mouse move wont work) .............................................ok
-- edit name of scene objects save it to the mesh ........................................ok
-
-- save scene to php => json file ........................................................ok
-- delete scene object ...................................................................ok
-- delete all scene objects ..............................................................ok
-- load scene from json file .............................................................ok
-- add clone scene object function .......................................................ok
-- add new object x,z on last mouse click position
-- collision checkbox for items
-
-- load one player into editor scene to move around ......................................ok
-- allow test player and enable/disable collision detection
-
-- popup json editor for light sources
-- popup json editor camera and camera controls.
-- popup json editor background
-- save/load light,camera,background with scene
-
-- add 4 camera presets top, front, right orto and perspective
-- allow to select multiple objects and move, scale and rotate them
-
-- add hierarchy for objects in scene with drag and drop
-- add scripted position, size and scale animation for objects
-
-- add visual object library
-
-- merge the nodejs server (characters and chat) into test3.php
-
-
-
-
-
-
- */
 
 
 var camera, // We need a camera.
   scene, // The camera has to see something.
   renderer, // Render our graphics.
   controls, // Our Orbit Controller for camera magic.
-  transform_controls,
-  container, // Our HTML container for the program.
-  rotationPoint;  // The point in which our camera will rotate around.
+  container; // Our HTML container for the program.
 
 var loader = new THREE.GLTFLoader();
-var loaderTexture = new THREE.TextureLoader();
 
 var characterSize = 30;
 var outlineSize = characterSize * 0.05;
 
 // Track all objects and collisions.
 var objects = [];
-//var drag_objects = [];
 
 var scene_objects = new THREE.Group();
 
@@ -79,8 +36,6 @@ var main_player = null;
 
 var other_players = [];
 
-var json_objects;
-
 var IgnoreThisClick = false;
 
 
@@ -98,7 +53,7 @@ var DirectionalLight1;
 var DirectionalLight1Helper;
 var PointLight1;
 var PointLight1Helper;
-var composer, effectFXAA, outlinePass, outlinePassSelected;
+var composer, effectFXAA, outlinePassSelected;
 
 var Outline_mouse = new THREE.Vector2();
 var Outline_selectedObjects = [];
@@ -173,47 +128,7 @@ function AddLights() {
   PointLight1Helper = new THREE.PointLightHelper(PointLight1);
   scene.add(PointLight1Helper);
 
-  if (1 == 2) {
-    //light controls
-    const gui = new dat.GUI();
-    var folder = gui.addFolder("Lights");
-
-    var person = {name: 'Hemisphere Light'};
-    folder.add(person, 'name');
-
-    folder.add(HemisphereLight1, 'intensity', 0, 2, 0.01);
-
-    folder.addColor(new ColorGUIHelper(HemisphereLight1, 'color'), 'value').name('skyColor');
-    folder.addColor(new ColorGUIHelper(HemisphereLight1, 'groundColor'), 'value').name('groundColor');
-
-    var person = {name: 'Directional Light'};
-    folder.add(person, 'name');
-
-    folder.addColor(new ColorGUIHelper(DirectionalLight1, 'color'), 'value').name('color');
-    folder.add(DirectionalLight1, 'intensity', 0, 2, 0.01);
-
-    var person = {name: 'Directional Light Position'};
-    folder.add(person, 'name');
-
-    makeXYZGUI(folder, DirectionalLight1.position, updateLight);
-
-    var person = {name: 'Directional Light Target'};
-    folder.add(person, 'name');
-
-    makeXYZGUI(folder, DirectionalLight1.target.position, updateLight);
-
-    var person = {name: 'Point Light'};
-    folder.add(person, 'name');
-
-    folder.addColor(new ColorGUIHelper(PointLight1, 'color'), 'value').name('color');
-    folder.add(PointLight1, 'intensity', 0, 2, 0.01);
-    makeXYZGUI(gui, PointLight1.position, updateLight);
-
-    gui.close();
-  }
-
   updateLight();
-
 }
 
 
@@ -257,7 +172,7 @@ function detectCollisions() {
           (bounds.yMin <= collisions[index].yMax && bounds.yMax >= collisions[index].yMin) &&
           (bounds.zMin <= collisions[index].zMax && bounds.zMax >= collisions[index].zMin)) {
           // We hit a solid object! Stop all movements.
-          stopMovement();
+          // stopMovement();
 
           // Move the object in the clear. Detect the best direction to move.
           if (bounds.xMin <= collisions[index].xMax && bounds.xMax >= collisions[index].xMin) {
@@ -292,38 +207,6 @@ function detectCollisions() {
 
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
-function createOtherCharacter(name, model_file, width, height, position, rotate, collidable) {
-
-  var geometry = new THREE.PlaneGeometry(width, height, 2);
-  var texture = new THREE.TextureLoader().load(model_file);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  var material = new THREE.MeshBasicMaterial({side: THREE.DoubleSide, map: texture});
-  material.transparent = true;
-
-  var new_player = new THREE.Mesh(geometry, material);
-
-  new_player.rotation.set(THREE.Math.degToRad(rotate.x), THREE.Math.degToRad(rotate.y), THREE.Math.degToRad(rotate.z));
-
-  new_player.position.x = position.x;				    //Position (x = right+ left-)
-  new_player.position.y = position.y;				    //Position (y = up+, down-)
-  new_player.position.z = position.z;				    //Position (z = front +, back-)
-
-  if (collidable) {
-    calculateCollisionPoints(new_player);
-  }
-
-//  other_players.push({xname:name, mesh:new_player});
-
-  new_player.name = name;
-
-  scene.add(new_player);
-//    rotationPoint.add(main_player);
-
-}
-
-
-//------------------------------------------------------------------------------------------------------------------------------------------------
 function createCharacter(model_file, width, height, position, rotate) {
   // var geometry = new THREE.BoxBufferGeometry(characterSize, characterSize, characterSize);
 
@@ -345,10 +228,7 @@ function createCharacter(model_file, width, height, position, rotate) {
 
   main_player.name = "main_player";
 
-//  rotationPoint.position.set(position.x, position.y, position.z);
-
   scene.add(main_player);
-  //rotationPoint.add(main_player);
 }
 
 
@@ -385,14 +265,8 @@ function loadGLTF(name, model_file, position, scale, rotate, collidable, can_mov
     var AssignNameToFirst = true;
     root.traverse((obj) => {
       if (obj.isMesh) {
-
-        // obj.applyMatrix(mS);
-
-//        drag_objects.push(obj);
-
         obj.scale.set(scale.x, scale.y, scale.z);
         obj.geometry.center();
-
 
         var box = new THREE.Box3().setFromObject(obj);
         var boxsize = new THREE.Vector3();
@@ -421,7 +295,6 @@ function loadGLTF(name, model_file, position, scale, rotate, collidable, can_mov
         }
 
         Outline_addSelectedObject(obj, root);
-        // outlinePass.selectedObjects = Outline_selectedObjects;
         SelectObject();
       }
 
@@ -678,7 +551,6 @@ function Outline_checkIntersection(event) {
     // console.log(intersects);
     // console.log(Outline_selectedObject_temp);
     Outline_addSelectedObject(intersects[0].object, Outline_selectedObject_temp);
-    // outlinePass.selectedObjects = Outline_selectedObjects;
   }
   else {
     // console.log("set selected object to null");
@@ -687,23 +559,6 @@ function Outline_checkIntersection(event) {
   }
 }
 
-
-//------------------------------------------------------------------------------------------------------------------------------------------------
-function Outline_onTouchMove(event) {
-
-  var x, y;
-  if (event.changedTouches) {
-    x = event.changedTouches[0].pageX;
-    y = event.changedTouches[0].pageY;
-  }
-  else {
-    x = event.clientX;
-    y = event.clientY;
-  }
-  Outline_mouse.x = (x / (window.innerWidth - 250)) * 2 - 1;
-  Outline_mouse.y = -(y / window.innerHeight) * 2 + 1;
-  Outline_checkIntersection();
-}
 
 function radians_to_degrees(radians) {
   var pi = Math.PI;
@@ -747,40 +602,6 @@ function fitCameraToSelection(camera, controls, selection, fitOffset = 1.2) {
 }
 
 
-function updateSet(setName) {
-  $("#object_file").find('option').remove();
-  $("#object_group").find('option').remove();
-
-  for (var key in sets) {
-    if (sets[key].name === setName) {
-      for (var key2 in sets[key].groups) {
-        $("#object_group").append('<option value="' + sets[key].groups[key2].name + '">' + sets[key].groups[key2].name + '</option>');
-//          console.log(sets[key].groups[key2].name);
-      }
-    }
-  }
-}
-
-function updateSetGroup() {
-  $("#object_file").find('option').remove();
-  for (var key in sets) {
-    if (sets[key].name === $("#object_set").val()) {
-
-      for (var key2 in sets[key].groups) {
-        if (sets[key].groups[key2].name === $("#object_group").val()) {
-          // console.log(sets[key].groups[key2].name);
-          // console.log(sets[key].groups[key2]);
-
-          for (var key3 in sets[key].groups[key2].folders) {
-
-            $("#object_file").append('<option value="' + sets[key].groups[key2].folders[key3] + '">' + sets[key].groups[key2].folders[key3] + '</option>');
-            // console.log(sets[key].groups[key2].folders[key3]);
-          }
-        }
-      }
-    }
-  }
-}
 
 function SelectObject() {
   if (Outline_selectedObject_temp !== null) {
@@ -788,90 +609,9 @@ function SelectObject() {
     outlinePassSelected.selectedObjects = [Outline_selectedObject_temp];
 
     console.log("select object");
-
-    $("#object_name").val(Outline_selectedObject_temp.userData.name);
-    console.log(Outline_selectedObject_temp);
-
-    $('#all_objects option[value="' + Outline_selectedObject_temp.id + '"]').prop('selected', true);
-
-
-    var position = new THREE.Vector3();
-//    console.log(Outline_selectedObject_temp);
-
-    var MeshChild = null;
-    if (Outline_selectedObject_temp.isMesh) {
-      MeshChild = Outline_selectedObject_temp;
-    }
-    else if (Outline_selectedObject_temp.children[0].isMesh) {
-      MeshChild = Outline_selectedObject_temp.children[0];
-    }
-    else if (Outline_selectedObject_temp.children[0].children[0].isMesh) {
-      MeshChild = Outline_selectedObject_temp.children[0].children[0];
-    }
-    else if (Outline_selectedObject_temp.children[0].children[0].children[0].isMesh) {
-      MeshChild = Outline_selectedObject_temp.children[0].children[0].children[0];
-    }
-    else if (Outline_selectedObject_temp.children[0].children[0].children[0].children[0].isMesh) {
-      MeshChild = Outline_selectedObject_temp.children[0].children[0].children[0].children[0];
-    }
-    else if (Outline_selectedObject_temp.children[0].children[0].children[0].children[0].children[0].isMesh) {
-      MeshChild = Outline_selectedObject_temp.children[0].children[0].children[0].children[0].children[0];
-    }
-
-
-    if (MeshChild !== null) {
-      position.setFromMatrixPosition(MeshChild.matrixWorld);
-      console.log(position);
-
-      $("#position_x").val(Math.round(position.x * 10000) / 10000);
-      $("#position_y").val(Math.round(position.y * 10000) / 10000);
-      $("#position_z").val(Math.round(position.z * 10000) / 10000);
-
-
-      var box = new THREE.Box3().setFromObject(MeshChild);
-//      console.log( box.min, box.max, box.getSize() );
-      var boxsize = new THREE.Vector3();
-      box.getSize(boxsize);
-
-
-      $("#size_x").val(Math.round(MeshChild.scale.x * 100) / 100);
-      $("#size_y").val(Math.round(MeshChild.scale.y * 100) / 100);
-      $("#size_z").val(Math.round(MeshChild.scale.z * 100) / 100);
-
-      $("#size_x_hint").html(Math.round(boxsize.x * 10000) / 10000);
-      $("#size_y_hint").html(Math.round(boxsize.y * 10000) / 10000);
-      $("#size_z_hint").html(Math.round(boxsize.z * 10000) / 10000);
-
-
-      $("#rotate_x").val(radians_to_degrees(MeshChild.rotation.x));
-      $("#rotate_y").val(radians_to_degrees(MeshChild.rotation.y));
-      $("#rotate_z").val(radians_to_degrees(MeshChild.rotation.z));
-
-      $('#object_fixed option[value="' + Outline_selectedObject_temp.userData.canMove + '"]').prop('selected', true);
-    }
   }
   else {
     outlinePassSelected.selectedObjects = [];
-    outlinePass.selectedObjects = [];
-
-    $("#object_name").val("");
-
-    $("#position_x").val("");
-    $("#position_y").val("");
-    $("#position_z").val("");
-
-    $("#size_x").val("");
-    $("#size_y").val("");
-    $("#size_z").val("");
-
-    $("#size_x_hint").html("");
-    $("#size_y_hint").html("");
-    $("#size_z_hint").html("");
-
-    $("#rotate_x").val("");
-    $("#rotate_y").val("");
-    $("#rotate_z").val("");
-
   }
 }
 
@@ -879,8 +619,6 @@ function SelectObject() {
 function init() {
   // Build the container
   container = $("#GameContainer");
-  // document.createElement('div');
-  // document.body.appendChild(container);
 
   var width = window.innerWidth - 250;
   var height = window.innerHeight;
@@ -914,8 +652,6 @@ function init() {
 //    main_player.add(camera);
 
   controls = new THREE.OrbitControls(camera, renderer.domElement);
-  // controls.maxDistance = 5000; // Set our max zoom out distance (mouse scroll)
-  // controls.minDistance = 300; // Set our min zoom in distance (mouse scroll)
 
   controls.rotateSpeed = 0.05;
 
@@ -944,14 +680,7 @@ function init() {
   }
 
 
-  // Create a rotation point.
-  // rotationPoint = new THREE.Object3D();
-  // rotationPoint.position.set(0, 0, 0);
-  // scene.add(rotationPoint);
-
   createCharacter('./character1.png', 15, 25, new THREE.Vector3(0, 14.5, 155), new THREE.Vector3(0, 0, 0));
-  // createOtherCharacter("char2", "./character2.png", 35, 50, new THREE.Vector3(155, 20, 5), new THREE.Vector3(0, 0, 0), true);
-
 
   createFloor();
 
@@ -963,18 +692,6 @@ function init() {
 
   var renderPass = new THREE.RenderPass(scene, camera);
   composer.addPass(renderPass);
-
-  outlinePass = new THREE.OutlinePass(new THREE.Vector2((window.innerWidth - 250), window.innerHeight), scene, camera);
-  composer.addPass(outlinePass);
-
-  outlinePass.edgeStrength = 3;
-  outlinePass.edgeGlow = 1.0;
-  outlinePass.edgeThickness = 1.0;
-  outlinePass.pulsePeriod = 0;
-  outlinePass.usePatternTexture = true;
-  outlinePass.visibleEdgeColor.set('#ffffff');
-  outlinePass.hiddenEdgeColor.set('#190a05');
-
 
   outlinePassSelected = new THREE.OutlinePass(new THREE.Vector2((window.innerWidth - 250), window.innerHeight), scene, camera);
   composer.addPass(outlinePassSelected);
@@ -988,47 +705,7 @@ function init() {
   outlinePassSelected.hiddenEdgeColor.set('#190a05');
 
 
-  var onLoad = function (texture) {
-    outlinePass.patternTexture = texture;
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-  };
-
-  var loader2 = new THREE.TextureLoader();
-  loader2.load('./threejs/examples/textures/tri_pattern.jpg', onLoad);
-  effectFXAA = new THREE.ShaderPass(THREE.FXAAShader);
-  effectFXAA.uniforms['resolution'].value.set(1 / (window.innerWidth - 250), 1 / window.innerHeight);
-  composer.addPass(effectFXAA);
-
   window.addEventListener('resize', onWindowResize, false);
-
-  // window.addEventListener('mousemove', Outline_onTouchMove);
-  // window.addEventListener('touchmove', Outline_onTouchMove);
-//  Outline_selectedObjects
-  var dragControls = new THREE.DragControls(Outline_selectedObjects, camera, renderer.domElement);
-  dragControls.addEventListener('dragstart', function () {
-    if (Outline_selectedObject_temp !== null) {
-
-      console.log(Outline_selectedObject_temp.userData.canMove);
-      if (Outline_selectedObject_temp.userData.canMove === "fixed") {
-        return false;
-      }
-
-    }
-    else {
-      return false;
-    }
-    IgnoreThisClick = true;
-    controls.enabled = false;
-  });
-
-  dragControls.addEventListener('dragend', function (object) {
-    console.log(object);
-//    object.position.y=0;
-    controls.enabled = true;
-    SelectObject();
-
-  });
 
   $(document).dblclick(function (event) {
     if (event.target.nodeName === "CANVAS") {
@@ -1042,77 +719,6 @@ function init() {
           }
         }
       }
-    }
-  });
-
-  $("#rotate_camera").on('click', function () {
-    if (controls.enableRotate) {
-      $("#rotate_camera").html("Enable Rotate");
-      controls.enableRotate = false;
-    }
-    else {
-      $("#rotate_camera").html("Disable Rotate");
-      controls.enableRotate = true;
-    }
-  });
-
-  $("#object_set").on("change", function () {
-    updateSet($(this).val());
-    updateSetGroup();
-  });
-
-  $("#object_group").on("change", function () {
-    updateSetGroup()
-  });
-
-  $("#all_objects").on("change", function () {
-    console.log($(this).val());
-
-    Outline_selectedObject_temp = scene.getObjectById(parseInt($(this).val(), 10), true);
-    Outline_addSelectedObject(Outline_selectedObject_temp, Outline_selectedObject_temp);
-    // outlinePass.selectedObjects = Outline_selectedObjects;
-    SelectObject();
-
-  });
-
-  updateSet("set1");
-  updateSetGroup();
-
-  $("#add_object").on("click", function () {
-//    console.log("add new "+$("#object_file").val()+" "+$("#object_file option:selected").attr("id"));
-
-    var scaleFactor = "";
-    if ($("#object_set").val() === "set1") {
-      scaleFactor = new THREE.Vector3(500, 500, 500);
-    }
-
-    if ($("#object_set").val() === "set2") {
-      scaleFactor = new THREE.Vector3(25, 25, 25);
-    }
-
-    if ($("#object_set").val() === "set3") {
-      scaleFactor = new THREE.Vector3(0.5, 0.5, 0.5);
-    }
-
-    if ($("#object_set").val() === "set4") {
-      scaleFactor = new THREE.Vector3(10, 10, 1);
-    }
-
-    loadGLTF($("#object_file").val(), "./library/" + $("#object_set").val() + "/" + $("#object_group").val() + "/" + $("#object_file").val() + "/" + $("#object_file").val() + ".gltf", new THREE.Vector3(0, 0, 0), scaleFactor, null, true, "can_move", false);
-
-  });
-
-  $("#object_fixed").on("change", function () {
-    if (Outline_selectedObject_temp !== null) {
-      Outline_selectedObject_temp.userData.canMove = $(this).val();
-      console.log($(this).val());
-    }
-  });
-
-  $("#object_name").on('change', function () {
-    if (Outline_selectedObject_temp !== null) {
-      Outline_selectedObject_temp.userData.name = $(this).val();
-      $('#all_objects option[value="' + Outline_selectedObject_temp.id + '"]').html($(this).val() + "(" + Outline_selectedObject_temp.id + ")");
     }
   });
 
@@ -1180,269 +786,7 @@ function init() {
     e.preventDefault();
   });
 
-  $("#saveSceneButton").on('click', function (e) {
 
-    var saveObjects = [];
-
-    for (var i = 0; i < scene_objects.children.length; i++) {
-      console.log(scene_objects.children[i]);
-
-      // console.log(drag_objects[i].id);
-      // console.log(drag_objects[i].name);
-      // console.log(drag_objects[i].userData.name);
-      // console.log(drag_objects[i].userData.filePath);
-
-      var MeshChild = null;
-      if (scene_objects.children[i].children[0].isMesh) {
-        MeshChild = scene_objects.children[i].children[0];
-      }
-      else if (scene_objects.children[i].children[0].children[0].isMesh) {
-        MeshChild = scene_objects.children[i].children[0].children[0];
-      }
-      else if (scene_objects.children[i].children[0].children[0].children[0].isMesh) {
-        MeshChild = scene_objects.children[i].children[0].children[0].children[0];
-      }
-      else if (scene_objects.children[i].children[0].children[0].children[0].children[0].isMesh) {
-        MeshChild = scene_objects.children[i].children[0].children[0].children[0].children[0];
-      }
-      else if (scene_objects.children[i].children[0].children[0].children[0].children[0].children[0].isMesh) {
-        MeshChild = scene_objects.children[i].children[0].children[0].children[0].children[0].children[0];
-      }
-      else if (scene_objects.children[i].children[0].children[0].children[0].children[0].children[0].children[0].isMesh) {
-        MeshChild = scene_objects.children[i].children[0].children[0].children[0].children[0].children[0].children[0];
-      }
-
-      if (MeshChild !== null) {
-
-        var position = new THREE.Vector3();
-        position.setFromMatrixPosition(MeshChild.matrixWorld);
-        // console.log(JSON.stringify(position));
-
-        var box = new THREE.Box3().setFromObject(MeshChild);
-        var boxsize = new THREE.Vector3();
-        box.getSize(boxsize);
-
-        // console.log(JSON.stringify(drag_objects[i].scale));
-        //
-        // $("#size_x_hint").html(Math.round(boxsize.x * 10000) / 10000);
-        // $("#size_y_hint").html(Math.round(boxsize.y * 10000) / 10000);
-        // $("#size_z_hint").html(Math.round(boxsize.z * 10000) / 10000);
-
-        saveObjects.push({
-          "id": scene_objects.children[i].id,
-          "name": scene_objects.children[i].name,
-          "canMove": scene_objects.children[i].userData.canMove,
-          "collision": scene_objects.children[i].userData.collision,
-          "userName": scene_objects.children[i].userData.name,
-          "filePath": scene_objects.children[i].userData.filePath,
-          "position": position,
-          "scale": MeshChild.scale,
-          "rotation": MeshChild.rotation
-        });
-      }
-    }
-    console.log(saveObjects);
-    console.log(JSON.stringify(saveObjects));
-
-
-    console.log("save scene press");
-    if ($("#saveSceneName").val() !== "") {
-      console.log("save scene");
-
-      var UrlToGet = "save_scene.php";
-      var data = {"scene_data": JSON.stringify(saveObjects), "scene_name": $("#saveSceneName").val()};
-
-      $.ajax({
-        type: "post",
-        url: UrlToGet,
-        data: data,
-        dataType: "json",
-        success: function (data, status) {
-          console.log("Status: " + status);
-        },
-        error: function (data, status) {
-          console.log("error Status: " + status);
-        }
-      });
-      $("#saveSceneModal").modal('hide');
-    }
-    else {
-      alert("scene name?");
-    }
-    e.preventDefault();
-  });
-
-
-  $(".edit_object_prop").TouchSpin({
-    min: -1000000,
-    max: 1000000,
-    decimals: 4,
-    step: 0.1,
-    stepinterval: 50,
-    maxboostedstep: 1000000,
-    buttondown_class: "btn btn-outline-info",
-    buttonup_class: "btn btn-outline-info"
-  });
-
-  $("#focus_object").on('click', function () {
-
-    console.log(outlinePassSelected.selectedObjects.length);
-    if (outlinePassSelected.selectedObjects.length > 0) {
-      fitCameraToSelection(camera, controls, outlinePassSelected.selectedObjects, 1.2);
-    }
-    else {
-      controls.reset();
-    }
-
-    // var bb = new THREE.Box3();
-    // bb.setFromObject(outlinePassSelected.selectedObjects[0]);
-    // bb.center(controls.target);
-  });
-
-  $("#delete_object").on('click', function (e) {
-    $("#deleteObjectModal").modal('show');
-    e.preventDefault();
-  });
-
-  $("#clone_object").on('click', function (e) {
-
-    if (Outline_selectedObject_temp !== null) {
-      console.log("trying to clone");
-
-
-      for (var i = scene_objects.children.length - 1; i >= 0; i--) {
-        console.log((Outline_selectedObject_temp.id === scene_objects.children[i].id));
-
-        console.log((Outline_selectedObject_temp.id + "===" + scene_objects.children[i].id));
-        if (Outline_selectedObject_temp.id === scene_objects.children[i].id) {
-//          scene_objects.remove(scene_objects.children[i]);
-
-
-          var MeshChild = null;
-          if (scene_objects.children[i].children[0].isMesh) {
-            MeshChild = scene_objects.children[i].children[0];
-          }
-          else if (scene_objects.children[i].children[0].children[0].isMesh) {
-            MeshChild = scene_objects.children[i].children[0].children[0];
-          }
-          else if (scene_objects.children[i].children[0].children[0].children[0].isMesh) {
-            MeshChild = scene_objects.children[i].children[0].children[0].children[0];
-          }
-          else if (scene_objects.children[i].children[0].children[0].children[0].children[0].isMesh) {
-            MeshChild = scene_objects.children[i].children[0].children[0].children[0].children[0];
-          }
-          else if (scene_objects.children[i].children[0].children[0].children[0].children[0].children[0].isMesh) {
-            MeshChild = scene_objects.children[i].children[0].children[0].children[0].children[0].children[0];
-          }
-          else if (scene_objects.children[i].children[0].children[0].children[0].children[0].children[0].children[0].isMesh) {
-            MeshChild = scene_objects.children[i].children[0].children[0].children[0].children[0].children[0].children[0];
-          }
-
-          if (MeshChild !== null) {
-
-            var position = new THREE.Vector3();
-            position.setFromMatrixPosition(MeshChild.matrixWorld);
-            // console.log(JSON.stringify(position));
-
-            var box = new THREE.Box3().setFromObject(MeshChild);
-            var boxsize = new THREE.Vector3();
-            box.getSize(boxsize);
-
-            loadGLTF(scene_objects.children[i].name+ " Clone", scene_objects.children[i]  .userData.filePath, position, MeshChild.scale, MeshChild.rotation, scene_objects.children[i].userData.collision, true, true);
-          }
-        }
-      }
-    }
-    e.preventDefault();
-  });
-
-
-  $("#deleteObjectButton").on('click', function (e) {
-
-    if (Outline_selectedObject_temp !== null) {
-      console.log("trying to delete");
-
-      for (var i = scene_objects.children.length - 1; i >= 0; i--) {
-        console.log((Outline_selectedObject_temp.id === scene_objects.children[i].id));
-
-        console.log((Outline_selectedObject_temp.id + "===" + scene_objects.children[i].id));
-        if (Outline_selectedObject_temp.id === scene_objects.children[i].id) {
-          scene_objects.remove(scene_objects.children[i]);
-        }
-      }
-
-    }
-
-    $("#all_objects").find('option').remove();
-    for (var i = 0; i < scene_objects.children.length; i++) {
-      $("#all_objects").append('<option value="' + scene_objects.children[i].id + '" data-userdata_name="' + scene_objects.children[i].userData.name + '" >' + scene_objects.children[i].userData.name + "(" + scene_objects.children[i].id + ")" + '</option>');
-    }
-
-    $("#deleteObjectModal").modal('hide');
-    e.preventDefault();
-  });
-
-
-  //--------- update object position
-  $(".edit_object_prop").on('change', function () {
-
-    var edit_id = $(this).attr('id');
-    console.log($(this).attr('id') + " " + $(this).val());
-
-    console.log(outlinePassSelected);
-    var MeshChild = null;
-    if (outlinePassSelected.selectedObjects[0].children[0].isMesh) {
-      MeshChild = outlinePassSelected.selectedObjects[0].children[0];
-    }
-    else if (outlinePassSelected.selectedObjects[0].children[0].children[0].isMesh) {
-      MeshChild = outlinePassSelected.selectedObjects[0].children[0].children[0];
-    }
-    else if (outlinePassSelected.selectedObjects[0].children[0].children[0].children[0].isMesh) {
-      MeshChild = outlinePassSelected.selectedObjects[0].children[0].children[0].children[0];
-    }
-    else if (outlinePassSelected.selectedObjects[0].children[0].children[0].children[0].children[0].isMesh) {
-      MeshChild = outlinePassSelected.selectedObjects[0].children[0].children[0].children[0].children[0];
-    }
-    else if (outlinePassSelected.selectedObjects[0].children[0].children[0].children[0].children[0].children[0].isMesh) {
-      MeshChild = outlinePassSelected.selectedObjects[0].children[0].children[0].children[0].children[0].children[0];
-    }
-    else if (outlinePassSelected.selectedObjects[0].children[0].children[0].children[0].children[0].children[0].children[0].isMesh) {
-      MeshChild = outlinePassSelected.selectedObjects[0].children[0].children[0].children[0].children[0].children[0].children[0];
-    }
-
-    if (MeshChild !== null) {
-
-      if (edit_id === "position_x") {
-        MeshChild.position.x = parseFloat($(this).val());
-      }
-      if (edit_id === "position_y") {
-        MeshChild.position.y = parseFloat($(this).val());
-      }
-      if (edit_id === "position_z") {
-        MeshChild.position.z = parseFloat($(this).val());
-      }
-
-      if (edit_id === "size_x") {
-        MeshChild.scale.x = parseFloat($(this).val());
-      }
-      if (edit_id === "size_y") {
-        MeshChild.scale.y = parseFloat($(this).val());
-      }
-      if (edit_id === "size_z") {
-        MeshChild.scale.z = parseFloat($(this).val());
-      }
-
-      if (edit_id === "rotate_x") {
-        MeshChild.rotation.x = degrees_to_radians(parseFloat($(this).val()));
-      }
-      if (edit_id === "rotate_y") {
-        MeshChild.rotation.y = degrees_to_radians(parseFloat($(this).val()));
-      }
-      if (edit_id === "rotate_z") {
-        MeshChild.rotation.z = degrees_to_radians(parseFloat($(this).val()));
-      }
-    }
-  });
 
 
   $(document).click(function (event) {
@@ -1496,11 +840,6 @@ function update() {
 function render() {
 //  renderer.render(scene, camera);
   composer.render();
-
-  // Don't let the camera go too low.
-  // if (camera.position.y < 10) {
-  //   camera.position.y = 10;
-  // }
 
   if (1 == 1) {
     scene.traverse(function (node) {

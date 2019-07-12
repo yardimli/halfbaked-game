@@ -38,6 +38,7 @@
       initval: '',
       replacementval: '',
       step: 1,
+      round_step : 0.0001,
       decimals: 0,
       stepinterval: 100,
       forcestepdivisibility: 'round', // none | floor | round | ceil
@@ -73,6 +74,7 @@
       initval: 'init-val',
       replacementval: 'replacement-val',
       step: 'step',
+      round_step:'round_step',
       decimals: 'decimals',
       stepinterval: 'step-interval',
       verticalbuttons: 'vertical-buttons',
@@ -543,11 +545,11 @@
       function _forcestepdivisibility(value) {
         switch (settings.forcestepdivisibility) {
           case 'round':
-            return (Math.round(value / settings.step) * settings.step).toFixed(settings.decimals);
+            return (Math.round(value / settings.round_step) * settings.round_step).toFixed(settings.decimals);
           case 'floor':
-            return (Math.floor(value / settings.step) * settings.step).toFixed(settings.decimals);
+            return (Math.floor(value / settings.round_step) * settings.round_step).toFixed(settings.decimals);
           case 'ceil':
-            return (Math.ceil(value / settings.step) * settings.step).toFixed(settings.decimals);
+            return (Math.ceil(value / settings.round_step) * settings.round_step).toFixed(settings.decimals);
           default:
             return value;
         }

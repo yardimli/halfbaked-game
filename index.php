@@ -193,9 +193,19 @@
   <hr>
   <select id="all_objects" class="form-control" style="margin-bottom: 3px;">
   </select>
+  Clone
   <div class="row" style="margin-bottom: 3px; margin-left: 0px; margin-right: 0px;">
-    <div class="col-6" style="padding: 0px;"> <button id="clone_object" class="form-control btn-outline-info">Clone</button></div>
-    <div class="col-1" style="padding: 0px;"></div>
+    <div class="col-2" style="padding: 0px;"> <button class="form-control btn-outline-info clone_object clone_x_minus">X-</button></div>
+    <div class="col-2" style="padding: 0px;"> <button class="form-control btn-outline-info clone_object clone_x_plus">X+</button></div>
+
+    <div class="col-2" style="padding: 0px;"> <button class="form-control btn-outline-info clone_object clone_y_minus">Y-</button></div>
+    <div class="col-2" style="padding: 0px;"> <button class="form-control btn-outline-info clone_object clone_y_plus">Y+</button></div>
+
+    <div class="col-2" style="padding: 0px;"> <button class="form-control btn-outline-info clone_object clone_z_minus">Z-</button></div>
+    <div class="col-2" style="padding: 0px;"> <button class="form-control btn-outline-info clone_object clone_z_plus">Z+</button></div>
+
+  </div>
+    <div class="row" style="margin-bottom: 3px; margin-left: 0px; margin-right: 0px;">
     <div class="col-5" style="padding: 0px;"> <button id="delete_object" class="form-control btn-outline-info">Delete</button></div>
   </div>
 

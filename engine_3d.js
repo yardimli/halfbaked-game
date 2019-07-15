@@ -10,11 +10,10 @@ TODO:
 - delete all scene objects ..............................................................ok
 - load scene from json file .............................................................ok
 - add clone scene object function .......................................................ok
-- add new object x,z on last mouse click position
+- add new object x,z on last mouse click position .......................................ok
 - collision checkbox for items
-
-- load one player into editor scene to move around ......................................ok
-- allow test player and enable/disable collision detection
+- fix can move/fixed bug ................................................................ok
+- clone besides existing object x,y,z ...................................................ok
 
 - popup json editor for light sources
 - popup json editor camera and camera controls.
@@ -22,9 +21,15 @@ TODO:
 - save/load light,camera,background with scene
 
 - add 4 camera presets top, front, right orto and perspective
-- allow to select multiple objects and move, scale and rotate them
 
 - add hierarchy for objects in scene with drag and drop
+
+
+- load one player into editor scene to move around ......................................ok
+- allow test player and enable/disable collision detection
+
+- allow to select multiple objects and align, move, scale and rotate them
+
 - add scripted position, size and scale animation for objects
 
 - add visual object library
@@ -83,6 +88,11 @@ var json_objects;
 
 var IgnoreThisClick = false;
 
+var AddNewObjectPoint = new THREE.Vector3();
+
+AddNewObjectPoint.x = 0;
+AddNewObjectPoint.y = 0;
+AddNewObjectPoint.z = 0;
 
 var connection = null;
 
@@ -562,7 +572,9 @@ function onDocumentMouseDown(event, bypass = false) {
         posY: intersects[0].point.y,
         posZ: intersects[0].point.z
       }));
+
     }
+    AddNewObjectPoint = intersects[0].point;
 
     movements.push(intersects[0].point);
   }
@@ -847,6 +859,7 @@ function SelectObject() {
       $("#rotate_y").val(radians_to_degrees(MeshChild.rotation.y));
       $("#rotate_z").val(radians_to_degrees(MeshChild.rotation.z));
 
+      console.log(" can move : "+Outline_selectedObject_temp.userData.canMove);
       $('#object_fixed option[value="' + Outline_selectedObject_temp.userData.canMove + '"]').prop('selected', true);
     }
   }
@@ -909,7 +922,7 @@ function init() {
   const near = 1; //1
   const far = 10000; //200000
   camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-  camera.position.set(300, 75, 600);
+  camera.position.set(0, 75, 600);
 //  camera.lookAt(1500,200,500);
 //    main_player.add(camera);
 
@@ -928,7 +941,7 @@ function init() {
   controls.zoomSpeed = 0.6;
   controls.enableKeys = false;
 
-  controls.target = new THREE.Vector3(300, 2, 0);
+  controls.target = new THREE.Vector3(0, 2, 0);
 
   controls.update();
 
@@ -1098,7 +1111,8 @@ function init() {
       scaleFactor = new THREE.Vector3(10, 10, 1);
     }
 
-    loadGLTF($("#object_file").val(), "./library/" + $("#object_set").val() + "/" + $("#object_group").val() + "/" + $("#object_file").val() + "/" + $("#object_file").val() + ".gltf", new THREE.Vector3(0, 0, 0), scaleFactor, null, true, "can_move", false);
+    console.log(AddNewObjectPoint);
+    loadGLTF($("#object_file").val(), "./library/" + $("#object_set").val() + "/" + $("#object_group").val() + "/" + $("#object_file").val() + "/" + $("#object_file").val() + ".gltf", AddNewObjectPoint, scaleFactor, null, true, "can_move", false);
 
   });
 
@@ -1106,6 +1120,12 @@ function init() {
     if (Outline_selectedObject_temp !== null) {
       Outline_selectedObject_temp.userData.canMove = $(this).val();
       console.log($(this).val());
+
+      Outline_selectedObjects = [];
+      if (Outline_selectedObject_temp.userData.canMove !== "fixed") {
+        Outline_selectedObjects.push(Outline_selectedObject_temp);
+      }
+
     }
   });
 
@@ -1304,7 +1324,7 @@ function init() {
     e.preventDefault();
   });
 
-  $("#clone_object").on('click', function (e) {
+  $(".clone_object").on('click', function (e) {
 
     if (Outline_selectedObject_temp !== null) {
       console.log("trying to clone");
@@ -1342,13 +1362,40 @@ function init() {
 
             var position = new THREE.Vector3();
             position.setFromMatrixPosition(MeshChild.matrixWorld);
+
+            var box = new THREE.Box3().setFromObject(MeshChild);
+            var boxsize = new THREE.Vector3();
+            box.getSize(boxsize);
+
+            if ($(this).hasClass("clone_x_minus")) {
+              position.x = position.x - (Math.round(boxsize.x * 10000) / 10000);
+            }
+            if ($(this).hasClass("clone_x_plus")) {
+              position.x = position.x + (Math.round(boxsize.x * 10000) / 10000);
+            }
+
+            if ($(this).hasClass("clone_y_minus")) {
+              position.y = position.y - (Math.round(boxsize.y * 10000) / 10000);
+            }
+            if ($(this).hasClass("clone_y_plus")) {
+              position.y = position.y + (Math.round(boxsize.y * 10000) / 10000);
+            }
+
+
+            if ($(this).hasClass("clone_z_minus")) {
+              position.z = position.z - (Math.round(boxsize.z * 10000) / 10000);
+            }
+            if ($(this).hasClass("clone_z_plus")) {
+              position.z = position.z + (Math.round(boxsize.z * 10000) / 10000);
+            }
+
             // console.log(JSON.stringify(position));
 
             var box = new THREE.Box3().setFromObject(MeshChild);
             var boxsize = new THREE.Vector3();
             box.getSize(boxsize);
 
-            loadGLTF(scene_objects.children[i].name+ " Clone", scene_objects.children[i]  .userData.filePath, position, MeshChild.scale, MeshChild.rotation, scene_objects.children[i].userData.collision, true, true);
+            loadGLTF(scene_objects.children[i].name + " Clone", scene_objects.children[i].userData.filePath, position, MeshChild.scale, MeshChild.rotation, scene_objects.children[i].userData.collision, scene_objects.children[i].userData.canMove, true);
           }
         }
       }

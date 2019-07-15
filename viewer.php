@@ -80,6 +80,7 @@
 
   <script type="text/javascript" src="js/jquery-3.4.1.js"></script>
   <script type="text/javascript" src="js/dat.gui.js"></script>
+  <script type="text/javascript" src="CharacterPool/CharacterPool.js"></script>
   <script type="text/javascript" src="viewer_3d.js"></script>
 
   <link rel="stylesheet" href="css/bootstrap.css">

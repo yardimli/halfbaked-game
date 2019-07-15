@@ -207,6 +207,209 @@ function detectCollisions() {
 
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
+var CharacterTexture = null;
+function createCharacter2(width, height, position, rotate) {
+
+  var CharacterCanvas = document.createElement( 'canvas' );
+  CharacterCanvas.width = 200; CharacterCanvas.height = 200;
+
+  var Character = buildCharacter(Math.floor(Math.random()*2));
+  var player = new characterPool(CharacterCanvas, Character, {});
+
+  CharacterTexture = new THREE.Texture(CharacterCanvas);
+  var material = new THREE.MeshBasicMaterial({ map: CharacterTexture });
+  material.transparent = true;
+  var geometry = new THREE.PlaneGeometry(width, height);
+
+  main_player = new THREE.Mesh( geometry, material );
+
+  main_player.rotation.set(THREE.Math.degToRad(rotate.x), THREE.Math.degToRad(rotate.y), THREE.Math.degToRad(rotate.z));
+
+  main_player.position.x = position.x;				    //Position (x = right+ left-)
+  main_player.position.y = position.y;				    //Position (y = up+, down-)
+  main_player.position.z = position.z;				    //Position (z = front +, back-)
+
+  main_player.name = "main_player";
+
+  scene.add(main_player);
+}
+
+function buildCharacter(gender){
+
+  if(gender === 0){
+    var hairStylePool = [1, 2, 3];
+  }else if(gender === 1){
+    var hairStylePool = [5, 7];
+  }
+  var hairStyle = hairStylePool[Math.floor(Math.random()*hairStylePool.length)];
+
+  if(gender === 0){
+    var faceStylePool = [1, 2, 3, 4, 5, 7];
+
+  }else if(gender === 1){
+    var faceStylePool = [1, 2, 4, 5, 6, 7];
+    if(hairStyle === 7){
+      faceStylePool = [1, 2, 5, 6, 7];
+    }
+  }
+  var faceStyle = faceStylePool[Math.floor(Math.random()*faceStylePool.length)];
+
+  if(gender === 0){
+    var mouthStylePool = [1, 2, 3, 4, 5, 6, 8];
+  }else if(gender === 1){
+    var mouthStylePool = [1, 2, 4, 5, 6, 7, 8];
+  }
+  var mouthStyle = mouthStylePool[Math.floor(Math.random()*mouthStylePool.length)];
+
+  var Character = {
+    width: 160,
+    height: 180,
+    animation: 'walk',
+    animationTotalFrame: 2,
+    parts: [
+      {
+        name: 'face',
+        style: faceStyle,
+        components: [
+          {
+            name: 'face',
+            numberOfPieces: 1,
+            zIndex: 0
+          }
+        ]
+      },
+      {
+        name: 'eyes',
+        style: Math.floor(Math.random()*8)+1,
+        components: [
+          {
+            name: 'eyes',
+            numberOfPieces: 1,
+            zIndex: 1
+          }
+        ]
+      },
+      {
+        name: 'glasses',
+        style: Math.floor(Math.random()*4),
+        components: [
+          {
+            name: 'glasses',
+            numberOfPieces: 1,
+            zIndex: 2
+          }
+        ]
+      },
+      {
+        name: 'mouth',
+        style: mouthStyle,
+        components: [
+          {
+            name: 'mouth',
+            numberOfPieces: 1,
+            zIndex: 1
+          }
+        ]
+      },
+      {
+        name: 'body',
+        style: Math.floor(Math.random()*12)+1,
+        components: [
+          {
+            name: 'body',
+            numberOfPieces: 1,
+            zIndex: 0
+          }
+        ]
+      }
+    ]
+  };
+
+  if((hairStyle >=1 && hairStyle <= 3) || hairStyle === 5){
+    Character.parts.push(
+        {
+          name: 'hair',
+          style: hairStyle,
+          components: [
+            {
+              name: 'back-hair',
+              numberOfPieces: 1,
+              zIndex: -1
+            },
+            {
+              name: 'front-hair',
+              numberOfPieces: 2,
+              zIndex: 3
+            }
+          ]
+        }
+    );
+  }else if(hairStyle === 4 || hairStyle === 8 || hairStyle === 11 || hairStyle === 12){
+    Character.parts.push(
+        {
+          name: 'hair',
+          style: hairStyle,
+          components: [
+            {
+              name: 'back-hair',
+              numberOfPieces: 1,
+              zIndex: -1
+            }
+          ]
+        }
+    )
+  }else if(hairStyle === 6){
+    Character.parts.push(
+        {
+          name: 'hair',
+          style: hairStyle,
+          components: [
+            {
+              name: 'front-hair',
+              numberOfPieces: 1,
+              zIndex: 3
+            }
+          ]
+        }
+    )
+  }else if(hairStyle === 7){
+    Character.parts.push(
+        {
+          name: 'hair',
+          style: hairStyle,
+          components: [
+            {
+              name: 'front-hair',
+              numberOfPieces: 1,
+              zIndex: 3
+            },
+            {
+              name: 'top-pony',
+              numberOfPieces: 2,
+              zIndex: -1
+            }
+          ]
+        }
+    )
+  }else if(hairStyle === 9 || hairStyle === 10){
+    Character.parts.push(
+        {
+          name: 'hair',
+          style: hairStyle,
+          components: [
+            {
+              name: 'back-hair',
+              numberOfPieces: 1,
+              zIndex: 1
+            }
+          ]
+        }
+    )
+  }
+
+  return Character;
+}
+
 function createCharacter(model_file, width, height, position, rotate) {
   // var geometry = new THREE.BoxBufferGeometry(characterSize, characterSize, characterSize);
 
@@ -680,7 +883,8 @@ function init() {
   }
 
 
-  createCharacter('./character1.png', 15, 25, new THREE.Vector3(0, 14.5, 155), new THREE.Vector3(0, 0, 0));
+  // createCharacter('./character1.png', 15, 25, new THREE.Vector3(0, 14.5, 155), new THREE.Vector3(0, 0, 0));
+  createCharacter2(16, 30, new THREE.Vector3(0, 14.5, 155), new THREE.Vector3(0, 0, 0));
 
   createFloor();
 
@@ -832,6 +1036,7 @@ function update() {
 
   if (main_player !== null) {
     main_player.lookAt(camera.position);
+    CharacterTexture.needsUpdate = true;
 //  main_player.quaternion.copy(camera.quaternion);
   }
 }

@@ -1,68 +1,92 @@
 class characterPool {
-	constructor(canvas, character, config = {}) {
+	constructor(canvas, config = {}) {
 	    this.canvas = canvas;
 		this.ctx = canvas.getContext('2d');
-		this.animationFrame = [];
-		this.character = character;
+		this.video = {};
+		this.supportAnime = [
+            {name: 'frontStand', totalFrame: 4},
+            {name: 'frontWalk', totalFrame: 2},
+            {name: 'backStand', totalFrame: 4},
+            {name: 'backWalk', totalFrame: 2},
+            {name: 'leftStand', totalFrame: 3},
+            {name: 'leftWalk', totalFrame: 2},
+            {name: 'rightStand', totalFrame: 3},
+            {name: 'rightWalk', totalFrame: 2}
+        ];
+
+		this.gender = config.hasOwnProperty('gender') ? config.gender : 1 // 0 is girl, 1 is boy .
+        this.animation = config.hasOwnProperty('animation') ? config.animation : 'frontStand';
+        this.character = this.buildCharacter();
+
 		this.animationTimer = null;
         this.isAllImageLoaded = false;
         this.checkImgLoadedTimer = null;
         this.curtFrame = 0;
 
-		for(var f=0; f<character.animationTotalFrame; f++){
-            var images = [];
-            this.character.parts.forEach(function(part) {
+        for(var a=0; a<this.supportAnime.length; a++){
 
-                part.components.forEach(function(component, i){
+            var anime = this.supportAnime[a].name;
+            var totalFrame = this.supportAnime[a].totalFrame;
+            var animationFrame = [];
+
+            for(var f=0; f<totalFrame; f++){
+                var images = [];
+                this.character.parts.forEach(function(part) {
+
                     if(part.style > 0){
 
                         var img = new Image();
 
-                        if(part.name === 'body'){
-                            img.src = 'CharacterPool/images/' + part.name + part.style + '-' + part.components[i].numberOfPieces + '-' + character.animation + '-' + (f+1) + '.png';
-                        } else {
-                            img.src = 'CharacterPool/images/' + part.name + part.style + '-' + part.components[i].numberOfPieces + '.png';
-                        }
-
+                        img.src = 'CharacterPool/images/' + part.name + 'Set' + part.style + '/' + part.name + part.style + '_' + anime + '_' + (f+1) + '.png';
                         img.characterPool = this;
-                        img.componentObj = {
+                        img.characterObj = {
                             part: part,
-                            component: part.components[i],
                             isLoad: img.complete,
-                            imagesArrayKey: images.length,
+                            imageKey: images.length,
+                            anime: anime,
                             frameKey: f
                         }
 
                         img.onload = function (e) {
-                            var componentObj = e.path[0].componentObj;
-                            e.path[0].characterPool.animationFrame[componentObj.frameKey][componentObj.imagesArrayKey].componentObj.isLoad = true;
+                            var characterObj = e.path[0].characterObj;
+                            var anime = characterObj.anime;
+                            var frameKey = characterObj.frameKey;
+                            var imageKey = characterObj.imageKey;
+                            e.path[0].characterPool.video[anime][frameKey][imageKey].characterObj.isLoad = true;
                         }
 
-                       images.push(img);
+                        images.push(img);
+
                     }
-                }, this)
-            }, this);
-            images.sort(function(a, b){return a.componentObj.component.zIndex-b.componentObj.component.zIndex});
-            this.animationFrame.push(images);
+
+                }, this);
+                images.sort(function(a, b){return a.characterObj.part.zIndex-b.characterObj.part.zIndex});
+                animationFrame.push(images);
+            }
+
+            this.video[anime] = animationFrame;
         }
 
 		this.checkImgLoadedTimer = window.setInterval(function(characterPool){
 			var isAllLoaded = true;
 
-			for(var f=0; i<characterPool.animationFrame.length; f++){
-                for(var i=0; i<characterPool.animationFrame[f].length; i++){
-                    if(!characterPool.animationFrame[f][i].componentObj.isLoad) {
-                        isAllLoaded = false;
-                        break;
+			for (var anime in characterPool.video){
+                for(var f=0; i<characterPool.video[anime].length; f++){
+                    for(var i=0; i<characterPool.video[anime][f].length; i++){
+                        if(!characterPool.video[anime][f][i].characterObj.isLoad) {
+                            isAllLoaded = false;
+                            break;
+                        }
                     }
                 }
-			}
+
+            }
 
 			if(isAllLoaded){
 				console.log('All images loaded: ' + isAllLoaded);
-				characterPool.isAllImageLoaded = true;
-				window.clearInterval(characterPool.checkImgLoadedTimer);
-				console.log(characterPool.animationFrame);
+                console.log(characterPool.video);
+                characterPool.isAllImageLoaded = true;
+                window.clearInterval(characterPool.checkImgLoadedTimer);
 				characterPool.drawCharacter();
 			}
 		}, 1, this);
@@ -70,168 +94,75 @@ class characterPool {
 		return this;
 	}
 
+	setAnimation(value) {
+	    this.animation = value;
+	    this.curtFrame = 0;
+    }
+
 	drawCharacter() {
 	    console.log('Draw Characters');
 		this.animationTimer = window.setInterval(function(characterPool){
 
 		    characterPool.ctx.clearRect(0, 0, characterPool.character.width, characterPool.character.height);
 
-            characterPool.animationFrame[characterPool.curtFrame].forEach(function (img) {
+            var curtFrame = characterPool.curtFrame;
+            var animationFrames = characterPool.video[characterPool.animation];
 
-                var part = img.componentObj.part;
-                var component = img.componentObj.component;
-                var characterX = characterPool.character.x;
-                var characterY = characterPool.character.y;
+            animationFrames[curtFrame].forEach(function (img) {
+
+                var part = img.characterObj.part;
                 var characterW = characterPool.character.width;
                 var characterH = characterPool.character.height;
-                var canvasW = characterPool.canvas.width;
-                var canvasH = characterPool.canvas.height;
 
-
-                if (part.name === 'hat') {
+                if (part.name === 'head') {
                     if(part.style !== 0){
-                        if(part.style === 1){
-                            characterPool.ctx.drawImage(img, 0, 0, characterW*0.9, characterH*0.35);
-                        }
-                        if(part.style === 2){
-                            characterPool.ctx.drawImage(img, characterW*0.1, 0, characterW*0.9, characterH*0.3);
-                        }
-                        if(part.style === 3){
-                            characterPool.ctx.drawImage(img, characterW*0.04, 0, characterW*0.9, characterH*0.3);
-                        }
-                    }
-                }
-
-
-                if(part.name === 'hair'){
-                    if(part.style !== 0){
-                        if(part.style === 1){
-                            if(component.name === 'back-hair'){
-                                characterPool.ctx.drawImage(img, 0, 0, characterW, characterH*0.6);
-                            }
-                            if(component.name === 'front-hair') {
-                                characterPool.ctx.drawImage(img, 0, 0, characterW, characterH*0.3);
-                            }
-                        }
-                        if(part.style === 2){
-                            if(component.name === 'back-hair'){
-                                characterPool.ctx.drawImage(img, 0, 0, characterW, characterH*0.8);
-                            }
-                            if(component.name === 'front-hair') {
-                                characterPool.ctx.drawImage(img, characterW*0.05, 0, characterW*0.9, characterH*0.3);
-                            }
-                        }
-                        if(part.style === 3){
-                            if(component.name === 'back-hair'){
-                                characterPool.ctx.drawImage(img, 0, 0, characterW, characterH*0.6);
-                            }
-                            if(component.name === 'front-hair') {
-                                characterPool.ctx.drawImage(img, characterW*0.1, characterH*0.05, characterW*0.5, characterH*0.3);
-                            }
-                        }
-                        if(part.style === 4){
-                            if(component.name === 'back-hair'){
-                                characterPool.ctx.drawImage(img, characterX-canvasW/2, 20, canvasW, canvasH);
-                            }
-                        }
-                        if(part.style === 5){
-                            if(component.name === 'back-hair'){
-                                characterPool.ctx.drawImage(img, 0, 0, characterW, characterH*0.6);
-                            }
-                            if(component.name === 'front-hair') {
-                                characterPool.ctx.drawImage(img, characterW*0.325, 0, characterW*0.35, characterH*0.15);
-                            }
-                        }
-                        if(part.style === 6){
-                            if(component.name === 'front-hair') {
-                                characterPool.ctx.drawImage(img, characterX-canvasW/2, 0, canvasW, canvasH);
-                            }
-                        }
-                        if(part.style === 7){
-                            if(component.name === 'front-hair') {
-                                characterPool.ctx.drawImage(img, characterW*0.125, characterH*0.1, characterW*0.75, characterH*0.2);
-                            }
-                            if(component.name === 'top-pony') {
-                                characterPool.ctx.drawImage(img, characterW*0.4+10, characterH*0.005+3, characterW*0.2, characterH*0.1);
-                            }
-                        }
-                        if(part.style === 8){
-                            if(component.name === 'back-hair'){
-                                characterPool.ctx.drawImage(img, characterX-canvasW/2, -20, canvasW, canvasH);
-                            }
-                        }
-                        if(part.style === 9){
-                            if(component.name === 'back-hair'){
-                                characterPool.ctx.drawImage(img, characterX-228, -20, canvasW, canvasH);
-                            }
-                        }
-                        if(part.style === 10){
-                            if(component.name === 'back-hair'){
-                                characterPool.ctx.drawImage(img, characterX-230, -45, canvasW, canvasH);
-                            }
-                        }
-                        if(part.style === 11){
-                            if(component.name === 'back-hair'){
-                                characterPool.ctx.drawImage(img, characterX-canvasW/2, 60, canvasW, canvasH);
-                            }
-                        }
-                        if(part.style === 12){
-                            if(component.name === 'back-hair'){
-                                characterPool.ctx.drawImage(img, characterX-canvasW/2, 60, canvasW, canvasH);
-                            }
-                        }
-                    }
-                }
-
-
-
-                if (part.name === 'face') {
-                    if(part.style !== 0){
-                        characterPool.ctx.drawImage(img, characterW*0.1, characterH*0.1, characterW*0.8, characterH*0.5);
-                    }
-                }
-
-
-                if (part.name === 'eyes') {
-                    if(part.style !== 0){
-                        characterPool.ctx.drawImage(img, characterW*0.2, characterH*0.20, characterW*0.6, characterH*0.2);
-                    }
-                }
-/*
-                if (part.name === 'glasses') {
-                    if(part.style !== 0){
-                        characterPool.ctx.drawImage(img, characterX-canvasW/2, 220, canvasW, canvasH);
-                    }
-                }
-*/
-                if (part.name === 'mouth') {
-                    if(part.style !== 0){
-                        characterPool.ctx.drawImage(img, characterW*0.35, characterH*0.45, characterW*0.3, characterH*0.1);
+                        characterPool.ctx.drawImage(img, 0, 0, characterW, characterH*0.525);
                     }
                 }
 
                 if (part.name === 'body') {
                     if(part.style !== 0){
-                        characterPool.ctx.drawImage(img, characterW*0.075, characterH*0.56, characterW*0.85, characterH*0.43);
+                        characterPool.ctx.drawImage(img, characterW*0.1, characterH*0.495, characterW*0.8, characterH*0.5);
                     }
                 }
 
-
-
-
             }, characterPool);
 
-            if(characterPool.curtFrame === characterPool.animationFrame.length-1){
+            if(characterPool.curtFrame === animationFrames.length-1){
                 characterPool.curtFrame = 0 ;
             }else {
                 characterPool.curtFrame ++ ;
             }
 
-        }, 150, this);
+        }, 200, this);
 
 	}
 
-	stopAnimation () {
+    buildCharacter() {
+
+        var Character = {
+            gender: this.gender,
+            width: this.canvas.width,
+            height: this.canvas.height,
+            animation: this.animation,
+            parts: [
+                {
+                    name: 'head',
+                    style: 1,
+                    zIndex: 1
+                },
+                {
+                    name: 'body',
+                    style: 1,
+                    zIndex: 0
+                }
+            ]
+        };
+
+        return Character;
+    }
+
+    stopAnimation () {
 	    window.clearInterval(this.animationTimer);
     }
 

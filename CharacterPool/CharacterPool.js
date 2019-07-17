@@ -130,6 +130,7 @@ class characterPool {
                     if (part.name === 'body') {
                         if(part.style !== 0){
                             characterPool.ctx.drawImage(img, 0, 0, characterW, characterH);
+                            main_playerTexture.needsUpdate = true;
                         }
                     }
                 }

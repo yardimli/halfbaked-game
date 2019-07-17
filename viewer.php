@@ -121,8 +121,12 @@
 
     <div class="form-group">
         <select class="form-control" id="characterSelect" style="color: white; background-color: #343a40">
-            <option value="1">John</option>
+            <option value="1">Leonore</option>
             <option value="2">Ekim</option>
+            <option value="3">John</option>
+            <option value="4">Tammy</option>
+            <option value="5">Elo</option>
+            <option value="6">Guan</option>
         </select>
     </div>
 

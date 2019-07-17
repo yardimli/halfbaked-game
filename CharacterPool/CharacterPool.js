@@ -126,28 +126,13 @@ class characterPool {
                 var characterW = characterPool.character.width;
                 var characterH = characterPool.character.height;
 
-                if(this.characterId === 1){
-                    if (part.name === 'head') {
-                        if(part.style !== 0){
-                            characterPool.ctx.drawImage(img, 0, 0, characterW, characterH*0.525);
-                        }
-                    }
-
-                    if (part.name === 'body') {
-                        if(part.style !== 0){
-                            characterPool.ctx.drawImage(img, characterW*0.1, characterH*0.495, characterW*0.8, characterH*0.5);
-                        }
-                    }
-                }
-
-                if(this.characterId === 2){
+                if(this.characterId >= 1 && this.characterId <= 6){
                     if (part.name === 'body') {
                         if(part.style !== 0){
                             characterPool.ctx.drawImage(img, 0, 0, characterW, characterH);
                         }
                     }
                 }
-
 
             }, characterPool);
 
@@ -176,16 +161,6 @@ class characterPool {
                 }
             ]
         };
-
-        if(this.characterId === 1){
-            Character.parts.push(
-                {
-                    name: 'head',
-                    style: this.characterId,
-                    zIndex: 1
-                }
-            );
-        }
 
         return Character;
     }

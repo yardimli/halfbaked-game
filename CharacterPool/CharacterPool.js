@@ -8,13 +8,13 @@ class characterPool {
             {name: 'frontWalk', totalFrame: 2},
             {name: 'backStand', totalFrame: 4},
             {name: 'backWalk', totalFrame: 2},
-            {name: 'leftStand', totalFrame: 3},
+            {name: 'leftStand', totalFrame: 2},
             {name: 'leftWalk', totalFrame: 2},
-            {name: 'rightStand', totalFrame: 3},
+            {name: 'rightStand', totalFrame: 2},
             {name: 'rightWalk', totalFrame: 2}
         ];
 
-		this.gender = config.hasOwnProperty('gender') ? config.gender : 1 // 0 is girl, 1 is boy .
+		this.characterId = config.hasOwnProperty('characterId') ? config.characterId : 0 ;
         this.animation = config.hasOwnProperty('animation') ? config.animation : 'frontStand';
         this.character = this.buildCharacter();
 
@@ -22,6 +22,17 @@ class characterPool {
         this.isAllImageLoaded = false;
         this.checkImgLoadedTimer = null;
         this.curtFrame = 0;
+
+        this.loadImg();
+
+		this.setImgLoadedTimer();
+
+		return this;
+	}
+
+	loadImg(){
+
+	    this.video = {} ;
 
         for(var a=0; a<this.supportAnime.length; a++){
 
@@ -67,10 +78,13 @@ class characterPool {
             this.video[anime] = animationFrame;
         }
 
-		this.checkImgLoadedTimer = window.setInterval(function(characterPool){
-			var isAllLoaded = true;
+    }
 
-			for (var anime in characterPool.video){
+	setImgLoadedTimer(){
+        this.checkImgLoadedTimer = window.setInterval(function(characterPool){
+            var isAllLoaded = true;
+
+            for (var anime in characterPool.video){
                 for(var f=0; i<characterPool.video[anime].length; f++){
                     for(var i=0; i<characterPool.video[anime][f].length; i++){
                         if(!characterPool.video[anime][f][i].characterObj.isLoad) {
@@ -82,17 +96,15 @@ class characterPool {
 
             }
 
-			if(isAllLoaded){
-				console.log('All images loaded: ' + isAllLoaded);
+            if(isAllLoaded){
+                console.log('All images loaded: ' + isAllLoaded);
                 console.log(characterPool.video);
                 characterPool.isAllImageLoaded = true;
                 window.clearInterval(characterPool.checkImgLoadedTimer);
-				characterPool.drawCharacter();
-			}
-		}, 1, this);
-
-		return this;
-	}
+                characterPool.drawCharacter();
+            }
+        }, 1, this);
+    }
 
 	setAnimation(value) {
 	    this.animation = value;
@@ -114,17 +126,28 @@ class characterPool {
                 var characterW = characterPool.character.width;
                 var characterH = characterPool.character.height;
 
-                if (part.name === 'head') {
-                    if(part.style !== 0){
-                        characterPool.ctx.drawImage(img, 0, 0, characterW, characterH*0.525);
+                if(this.characterId === 1){
+                    if (part.name === 'head') {
+                        if(part.style !== 0){
+                            characterPool.ctx.drawImage(img, 0, 0, characterW, characterH*0.525);
+                        }
+                    }
+
+                    if (part.name === 'body') {
+                        if(part.style !== 0){
+                            characterPool.ctx.drawImage(img, characterW*0.1, characterH*0.495, characterW*0.8, characterH*0.5);
+                        }
                     }
                 }
 
-                if (part.name === 'body') {
-                    if(part.style !== 0){
-                        characterPool.ctx.drawImage(img, characterW*0.1, characterH*0.495, characterW*0.8, characterH*0.5);
+                if(this.characterId === 2){
+                    if (part.name === 'body') {
+                        if(part.style !== 0){
+                            characterPool.ctx.drawImage(img, 0, 0, characterW, characterH);
+                        }
                     }
                 }
+
 
             }, characterPool);
 
@@ -141,25 +164,44 @@ class characterPool {
     buildCharacter() {
 
         var Character = {
-            gender: this.gender,
+            characterId: this.characterId,
             width: this.canvas.width,
             height: this.canvas.height,
             animation: this.animation,
             parts: [
                 {
-                    name: 'head',
-                    style: 1,
-                    zIndex: 1
-                },
-                {
                     name: 'body',
-                    style: 1,
+                    style: this.characterId,
                     zIndex: 0
                 }
             ]
         };
 
+        if(this.characterId === 1){
+            Character.parts.push(
+                {
+                    name: 'head',
+                    style: this.characterId,
+                    zIndex: 1
+                }
+            );
+        }
+
         return Character;
+    }
+
+    changeCharacter(characterId){
+
+	    this.characterId = characterId;
+	    this.stopAnimation();
+        this.character = this.buildCharacter();
+
+        this.isAllImageLoaded = false;
+        this.curtFrame = 0;
+
+        this.loadImg();
+        this.setImgLoadedTimer();
+
     }
 
     stopAnimation () {

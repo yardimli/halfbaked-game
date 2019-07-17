@@ -117,7 +117,15 @@
 <div
   style="position: fixed; right:0px; top:0px; width:250px; height: 100%; background-color: white; border-color: black; border-radius: 1px; color:black; padding: 5px; box-sizing: border-box; overflow-y: auto; overflow-x: hidden;">
 
-  <button id="load_scene_dialog_button" class="form-control btn-dark" style="margin-bottom: 3px;">Load Scene</button>
+    <button id="load_scene_dialog_button" class="form-control btn-dark" style="margin-bottom: 3px;">Load Scene</button>
+
+    <div class="form-group">
+        <select class="form-control" id="characterSelect" style="color: white; background-color: #343a40">
+            <option value="1">John</option>
+            <option value="2">Ekim</option>
+        </select>
+    </div>
+
 </div>
 
 

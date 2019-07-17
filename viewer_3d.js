@@ -46,6 +46,9 @@ var connection = null;
 $(document).ready(function () {
   init();
   animate();
+  $('#characterSelect').on('change', function(e){
+    mainCharacterAnime.changeCharacter(parseInt($(this).val()));
+  })
 });
 
 
@@ -216,6 +219,7 @@ function createCharacter(width, height, position, rotate) {
 
   // Draw the character animation --------------------------
   mainCharacterAnime = new characterPool(CharacterCanvas, {
+    characterId: 1,
     animation: 'frontStand'
   });
 
@@ -452,32 +456,57 @@ function onDocumentMouseDown(event, bypass = false) {
 
 function changeMainCharacterAnime(){
 
-  var direction = new THREE.Vector3(movements[0].x - main_player.position.x, 0, movements[0].z - main_player.position.z);
-  var angle = direction.angleTo(new THREE.Vector3(1, 0, 0)) * (180/Math.PI) ;
+  // var direction = new THREE.Vector3(movements[0].x - main_player.position.x, 0, movements[0].z - main_player.position.z);
+  // var angle = direction.angleTo(new THREE.Vector3(1, 0, 0)) * (180/Math.PI) ;
+  //
+  // if(direction.z > 0){
+  //   if(angle < 45){
+  //     console.log('go right')
+  //     mainCharacterAnime.setAnimation('rightWalk');
+  //   }else if(angle >= 45 && angle <= 135){
+  //     console.log('go front')
+  //     mainCharacterAnime.setAnimation('frontWalk');
+  //   }else {
+  //     console.log('go left')
+  //     mainCharacterAnime.setAnimation('leftWalk');
+  //   }
+  // }else {
+  //   if(angle < 45){
+  //     console.log('go right')
+  //     mainCharacterAnime.setAnimation('rightWalk');
+  //   }else if(angle >= 45 && angle <= 135){
+  //     console.log('go back')
+  //     mainCharacterAnime.setAnimation('backWalk');
+  //   }else {
+  //     console.log('go left')
+  //     mainCharacterAnime.setAnimation('leftWalk');
+  //   }
+  // }
 
-  if(direction.z > 0){
-    if(angle < 45){
-      console.log('go right')
-      mainCharacterAnime.setAnimation('rightWalk');
-    }else if(angle >= 45 && angle <= 135){
+  var xVector = new THREE.Vector3(movements[0].x - main_player.position.x, 0, 0);
+  var zVector = new THREE.Vector3(0, 0, movements[0].z - main_player.position.z);
+
+  if(zVector.length() > xVector.length()) {
+    if (zVector.z > 0) {
       console.log('go front')
       mainCharacterAnime.setAnimation('frontWalk');
-    }else {
-      console.log('go left')
-      mainCharacterAnime.setAnimation('leftWalk');
     }
-  }else {
-    if(angle < 45){
-      console.log('go right')
-      mainCharacterAnime.setAnimation('rightWalk');
-    }else if(angle >= 45 && angle <= 135){
+    if (zVector.z < 0) {
       console.log('go back')
       mainCharacterAnime.setAnimation('backWalk');
-    }else {
+
+    }
+  } else {
+    if (xVector.x > 0) {
+      console.log('go right')
+      mainCharacterAnime.setAnimation('rightWalk');
+    }
+    if (xVector.x < 0) {
       console.log('go left')
       mainCharacterAnime.setAnimation('leftWalk');
     }
   }
+
 
 }
 
@@ -729,7 +758,7 @@ function init() {
   }
 
 
-  createCharacter(16, 30, new THREE.Vector3(0, 15, 155), new THREE.Vector3(0, 0, 0));
+  createCharacter(27, 40, new THREE.Vector3(0, 27, 155), new THREE.Vector3(0, 0, 0));
 
   createFloor();
 

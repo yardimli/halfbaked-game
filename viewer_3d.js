@@ -483,6 +483,8 @@ function changeMainCharacterAnime() {
     }
   }
 
+  mainCharacterAnime.isAnimeReady = true;
+
 }
 
 
@@ -762,6 +764,7 @@ function init() {
 
   $(document).dblclick(function (event) {
     if (event.target.nodeName === "CANVAS") {
+      mainCharacterAnime.isAnimeReady = false;
       onDocumentMouseDown(event);
       changeMainCharacterAnime();
       if (outlinePassSelected.selectedObjects.length > 0) {
@@ -930,7 +933,10 @@ function render() {
       }
     }
 
-    move(main_player, movements[0]);
+    //Move after character anime is changed and ready.
+    if(mainCharacterAnime.isAnimeReady){
+      move(main_player, movements[0]);
+    }
   }
 
   // Detect collisions.

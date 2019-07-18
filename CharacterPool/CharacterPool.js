@@ -18,22 +18,38 @@ class characterPool {
         this.animation = config.hasOwnProperty('animation') ? config.animation : 'frontStand';
         this.character = this.buildCharacter();
 
-		this.animationTimer = null;
-        this.isAllImageLoaded = false;
-        this.checkImgLoadedTimer = null;
         this.curtFrame = 0;
+        this.animationTimer = null;
 
-        this.loadImg();
+        this.loadedImages = [];
+        this.totalNeedImages = 0;
+        this.isAnimeReady = false;
 
-		this.setImgLoadedTimer();
+        this.initiate();
 
 		return this;
 	}
 
-	loadImg(){
+	initiate(){
 
-	    this.video = {} ;
+	    this.video = {};
+	    this.loadedImages = [];
+        this.curtFrame = 0;
+	    this.totalNeedImages = 0;
+        this.isAnimeReady = false;
 
+	    // Calculate Total Images Needed -------------------------
+        for(var a=0; a<this.supportAnime.length; a++){
+            var totalFrame = this.supportAnime[a].totalFrame;
+            for(var f=0; f<totalFrame; f++){
+                var parts = this.character.parts;
+                for(var p=0; p<parts.length; p++){
+                    this.totalNeedImages ++ ;
+                }
+            }
+        }
+
+        // Start Loading Images -----------------------------------
         for(var a=0; a<this.supportAnime.length; a++){
 
             var anime = this.supportAnime[a].name;
@@ -50,20 +66,23 @@ class characterPool {
 
                         img.src = 'CharacterPool/images/' + part.name + 'Set' + part.style + '/' + part.name + part.style + '_' + anime + '_' + (f+1) + '.png';
                         img.characterPool = this;
-                        img.characterObj = {
-                            part: part,
-                            isLoad: img.complete,
-                            imageKey: images.length,
-                            anime: anime,
-                            frameKey: f
-                        }
+                        img.characterPart = part;
 
+                        // Check if all images are loaded ------------------------
                         img.onload = function (e) {
-                            var characterObj = e.path[0].characterObj;
-                            var anime = characterObj.anime;
-                            var frameKey = characterObj.frameKey;
-                            var imageKey = characterObj.imageKey;
-                            e.path[0].characterPool.video[anime][frameKey][imageKey].characterObj.isLoad = true;
+
+                            var characterPool = e.path[0].characterPool;
+                            characterPool.loadedImages.push(e.path[0].src);
+
+                            if(characterPool.loadedImages.length === characterPool.totalNeedImages){
+
+                                console.log('All images loaded');
+
+                                // All images are loaded, draw the character -------------------
+                                characterPool.isAnimeReady = true;
+                                characterPool.drawCharacter();
+                            }
+
                         }
 
                         images.push(img);
@@ -80,68 +99,48 @@ class characterPool {
 
     }
 
-	setImgLoadedTimer(){
-        this.checkImgLoadedTimer = window.setInterval(function(characterPool){
-            var isAllLoaded = true;
-
-            for (var anime in characterPool.video){
-                for(var f=0; i<characterPool.video[anime].length; f++){
-                    for(var i=0; i<characterPool.video[anime][f].length; i++){
-                        if(!characterPool.video[anime][f][i].characterObj.isLoad) {
-                            isAllLoaded = false;
-                            break;
-                        }
-                    }
-                }
-
-            }
-
-            if(isAllLoaded){
-                console.log('All images loaded: ' + isAllLoaded);
-                console.log(characterPool.video);
-                characterPool.isAllImageLoaded = true;
-                window.clearInterval(characterPool.checkImgLoadedTimer);
-                characterPool.drawCharacter();
-            }
-        }, 1, this);
-    }
-
 	setAnimation(value) {
 	    this.animation = value;
 	    this.curtFrame = 0;
     }
 
 	drawCharacter() {
-	    console.log('Draw Characters');
-		this.animationTimer = window.setInterval(function(characterPool){
 
-		    characterPool.ctx.clearRect(0, 0, characterPool.character.width, characterPool.character.height);
+        console.log('Draw Character Animation Frame');
 
-            var curtFrame = characterPool.curtFrame;
-            var animationFrames = characterPool.video[characterPool.animation];
+        this.animationTimer = window.setInterval(function(characterPool){
 
-            animationFrames[curtFrame].forEach(function (img) {
+            if(characterPool.isAnimeReady){
 
-                var part = img.characterObj.part;
-                var characterW = characterPool.character.width;
-                var characterH = characterPool.character.height;
+                characterPool.ctx.clearRect(0, 0, characterPool.character.width, characterPool.character.height);
 
-                if(this.characterId >= 1 && this.characterId <= 6){
-                    if (part.name === 'body') {
-                        if(part.style !== 0){
-                            characterPool.ctx.drawImage(img, 0, 0, characterW, characterH);
+                var curtFrame = characterPool.curtFrame;
+                var animationFrames = characterPool.video[characterPool.animation];
+
+                animationFrames[curtFrame].forEach(function (img) {
+
+                    var part = img.characterPart;
+                    var characterW = characterPool.character.width;
+                    var characterH = characterPool.character.height;
+
+                    if(this.characterId >= 1 && this.characterId <= 6){
+                        if (part.name === 'body') {
+                            if(part.style !== 0){
+                                characterPool.ctx.drawImage(img, 0, 0, characterW, characterH);
+                            }
                         }
                     }
+
+                }, characterPool);
+
+                main_playerTexture.needsUpdate = true;
+
+                if(characterPool.curtFrame === animationFrames.length-1){
+                    characterPool.curtFrame = 0 ;
+                }else {
+                    characterPool.curtFrame ++ ;
                 }
 
-            }, characterPool);
-
-            main_playerTexture.needsUpdate = true;
-
-            if(characterPool.curtFrame === animationFrames.length-1){
-                characterPool.curtFrame = 0 ;
-            }else {
-                characterPool.curtFrame ++ ;
             }
 
         }, 200, this);
@@ -172,12 +171,7 @@ class characterPool {
 	    this.characterId = characterId;
 	    this.stopAnimation();
         this.character = this.buildCharacter();
-
-        this.isAllImageLoaded = false;
-        this.curtFrame = 0;
-
-        this.loadImg();
-        this.setImgLoadedTimer();
+        this.initiate();
 
     }
 

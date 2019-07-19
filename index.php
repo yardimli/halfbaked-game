@@ -112,7 +112,7 @@
 
     var sets = [
       <?php
-      for ($j=0; $j<4; $j++) {
+      for ($j=0; $j<5; $j++) {
       ?>
       {
       name: "set<?php echo $j+1; ?>",
@@ -175,6 +175,7 @@
     <option value="set2">Set #2</option>
     <option value="set3">Set #3</option>
     <option value="set4">Set #4</option>
+    <option value="set5">Set #5</option>
   </select>
 
 

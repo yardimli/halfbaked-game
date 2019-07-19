@@ -1111,6 +1111,10 @@ function init() {
       scaleFactor = new THREE.Vector3(10, 10, 1);
     }
 
+    if ($("#object_set").val() === "set5") {
+      scaleFactor = new THREE.Vector3(0.3, 0.3, 0.3);
+    }
+
     console.log(AddNewObjectPoint);
     loadGLTF($("#object_file").val(), "./library/" + $("#object_set").val() + "/" + $("#object_group").val() + "/" + $("#object_file").val() + "/" + $("#object_file").val() + ".gltf", AddNewObjectPoint, scaleFactor, null, true, "can_move", false);
 

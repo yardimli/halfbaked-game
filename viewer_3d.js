@@ -60,9 +60,12 @@ $(document).ready(function () {
   });
   var totalSupportAnime = demoCharacterAnime.supportAnime.length;
   var curtDemoAnimeKey = 0;
+  $('#totalAnime').text(totalSupportAnime);
+  $('#curtDemo').text(curtDemoAnimeKey+1);
   $('#preDemo').on('click', function () {
     if(curtDemoAnimeKey > 0){
       curtDemoAnimeKey -- ;
+      $('#curtDemo').text(curtDemoAnimeKey+1);
       $('#demoTitle').html(demoCharacterAnime.supportAnime[curtDemoAnimeKey].name);
       demoCharacterAnime.setAnimation(demoCharacterAnime.supportAnime[curtDemoAnimeKey].name);
     }
@@ -70,6 +73,7 @@ $(document).ready(function () {
   $('#nextDemo').on('click', function () {
     if(curtDemoAnimeKey < totalSupportAnime - 1){
       curtDemoAnimeKey ++ ;
+      $('#curtDemo').text(curtDemoAnimeKey+1);
       $('#demoTitle').html(demoCharacterAnime.supportAnime[curtDemoAnimeKey].name);
       demoCharacterAnime.setAnimation(demoCharacterAnime.supportAnime[curtDemoAnimeKey].name);
     }

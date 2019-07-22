@@ -135,6 +135,7 @@
         <canvas id="demoCharacterCanvas" width="240" height="355" style="border: 1px solid black;"></canvas>
         <div style="text-align: center;">
             <img id="preDemo" src="images/caret-left.png" style="width: 25px; height: 25px; cursor: pointer;"/>
+            <span id="curtDemo">0</span>/<span id="totalAnime">0</span>
             <img id="nextDemo" src="images/caret-right.png"  style="width: 25px; height: 25px; cursor: pointer;"/>
         </div>
     </div>

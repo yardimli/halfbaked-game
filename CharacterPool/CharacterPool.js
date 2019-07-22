@@ -11,7 +11,26 @@ class characterPool {
             {name: 'leftStand', totalFrame: 2},
             {name: 'leftWalk', totalFrame: 2},
             {name: 'rightStand', totalFrame: 2},
-            {name: 'rightWalk', totalFrame: 2}
+            {name: 'rightWalk', totalFrame: 2},
+
+            {name: 'frontStand_Watermelon', totalFrame: 4},
+            {name: 'frontWalk_Watermelon', totalFrame: 2},
+            {name: 'backStand_Watermelon', totalFrame: 4},
+            {name: 'backWalk_Watermelon', totalFrame: 2},
+            {name: 'leftStand_Watermelon', totalFrame: 2},
+            {name: 'leftWalk_Watermelon', totalFrame: 2},
+            {name: 'rightStand_Watermelon', totalFrame: 2},
+            {name: 'rightWalk_Watermelon', totalFrame: 2},
+
+            {name: 'frontStand_GreenApple', totalFrame: 4},
+            {name: 'frontWalk_GreenApple', totalFrame: 2},
+            {name: 'backStand_GreenApple', totalFrame: 4},
+            {name: 'backWalk_GreenApple', totalFrame: 2},
+            {name: 'leftStand_GreenApple', totalFrame: 2},
+            {name: 'leftWalk_GreenApple', totalFrame: 2},
+            {name: 'rightStand_GreenApple', totalFrame: 2},
+            {name: 'rightWalk_GreenApple', totalFrame: 2}
+
         ];
 
 		this.characterId = config.hasOwnProperty('characterId') ? config.characterId : 0 ;

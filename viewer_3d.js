@@ -46,9 +46,35 @@ var connection = null;
 $(document).ready(function () {
   init();
   animate();
+
   $('#characterSelect').on('change', function(e){
     mainCharacterAnime.changeCharacter(parseInt($(this).val()));
+    demoCharacterAnime.changeCharacter(parseInt($(this).val()));
   })
+
+  //Demo Character Animation ------------------------------------------------
+  var demoCharacterCanvas = document.getElementById( 'demoCharacterCanvas' );
+  var demoCharacterAnime = new characterPool(demoCharacterCanvas, {
+    characterId: 1,
+    animation: 'frontStand'
+  });
+  var totalSupportAnime = demoCharacterAnime.supportAnime.length;
+  var curtDemoAnimeKey = 0;
+  $('#preDemo').on('click', function () {
+    if(curtDemoAnimeKey > 0){
+      curtDemoAnimeKey -- ;
+      $('#demoTitle').html(demoCharacterAnime.supportAnime[curtDemoAnimeKey].name);
+      demoCharacterAnime.setAnimation(demoCharacterAnime.supportAnime[curtDemoAnimeKey].name);
+    }
+  })
+  $('#nextDemo').on('click', function () {
+    if(curtDemoAnimeKey < totalSupportAnime - 1){
+      curtDemoAnimeKey ++ ;
+      $('#demoTitle').html(demoCharacterAnime.supportAnime[curtDemoAnimeKey].name);
+      demoCharacterAnime.setAnimation(demoCharacterAnime.supportAnime[curtDemoAnimeKey].name);
+    }
+  })
+
 });
 
 

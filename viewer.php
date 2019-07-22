@@ -119,7 +119,7 @@
 
     <button id="load_scene_dialog_button" class="form-control btn-dark" style="margin-bottom: 3px;">Load Scene</button>
 
-    <div class="form-group">
+    <div class="form-group" style="margin-bottom: 5px;">
         <select class="form-control" id="characterSelect" style="color: white; background-color: #343a40">
             <option value="1">Leonore</option>
             <option value="2">Ekim</option>
@@ -128,6 +128,15 @@
             <option value="5">Elo</option>
             <option value="6">Guan</option>
         </select>
+    </div>
+
+    <div>
+        <h5 id="demoTitle">frontStand</h5>
+        <canvas id="demoCharacterCanvas" width="240" height="355" style="border: 1px solid black;"></canvas>
+        <div style="text-align: center;">
+            <img id="preDemo" src="images/caret-left.png" style="width: 25px; height: 25px; cursor: pointer;"/>
+            <img id="nextDemo" src="images/caret-right.png"  style="width: 25px; height: 25px; cursor: pointer;"/>
+        </div>
     </div>
 
 </div>

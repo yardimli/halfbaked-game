@@ -70,7 +70,12 @@ $(document).ready(function () {
       var animation = demoCharacterAnime.supportAnime[curtDemoAnimeKey].name;
       $('#demoTitle').html(animation);
       demoCharacterAnime.setAnimation(animation);
-      main_player_holdStuff = animation.substring(animation.indexOf('_'));
+
+      main_player_holdStuff = (animation.indexOf('_') === -1) ? '' : animation.substring(animation.indexOf('_'));
+
+      var mainAnime = (main_player_Anime.animation.indexOf('_') === -1) ? main_player_Anime.animation : main_player_Anime.animation.substring(0, main_player_Anime.animation.indexOf('_'))
+      main_player_Anime.animation = mainAnime + main_player_holdStuff ;
+
     }
   })
   $('#nextDemo').on('click', function () {
@@ -80,7 +85,12 @@ $(document).ready(function () {
       var animation = demoCharacterAnime.supportAnime[curtDemoAnimeKey].name;
       $('#demoTitle').html(animation);
       demoCharacterAnime.setAnimation(animation);
-      main_player_holdStuff = animation.substring(animation.indexOf('_'));
+
+      main_player_holdStuff = (animation.indexOf('_') === -1) ? '' : animation.substring(animation.indexOf('_'));
+
+      var mainAnime = (main_player_Anime.animation.indexOf('_') === -1) ? main_player_Anime.animation : main_player_Anime.animation.substring(0, main_player_Anime.animation.indexOf('_'))
+      main_player_Anime.animation = mainAnime + main_player_holdStuff ;
+
     }
   })
 

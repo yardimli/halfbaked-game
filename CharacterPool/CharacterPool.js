@@ -29,8 +29,16 @@ class characterPool {
             {name: 'leftStand_GreenApple', totalFrame: 2},
             {name: 'leftWalk_GreenApple', totalFrame: 2},
             {name: 'rightStand_GreenApple', totalFrame: 2},
-            {name: 'rightWalk_GreenApple', totalFrame: 2}
+            {name: 'rightWalk_GreenApple', totalFrame: 2},
 
+            {name: 'frontStand_EmptyCup', totalFrame: 4},
+            {name: 'frontWalk_EmptyCup', totalFrame: 2},
+            {name: 'backStand_EmptyCup', totalFrame: 4},
+            {name: 'backWalk_EmptyCup', totalFrame: 2},
+            {name: 'leftStand_EmptyCup', totalFrame: 2},
+            {name: 'leftWalk_EmptyCup', totalFrame: 2},
+            {name: 'rightStand_EmptyCup', totalFrame: 2},
+            {name: 'rightWalk_EmptyCup', totalFrame: 2}
         ];
 
 		this.characterId = config.hasOwnProperty('characterId') ? config.characterId : 0 ;

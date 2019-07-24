@@ -160,7 +160,7 @@ class characterPool {
 
                 }, characterPool);
 
-                main_playerTexture.needsUpdate = true;
+                main_player_Texture.needsUpdate = true;
 
                 if(characterPool.curtFrame === animationFrames.length-1){
                     characterPool.curtFrame = 0 ;

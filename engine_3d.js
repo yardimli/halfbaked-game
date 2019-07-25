@@ -81,6 +81,9 @@ var indicatorBottom;
 
 var collisions = [];
 var main_player = null;
+var main_player_Texture = null;
+var main_player_Anime = null;
+var main_player_holdStuff = '';
 
 var other_players = [];
 
@@ -334,18 +337,29 @@ function createOtherCharacter(name, model_file, width, height, position, rotate,
 
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
-function createCharacter(model_file, width, height, position, rotate) {
-  // var geometry = new THREE.BoxBufferGeometry(characterSize, characterSize, characterSize);
+function createCharacter(width, height, position, rotate) {
+  var CharacterCanvas = document.createElement( 'canvas' );
+  CharacterCanvas.width = width*100; CharacterCanvas.height = height*100;
 
-  var geometry = new THREE.PlaneGeometry(width, height, 2);
-  var texture = new THREE.TextureLoader().load(model_file);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  var material = new THREE.MeshBasicMaterial({side: THREE.DoubleSide, map: texture});
+  // Draw the character animation --------------------------
+  var holdStuffs = ['', '_Watermelon', '_GreenApple', '_EmptyCup'];
+  main_player_holdStuff = holdStuffs[Math.floor(Math.random()*4)];
+  main_player_Anime = new CharacterAnime(CharacterCanvas, {
+    characterId: Math.floor(Math.random()*6) + 1,
+    animation: 'frontStand' + main_player_holdStuff, // Optional, default is 'frontStand'
+    speed: 200 // Optional, default is 200
+  });
+
+  main_player_Texture = new THREE.Texture(CharacterCanvas);
+  main_player_Texture.wrapS = THREE.RepeatWrapping;
+  main_player_Texture.wrapT = THREE.RepeatWrapping;
+
+  var material = new THREE.MeshBasicMaterial({side: THREE.DoubleSide, map: main_player_Texture});
   material.transparent = true;
 
+  var geometry = new THREE.PlaneGeometry(width, height);
 
-  main_player = new THREE.Mesh(geometry, material);
+  main_player = new THREE.Mesh( geometry, material );
 
   main_player.rotation.set(THREE.Math.degToRad(rotate.x), THREE.Math.degToRad(rotate.y), THREE.Math.degToRad(rotate.z));
 
@@ -355,10 +369,7 @@ function createCharacter(model_file, width, height, position, rotate) {
 
   main_player.name = "main_player";
 
-//  rotationPoint.position.set(position.x, position.y, position.z);
-
   scene.add(main_player);
-  //rotationPoint.add(main_player);
 }
 
 
@@ -580,6 +591,36 @@ function onDocumentMouseDown(event, bypass = false) {
   }
 }
 
+function changeMainCharacterAnime() {
+
+  var direction = new THREE.Vector3(movements[0].x - main_player.position.x, 0, movements[0].z - main_player.position.z);
+  var angle = direction.angleTo(new THREE.Vector3(1, 0, 0)) * (180/Math.PI) ;
+
+  if(direction.z > 0){
+    if(angle < 45){
+      console.log('go right')
+      main_player_Anime.setAnimation('rightWalk' + main_player_holdStuff);
+    }else if(angle >= 45 && angle <= 135){
+      console.log('go front')
+      main_player_Anime.setAnimation('frontWalk' + main_player_holdStuff);
+    }else {
+      console.log('go left')
+      main_player_Anime.setAnimation('leftWalk' + main_player_holdStuff);
+    }
+  }else {
+    if(angle < 45){
+      console.log('go right')
+      main_player_Anime.setAnimation('rightWalk' + main_player_holdStuff);
+    }else if(angle >= 45 && angle <= 135){
+      console.log('go back')
+      main_player_Anime.setAnimation('backWalk' + main_player_holdStuff);
+    }else {
+      console.log('go left')
+      main_player_Anime.setAnimation('leftWalk' + main_player_holdStuff);
+    }
+  }
+
+}
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
 function stopMovement() {
@@ -632,6 +673,15 @@ function move(location, destination, speed = playerSpeed) {
 
     // Reset any movements.
     console.log("stop move");
+    if(main_player_Anime.animation === 'frontWalk' + main_player_holdStuff){
+      main_player_Anime.setAnimation('frontStand' + main_player_holdStuff)
+    }else if(main_player_Anime.animation === 'backWalk' + main_player_holdStuff){
+      main_player_Anime.setAnimation('backStand' + main_player_holdStuff)
+    }else if(main_player_Anime.animation === 'rightWalk' + main_player_holdStuff){
+      main_player_Anime.setAnimation('rightStand' + main_player_holdStuff)
+    }else if(main_player_Anime.animation === 'leftWalk' + main_player_holdStuff){
+      main_player_Anime.setAnimation('leftStand' + main_player_holdStuff)
+    }
     stopMovement();
 
     // Maybe move should return a boolean. True if completed, false if not.
@@ -962,7 +1012,7 @@ function init() {
   // rotationPoint.position.set(0, 0, 0);
   // scene.add(rotationPoint);
 
-  createCharacter('./character1.png', 15, 25, new THREE.Vector3(0, 14.5, 155), new THREE.Vector3(0, 0, 0));
+  createCharacter(27, 40, new THREE.Vector3(0, 27, 155), new THREE.Vector3(0, 0, 0));
   // createOtherCharacter("char2", "./character2.png", 35, 50, new THREE.Vector3(155, 20, 5), new THREE.Vector3(0, 0, 0), true);
 
 
@@ -1046,6 +1096,7 @@ function init() {
   $(document).dblclick(function (event) {
     if (event.target.nodeName === "CANVAS") {
       onDocumentMouseDown(event);
+      changeMainCharacterAnime();
       if (outlinePassSelected.selectedObjects.length > 0) {
 
         if (Outline_selectedObject_temp !== null) {
@@ -1573,6 +1624,12 @@ function render() {
 
   }
 
+  //If main player animation needs update, tell three.js updates the texture.
+  if(main_player_Anime.needsUpdateFrame){
+    main_player_Texture.needsUpdate = true;
+    main_player_Anime.needsUpdateFrame = false;
+  }
+
   // If any movement was added, run it!
   if (movements.length > 0) {
     // Set an indicator point to destination.
@@ -1588,7 +1645,10 @@ function render() {
       }
     }
 
-    move(main_player, movements[0]);
+    //Move after character anime is changed and ready.
+    if(main_player_Anime.isAnimeReady){
+      move(main_player, movements[0]);
+    }
   }
 
   // Detect collisions.

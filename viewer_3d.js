@@ -55,7 +55,7 @@ $(document).ready(function () {
 
   //Demo Character Animation ------------------------------------------------
   var demoCharacterCanvas = document.getElementById( 'demoCharacterCanvas' );
-  var demoCharacterAnime = new characterPool(demoCharacterCanvas, {
+  var demoCharacterAnime = new CharacterAnime(demoCharacterCanvas, {
     characterId: 1,
     animation: 'frontStand', // Optional, default is 'frontStand'
     speed: 200 // Optional, default is 200
@@ -264,7 +264,7 @@ function createCharacter(width, height, position, rotate) {
   CharacterCanvas.width = width*100; CharacterCanvas.height = height*100;
 
   // Draw the character animation --------------------------
-  main_player_Anime = new characterPool(CharacterCanvas, {
+  main_player_Anime = new CharacterAnime(CharacterCanvas, {
     characterId: 1,
     animation: 'frontStand', // Optional, default is 'frontStand'
     speed: 200 // Optional, default is 200

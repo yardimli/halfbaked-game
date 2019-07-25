@@ -1,4 +1,4 @@
-class characterPool {
+class CharacterAnime {
 	constructor(canvas, config = {}) {
 	    this.canvas = canvas;
 		this.ctx = canvas.getContext('2d');
@@ -93,7 +93,7 @@ class characterPool {
 
                         var img = new Image();
 
-                        img.src = 'CharacterPool/images/' + part.name + 'Set' + part.style + '/' + part.name + part.style + '_' + anime + '_' + (f+1) + '.png';
+                        img.src = 'CharacterAnime/images/' + part.name + 'Set' + part.style + '/' + part.name + part.style + '_' + anime + '_' + (f+1) + '.png';
                         img.characterPool = this;
                         img.characterPart = part;
 

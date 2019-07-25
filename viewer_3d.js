@@ -57,7 +57,8 @@ $(document).ready(function () {
   var demoCharacterCanvas = document.getElementById( 'demoCharacterCanvas' );
   var demoCharacterAnime = new characterPool(demoCharacterCanvas, {
     characterId: 1,
-    animation: 'frontStand'
+    animation: 'frontStand', // Optional, default is 'frontStand'
+    speed: 200 // Optional, default is 200
   });
   var totalSupportAnime = demoCharacterAnime.supportAnime.length;
   var curtDemoAnimeKey = 0;
@@ -265,7 +266,8 @@ function createCharacter(width, height, position, rotate) {
   // Draw the character animation --------------------------
   main_player_Anime = new characterPool(CharacterCanvas, {
     characterId: 1,
-    animation: 'frontStand'
+    animation: 'frontStand', // Optional, default is 'frontStand'
+    speed: 200 // Optional, default is 200
   });
 
   main_player_Texture = new THREE.Texture(CharacterCanvas);
@@ -527,8 +529,6 @@ function changeMainCharacterAnime() {
       main_player_Anime.setAnimation('leftWalk' + main_player_holdStuff);
     }
   }
-
-  main_player_Anime.isAnimeReady = true;
 
 }
 
@@ -809,7 +809,6 @@ function init() {
 
   $(document).dblclick(function (event) {
     if (event.target.nodeName === "CANVAS") {
-      main_player_Anime.isAnimeReady = false;
       onDocumentMouseDown(event);
       changeMainCharacterAnime();
       if (outlinePassSelected.selectedObjects.length > 0) {
@@ -961,6 +960,12 @@ function render() {
 
     logOnce--;
 
+  }
+
+  //If main player animation needs update, tell three.js updates the texture.
+  if(main_player_Anime.needsUpdateFrame){
+    main_player_Texture.needsUpdate = true;
+    main_player_Anime.needsUpdateFrame = false;
   }
 
   // If any movement was added, run it!

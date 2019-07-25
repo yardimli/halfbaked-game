@@ -46,11 +46,13 @@ class characterPool {
         this.character = this.buildCharacter();
 
         this.curtFrame = 0;
+        this.speed = config.hasOwnProperty('speed') ? config.speed : 200;
         this.animationTimer = null;
 
         this.loadedImages = [];
         this.totalNeedImages = 0;
         this.isAnimeReady = false;
+        this.needsUpdateFrame = false; // Let Three.js knows that need to update the texture when it's true;
 
         this.initiate();
 
@@ -107,7 +109,7 @@ class characterPool {
 
                                 // All images are loaded, draw the character -------------------
                                 characterPool.isAnimeReady = true;
-                                characterPool.drawCharacter();
+                                characterPool.setAnimationTimer();
                             }
 
                         }
@@ -127,50 +129,59 @@ class characterPool {
     }
 
 	setAnimation(value) {
+
+	    this.isAnimeReady = false;
 	    this.animation = value;
 	    this.curtFrame = 0;
+        this.drawAnimationFrame();
+	    this.isAnimeReady = true;
+
     }
 
-	drawCharacter() {
+    drawAnimationFrame() {
 
-        console.log('Draw Character Animation Frame');
+        this.ctx.clearRect(0, 0, this.character.width, this.character.height);
+
+        var curtFrame = this.curtFrame;
+        var animationFrames = this.video[this.animation];
+
+        animationFrames[curtFrame].forEach(function (img) {
+
+            var part = img.characterPart;
+            var characterW = this.character.width;
+            var characterH = this.character.height;
+
+            if(this.characterId >= 1 && this.characterId <= 6){
+                if (part.name === 'body') {
+                    if(part.style !== 0){
+                        this.ctx.drawImage(img, 0, 0, characterW, characterH);
+                    }
+                }
+            }
+
+        }, this);
+
+        // Let Three.js knows that need to update the texture when it's true;
+        this.needsUpdateFrame = true;
+
+        if(this.curtFrame === animationFrames.length-1){
+            this.curtFrame = 0 ;
+        }else {
+            this.curtFrame ++ ;
+        }
+    }
+
+	setAnimationTimer() {
+
+        console.log('Draw Animation Frame Every ' + this.speed + ' ms');
 
         this.animationTimer = window.setInterval(function(characterPool){
 
             if(characterPool.isAnimeReady){
-
-                characterPool.ctx.clearRect(0, 0, characterPool.character.width, characterPool.character.height);
-
-                var curtFrame = characterPool.curtFrame;
-                var animationFrames = characterPool.video[characterPool.animation];
-
-                animationFrames[curtFrame].forEach(function (img) {
-
-                    var part = img.characterPart;
-                    var characterW = characterPool.character.width;
-                    var characterH = characterPool.character.height;
-
-                    if(this.characterId >= 1 && this.characterId <= 6){
-                        if (part.name === 'body') {
-                            if(part.style !== 0){
-                                characterPool.ctx.drawImage(img, 0, 0, characterW, characterH);
-                            }
-                        }
-                    }
-
-                }, characterPool);
-
-                main_player_Texture.needsUpdate = true;
-
-                if(characterPool.curtFrame === animationFrames.length-1){
-                    characterPool.curtFrame = 0 ;
-                }else {
-                    characterPool.curtFrame ++ ;
-                }
-
+                characterPool.drawAnimationFrame();
             }
 
-        }, 200, this);
+        }, this.speed, this);
 
 	}
 
@@ -196,13 +207,13 @@ class characterPool {
     changeCharacter(characterId){
 
 	    this.characterId = characterId;
-	    this.stopAnimation();
+	    this.stopAnimationTimer();
         this.character = this.buildCharacter();
         this.initiate();
 
     }
 
-    stopAnimation () {
+    stopAnimationTimer () {
 	    window.clearInterval(this.animationTimer);
     }
 

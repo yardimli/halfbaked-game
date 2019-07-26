@@ -69,13 +69,10 @@ $(document).ready(function () {
       curtDemoAnimeKey -- ;
       $('#curtDemo').text(curtDemoAnimeKey+1);
       var animation = demoCharacterAnime.supportAnime[curtDemoAnimeKey].name;
-      $('#demoTitle').html(animation);
       demoCharacterAnime.setAnimation(animation);
-
       $('#animeSelect').val(animation);
 
       main_player_holdStuff = (animation.indexOf('_') === -1) ? '' : animation.substring(animation.indexOf('_'));
-
       var mainAnime = (main_player_Anime.animation.indexOf('_') === -1) ? main_player_Anime.animation : main_player_Anime.animation.substring(0, main_player_Anime.animation.indexOf('_'))
       main_player_Anime.animation = mainAnime + main_player_holdStuff ;
 
@@ -86,13 +83,10 @@ $(document).ready(function () {
       curtDemoAnimeKey ++ ;
       $('#curtDemo').text(curtDemoAnimeKey+1);
       var animation = demoCharacterAnime.supportAnime[curtDemoAnimeKey].name;
-      $('#demoTitle').html(animation);
       demoCharacterAnime.setAnimation(animation);
-
       $('#animeSelect').val(animation);
 
       main_player_holdStuff = (animation.indexOf('_') === -1) ? '' : animation.substring(animation.indexOf('_'));
-
       var mainAnime = (main_player_Anime.animation.indexOf('_') === -1) ? main_player_Anime.animation : main_player_Anime.animation.substring(0, main_player_Anime.animation.indexOf('_'))
       main_player_Anime.animation = mainAnime + main_player_holdStuff ;
 
@@ -105,15 +99,12 @@ $(document).ready(function () {
   })
 
   $('#animeSelect').on('change', function(e){
-    console.log($(this).val());
     var selectAnime = $(this).val();
-    $('#demoTitle').html(selectAnime);
     demoCharacterAnime.setAnimation(selectAnime);
     curtDemoAnimeKey = parseInt($('#animeSelect option:selected').data('animekey'));
     $('#curtDemo').text(curtDemoAnimeKey+1);
 
     main_player_holdStuff = (selectAnime.indexOf('_') === -1) ? '' : selectAnime.substring(selectAnime.indexOf('_'));
-
     var mainAnime = (main_player_Anime.animation.indexOf('_') === -1) ? main_player_Anime.animation : main_player_Anime.animation.substring(0, main_player_Anime.animation.indexOf('_'))
     main_player_Anime.animation = mainAnime + main_player_holdStuff ;
 

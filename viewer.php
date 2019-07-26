@@ -136,7 +136,6 @@
     </div>
 
     <div>
-        <h5 id="demoTitle">frontStand</h5>
         <canvas id="demoCharacterCanvas" width="240" height="355" style="border: 1px solid black;"></canvas>
         <div style="text-align: center;">
             <img id="preDemo" src="images/caret-left.png" style="width: 25px; height: 25px; cursor: pointer;"/>

@@ -38,7 +38,16 @@ class CharacterAnime {
             {name: 'leftStand_EmptyCup', totalFrame: 2},
             {name: 'leftWalk_EmptyCup', totalFrame: 2},
             {name: 'rightStand_EmptyCup', totalFrame: 2},
-            {name: 'rightWalk_EmptyCup', totalFrame: 2}
+            {name: 'rightWalk_EmptyCup', totalFrame: 2},
+
+            {name: 'frontStand_FullCup', totalFrame: 4},
+            {name: 'frontWalk_FullCup', totalFrame: 2},
+            {name: 'backStand_FullCup', totalFrame: 4},
+            {name: 'backWalk_FullCup', totalFrame: 2},
+            {name: 'leftStand_FullCup', totalFrame: 2},
+            {name: 'leftWalk_FullCup', totalFrame: 2},
+            {name: 'rightStand_FullCup', totalFrame: 2},
+            {name: 'rightWalk_FullCup', totalFrame: 2}
         ];
 
 		this.characterId = config.hasOwnProperty('characterId') ? config.characterId : 0 ;

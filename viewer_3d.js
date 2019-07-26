@@ -95,6 +95,24 @@ $(document).ready(function () {
     }
   })
 
+  //Demo Animation Drop Down Select ----------------------------------------
+  demoCharacterAnime.supportAnime.forEach(function(anime, i){
+    $('#animeSelect').append('<option value="' + anime.name + '" data-animekey="' + i + '">' + anime.name + '</option>')
+  })
+
+  $('#animeSelect').on('change', function(e){
+    console.log($(this).val());
+    var selectAnime = $(this).val();
+    $('#demoTitle').html(selectAnime);
+    demoCharacterAnime.setAnimation(selectAnime);
+    curtDemoAnimeKey = parseInt($('#animeSelect option:selected').data('animekey'));
+    $('#curtDemo').text(curtDemoAnimeKey+1);
+    main_player_holdStuff = (selectAnime.indexOf('_') === -1) ? '' : selectAnime.substring(selectAnime.indexOf('_'));
+    var mainAnime = (main_player_Anime.animation.indexOf('_') === -1) ? main_player_Anime.animation : main_player_Anime.animation.substring(0, main_player_Anime.animation.indexOf('_'))
+    main_player_Anime.animation = mainAnime + main_player_holdStuff ;
+
+  })
+
 });
 
 

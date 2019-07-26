@@ -121,7 +121,7 @@ THREE.DragControls = function ( _objects, _camera, _domElement ) {
 	function onDocumentMouseDown( event ) {
 		// console.log(_objects);
 		event.preventDefault();
-		console.log(Outline_selectedObjects);
+//		console.log(Outline_selectedObjects);
 
 		_raycaster.setFromCamera( _mouse, _camera );
 

@@ -70,7 +70,7 @@ var mouse = new THREE.Vector2();
 
 // Store movements.
 var movements = [];
-var playerSpeed = 3;
+var playerSpeed = 1;
 
 // Watch for double clicks.
 var clickTimer = null;
@@ -338,14 +338,15 @@ function createOtherCharacter(name, model_file, width, height, position, rotate,
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
 function createCharacter(width, height, position, rotate) {
-  var CharacterCanvas = document.createElement( 'canvas' );
-  CharacterCanvas.width = width*100; CharacterCanvas.height = height*100;
+  var CharacterCanvas = document.createElement('canvas');
+  CharacterCanvas.width = width * 100;
+  CharacterCanvas.height = height * 100;
 
   // Draw the character animation --------------------------
   var holdStuffs = ['', '_Watermelon', '_GreenApple', '_EmptyCup'];
-  main_player_holdStuff = holdStuffs[Math.floor(Math.random()*4)];
+  main_player_holdStuff = holdStuffs[Math.floor(Math.random() * 4)];
   main_player_Anime = new CharacterAnime(CharacterCanvas, {
-    characterId: Math.floor(Math.random()*6) + 1,
+    characterId: Math.floor(Math.random() * 6) + 1,
     animation: 'frontStand' + main_player_holdStuff, // Optional, default is 'frontStand'
     speed: 200 // Optional, default is 200
   });
@@ -359,7 +360,7 @@ function createCharacter(width, height, position, rotate) {
 
   var geometry = new THREE.PlaneGeometry(width, height);
 
-  main_player = new THREE.Mesh( geometry, material );
+  main_player = new THREE.Mesh(geometry, material);
 
   main_player.rotation.set(THREE.Math.degToRad(rotate.x), THREE.Math.degToRad(rotate.y), THREE.Math.degToRad(rotate.z));
 
@@ -593,32 +594,168 @@ function onDocumentMouseDown(event, bypass = false) {
 
 function changeMainCharacterAnime() {
 
-  var direction = new THREE.Vector3(movements[0].x - main_player.position.x, 0, movements[0].z - main_player.position.z);
-  var angle = direction.angleTo(new THREE.Vector3(1, 0, 0)) * (180/Math.PI) ;
+  console.log("camera position: x:" + camera.position.x + " z:" + camera.position.z);
 
-  if(direction.z > 0){
-    if(angle < 45){
-      console.log('go right')
-      main_player_Anime.setAnimation('rightWalk' + main_player_holdStuff);
-    }else if(angle >= 45 && angle <= 135){
+  var vector = new THREE.Vector3(); // create once and reuse it!
+  camera.getWorldDirection(vector);
+
+//  console.log("x: "+Math.round( vector.x * 100)+" z:"+Math.round(vector.z*100));
+  // console.log("x "+ Math.round( movements[0].x)+" pp:"+main_player.position.x);
+  // console.log("z " + Math.round( movements[0].z)+" pp:"+main_player.position.z);
+
+  var xState = "0";
+  if (vector.x * 100 > 0) {
+    xState = "1";
+  }
+
+  var zState = "0";
+  if (vector.z * 100 > 0) {
+    zState = "1";
+  }
+
+  var xZone = xState + "" + zState;
+
+  var xDiff = movements[0].x - main_player.position.x;
+  var zDiff = movements[0].z - main_player.position.z;
+
+  console.log("zone: " + xZone + ",  xDiff:" + xDiff + ", zDiff:" + zDiff+" "+Math.abs(xDiff));
+
+  if (xZone == "00") {
+
+   if (Math.abs(xDiff)>Math.abs(zDiff)) {
+     if (xDiff > 0) {
+       console.log('go right')
+       main_player_Anime.setAnimation('rightWalk' + main_player_holdStuff);
+     }
+     else {
+       console.log('go left')
+       main_player_Anime.setAnimation('leftWalk' + main_player_holdStuff);
+     }
+   } else {
+     if (zDiff > 0) {
       console.log('go front')
       main_player_Anime.setAnimation('frontWalk' + main_player_holdStuff);
-    }else {
-      console.log('go left')
-      main_player_Anime.setAnimation('leftWalk' + main_player_holdStuff);
-    }
-  }else {
-    if(angle < 45){
-      console.log('go right')
-      main_player_Anime.setAnimation('rightWalk' + main_player_holdStuff);
-    }else if(angle >= 45 && angle <= 135){
+     }
+     else {
       console.log('go back')
       main_player_Anime.setAnimation('backWalk' + main_player_holdStuff);
-    }else {
-      console.log('go left')
-      main_player_Anime.setAnimation('leftWalk' + main_player_holdStuff);
+     }
+   }
+  }
+
+
+  if (xZone == "01") {
+    if (Math.abs(zDiff)>Math.abs(xDiff)) {
+      if (zDiff > 0) {
+        console.log('go left')
+        main_player_Anime.setAnimation('leftWalk' + main_player_holdStuff);
+      }
+      else {
+        console.log('go right')
+        main_player_Anime.setAnimation('rightWalk' + main_player_holdStuff);
+      }
+    } else {
+      if (xDiff > 0) {
+        console.log('go front')
+        main_player_Anime.setAnimation('frontWalk' + main_player_holdStuff);
+      }
+      else {
+        console.log('go back')
+        main_player_Anime.setAnimation('backWalk' + main_player_holdStuff);
+      }
     }
   }
+
+  if (xZone == "11") {
+    if (Math.abs(xDiff)>Math.abs(zDiff)) {
+      if (xDiff > 0) {
+        console.log('go left')
+        main_player_Anime.setAnimation('leftWalk' + main_player_holdStuff);
+      }
+      else {
+        console.log('go right')
+        main_player_Anime.setAnimation('rightWalk' + main_player_holdStuff);
+      }
+    } else {
+      if (zDiff > 0) {
+        console.log('go back')
+        main_player_Anime.setAnimation('backWalk' + main_player_holdStuff);
+      }
+      else {
+        console.log('go front')
+        main_player_Anime.setAnimation('frontWalk' + main_player_holdStuff);
+      }
+    }
+  }
+
+  if (xZone == "10") {
+    if (Math.abs(xDiff)>Math.abs(zDiff)) {
+      if (xDiff > 0) {
+        console.log('go back')
+        main_player_Anime.setAnimation('backWalk' + main_player_holdStuff);
+      }
+      else {
+        console.log('go front')
+        main_player_Anime.setAnimation('frontWalk' + main_player_holdStuff);
+      }
+    } else {
+      if (zDiff > 0) {
+        console.log('go right')
+        main_player_Anime.setAnimation('rightWalk' + main_player_holdStuff);
+      }
+      else {
+        console.log('go left')
+        main_player_Anime.setAnimation('leftWalk' + main_player_holdStuff);
+      }
+    }
+  }
+
+//
+// var direction = new THREE.Vector3(camera.position.x, 1, camera.position.z); //new THREE.Vector3(movements[0].x, 0, movements[0].z);
+// var angle = direction.angleTo(new THREE.Vector3(1, 1, 1));// * (180/Math.PI) ;
+//
+// console.log(angle);
+//
+// // console.log(camera.position);
+//
+// if (angle>0 && angle<45) {
+//       console.log('go front')
+//       main_player_Anime.setAnimation('frontWalk' + main_player_holdStuff);
+// } else
+//   if (angle>135 && angle<180) {
+//       console.log('go back')
+//       main_player_Anime.setAnimation('backWalk' + main_player_holdStuff);
+// } else
+// {
+//       console.log('go right')
+//       main_player_Anime.setAnimation('rightWalk' + main_player_holdStuff);
+// }
+//
+
+//
+// if(direction.z > 0){
+//   if(angle < 45){
+//     console.log('go front')
+//     main_player_Anime.setAnimation('frontWalk' + main_player_holdStuff);
+//   }else if(angle >= 45 && angle <= 135){
+//     console.log('go right')
+//     main_player_Anime.setAnimation('rightWalk' + main_player_holdStuff);
+//   }else {
+//     console.log('go left')
+//     main_player_Anime.setAnimation('leftWalk' + main_player_holdStuff);
+//   }
+// }else {
+//   if(angle < 45){
+//     console.log('go left 2')
+//     main_player_Anime.setAnimation('leftWalk' + main_player_holdStuff);
+//   }else if(angle >= 45 && angle <= 135){
+//     console.log('go right 2')
+//     main_player_Anime.setAnimation('rightWalk' + main_player_holdStuff);
+//   }else {
+//     console.log('go back 2')
+//     main_player_Anime.setAnimation('backWalk' + main_player_holdStuff);
+//   }
+// }
 
 }
 
@@ -673,13 +810,16 @@ function move(location, destination, speed = playerSpeed) {
 
     // Reset any movements.
     console.log("stop move");
-    if(main_player_Anime.animation === 'frontWalk' + main_player_holdStuff){
+    if (main_player_Anime.animation === 'frontWalk' + main_player_holdStuff) {
       main_player_Anime.setAnimation('frontStand' + main_player_holdStuff)
-    }else if(main_player_Anime.animation === 'backWalk' + main_player_holdStuff){
+    }
+    else if (main_player_Anime.animation === 'backWalk' + main_player_holdStuff) {
       main_player_Anime.setAnimation('backStand' + main_player_holdStuff)
-    }else if(main_player_Anime.animation === 'rightWalk' + main_player_holdStuff){
+    }
+    else if (main_player_Anime.animation === 'rightWalk' + main_player_holdStuff) {
       main_player_Anime.setAnimation('rightStand' + main_player_holdStuff)
-    }else if(main_player_Anime.animation === 'leftWalk' + main_player_holdStuff){
+    }
+    else if (main_player_Anime.animation === 'leftWalk' + main_player_holdStuff) {
       main_player_Anime.setAnimation('leftStand' + main_player_holdStuff)
     }
     stopMovement();
@@ -909,7 +1049,7 @@ function SelectObject() {
       $("#rotate_y").val(radians_to_degrees(MeshChild.rotation.y));
       $("#rotate_z").val(radians_to_degrees(MeshChild.rotation.z));
 
-      console.log(" can move : "+Outline_selectedObject_temp.userData.canMove);
+      console.log(" can move : " + Outline_selectedObject_temp.userData.canMove);
       $('#object_fixed option[value="' + Outline_selectedObject_temp.userData.canMove + '"]').prop('selected', true);
     }
   }
@@ -998,7 +1138,7 @@ function init() {
   AddLights();
 
   //skybox
-  if (1 == 2) {
+  if (1 == 1) {
     var urls = ['px.jpg', 'nx.jpg', 'py.jpg', 'ny.jpg', 'pz.jpg', 'nz.jpg'];
     var loaderCube = new THREE.CubeTextureLoader().setPath('./threejs/examples/textures/cube/skyboxsun25deg/');
     loaderCube.load(urls, function (texture) {
@@ -1012,7 +1152,7 @@ function init() {
   // rotationPoint.position.set(0, 0, 0);
   // scene.add(rotationPoint);
 
-  createCharacter(27, 40, new THREE.Vector3(0, 27, 155), new THREE.Vector3(0, 0, 0));
+  createCharacter(10, 20, new THREE.Vector3(0, 10, 155), new THREE.Vector3(0, 0, 0));
   // createOtherCharacter("char2", "./character2.png", 35, 50, new THREE.Vector3(155, 20, 5), new THREE.Vector3(0, 0, 0), true);
 
 
@@ -1625,7 +1765,7 @@ function render() {
   }
 
   //If main player animation needs update, tell three.js updates the texture.
-  if(main_player_Anime.needsUpdateFrame){
+  if (main_player_Anime.needsUpdateFrame) {
     main_player_Texture.needsUpdate = true;
     main_player_Anime.needsUpdateFrame = false;
   }
@@ -1646,7 +1786,7 @@ function render() {
     }
 
     //Move after character anime is changed and ready.
-    if(main_player_Anime.isAnimeReady){
+    if (main_player_Anime.isAnimeReady) {
       move(main_player, movements[0]);
     }
   }

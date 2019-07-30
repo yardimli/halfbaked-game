@@ -47,7 +47,25 @@ class CharacterAnime {
             {name: 'leftStand_FullCup', totalFrame: 2},
             {name: 'leftWalk_FullCup', totalFrame: 2},
             {name: 'rightStand_FullCup', totalFrame: 2},
-            {name: 'rightWalk_FullCup', totalFrame: 2}
+            {name: 'rightWalk_FullCup', totalFrame: 2},
+
+            {name: 'frontStand_Orange', totalFrame: 4},
+            {name: 'frontWalk_Orange', totalFrame: 2},
+            {name: 'backStand_Orange', totalFrame: 4},
+            {name: 'backWalk_Orange', totalFrame: 2},
+            {name: 'leftStand_Orange', totalFrame: 2},
+            {name: 'leftWalk_Orange', totalFrame: 2},
+            {name: 'rightStand_Orange', totalFrame: 2},
+            {name: 'rightWalk_Orange', totalFrame: 2},
+
+            // {name: 'frontStand_Pineapple', totalFrame: 4},
+            // {name: 'frontWalk_Pineapple', totalFrame: 2},
+            // {name: 'backStand_Pineapple', totalFrame: 4},
+            // {name: 'backWalk_Pineapple', totalFrame: 2},
+            // {name: 'leftStand_Pineapple', totalFrame: 2},
+            // {name: 'leftWalk_Pineapple', totalFrame: 2},
+            // {name: 'rightStand_Pineapple', totalFrame: 2},
+            // {name: 'rightWalk_Pineapple', totalFrame: 2}
         ];
 
 		this.characterId = config.hasOwnProperty('characterId') ? config.characterId : 0 ;

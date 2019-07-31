@@ -110,8 +110,70 @@ $(document).ready(function () {
 
   })
 
-});
+  //Add Timer Dialog --------------------------------------------------------
+  $('#addTimerButton').on('click', function(e){
+    if($('#followPlayer').prop('checked')){
+      var timerPosX = main_player.position.x;
+      var timerPosY = main_player.position.y + 32;
+      var timerPosZ = main_player.position.z;
+    }else {
+      var timerPosX = parseInt($('#timerPosX').val());
+      var timerPosY = parseInt($('#timerPosY').val());
+      var timerPosZ = parseInt($('#timerPosZ').val());
+    }
 
+    var timerCanvas = document.createElement('canvas');
+    timerCanvas.width = 250; timerCanvas.height = 250;
+
+    var Timer = new ClockTimer(timerCanvas, {
+      x: 125,
+      y: 125,
+      size: 125,
+      time: parseInt($('#timerTime').val()),  //seconds
+      direction: 1,
+      speed: parseInt($('#timerSpeed').val()),  //milliseconds
+      eraseTimerAtEnd: true,
+      startColor: 'rgb(0, 255, 0)',
+      endColor: 'rgb(255, 0, 0)',
+      textStyle: '72px Arial',
+      textColor: '#000'
+    });
+    Timer.startTimer();
+    Timers.push(Timer);
+
+    main_timer_Texture = new THREE.Texture(timerCanvas);
+    main_timer_Texture.wrapS = THREE.RepeatWrapping;
+    main_timer_Texture.wrapT = THREE.RepeatWrapping;
+
+    Timers_Texture.push(main_timer_Texture);
+
+    var material = new THREE.MeshBasicMaterial({side: THREE.DoubleSide, map: main_timer_Texture});
+    material.transparent = true;
+
+    var geometry = new THREE.PlaneGeometry(25, 25);
+
+    main_timer = new THREE.Mesh( geometry, material );
+
+    main_timer.rotation.set(THREE.Math.degToRad(0), THREE.Math.degToRad(0), THREE.Math.degToRad(0));
+
+    main_timer.position.x = timerPosX;				    //Position (x = right+ left-)
+    main_timer.position.y = timerPosY;				    //Position (y = up+, down-)
+    main_timer.position.z = timerPosZ;				    //Position (z = front +, back-)
+
+    main_timer.name = "main_timer";
+
+    scene.add(main_timer);
+
+    // scene.remove(scene.getObjectByName('main_timer'));
+
+    $('#timerModal').modal('hide');
+
+  })
+
+});
+var main_timer_Texture = new THREE.Texture();
+var Timers_Texture = [];
+var Timers = [];
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
 var HemisphereLight1;
@@ -982,6 +1044,15 @@ function render() {
     main_player_Texture.needsUpdate = true;
     main_player_Anime.needsUpdateFrame = false;
   }
+
+  // main_timer_Texture.needsUpdate = true;
+  for(var i=0; i<Timers.length; i++){
+    if(Timers[i].needsUpdateFrame){
+      Timers_Texture[i].needsUpdate = true;
+      Timers[i].needsUpdateFrame = false;
+    }
+  }
+
 
   // If any movement was added, run it!
   if (movements.length > 0) {

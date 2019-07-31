@@ -80,6 +80,7 @@
 
   <script type="text/javascript" src="js/jquery-3.4.1.js"></script>
   <script type="text/javascript" src="js/dat.gui.js"></script>
+    <script type="text/javascript" src="js/ClockTimer.js"></script>
   <script type="text/javascript" src="CharacterAnime/CharacterAnime.js"></script>
   <script type="text/javascript" src="viewer_3d.js"></script>
 
@@ -144,8 +145,67 @@
         </div>
     </div>
 
+    <button id="add_timer_dialog_button" class="form-control btn-dark" data-toggle="modal" data-target="#timerModal" style="margin-bottom: 3px;">Add Timer</button>
+
 </div>
 
+<!-- Modal -->
+<div class="modal fade" id="timerModal" tabindex="-1" role="dialog" aria-labelledby="deleteObjectModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteObjectModalTitle">Add Timer</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group row" style="margin-bottom: 5px;">
+                        <label class="col-sm-4 col-form-label">Follow Main Player</label>
+                        <div class="col-sm-2">
+                            <input class="form-check-input" type="checkbox" id="followPlayer" checked style="vertical-align: bottom;">
+                        </div>
+                    </div>
+                    <div class="form-group row" style="margin-bottom: 5px;">
+                        <label for="staticEmail" class="col-sm-2 col-form-label">Time</label>
+                        <div class="col-sm-4">
+                            <input id="timerTime" type="number" min="0" class="form-control" value="30">
+                        </div>
+                    </div>
+                    <div class="form-group row" style="margin-bottom: 5px;">
+                        <label for="staticEmail" class="col-sm-2 col-form-label">Speed</label>
+                        <div class="col-sm-4">
+                            <input id="timerSpeed" type="number" min="0" class="form-control" value="100">
+                        </div>
+                    </div>
+                    <div class="form-group row" style="margin-bottom: 5px;">
+                        <label class="col-sm-2 col-form-label">X</label>
+                        <div class="col-sm-4">
+                            <input id="timerPosX" type="number" class="form-control" value="0">
+                        </div>
+                    </div>
+                    <div class="form-group row" style="margin-bottom: 5px;">
+                        <label class="col-sm-2 col-form-label">Y</label>
+                        <div class="col-sm-4">
+                            <input id="timerPosY" type="number" class="form-control" value="0">
+                        </div>
+                    </div>
+                    <div class="form-group row" style="margin-bottom: 5px;">
+                        <label class="col-sm-2 col-form-label">Z</label>
+                        <div class="col-sm-4">
+                            <input id="timerPosZ" type="number" class="form-control" value="0">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-dark" id="addTimerButton">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Modal -->
 <div class="modal fade" id="loadSceneModal" tabindex="-1" role="dialog" aria-labelledby="loadSceneModalTitle" aria-hidden="true">

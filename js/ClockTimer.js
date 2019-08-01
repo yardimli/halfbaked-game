@@ -22,8 +22,9 @@ class ClockTimer {
 
 		// style
 		this.startColor = config.hasOwnProperty('startColor') ? config.startColor : 'rgb(0, 255, 0)';
+		this.middleColor = config.hasOwnProperty('middleColor') ? config.middleColor : 'rgb(255, 255, 0)';
 		this.endColor = config.hasOwnProperty('endColor') ? config.endColor : 'rgb(255, 0, 0)';
-		this.gradients = this.interpolateColors(this.startColor, this.endColor, 360);
+		this.gradients = this.interpolateColors(this.startColor, this.middleColor, 180).concat( this.interpolateColors(this.middleColor, this.endColor, 180) );
 		this.textStyle = config.hasOwnProperty('textStyle') ? config.textStyle : '12px Arial';
 		this.textColor = config.hasOwnProperty('textColor') ? config.textColor : '#000';
 

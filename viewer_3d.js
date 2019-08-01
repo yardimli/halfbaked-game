@@ -169,6 +169,7 @@ function addTimer(width, height, position, rotation, isFollowPlayer){
     speed: parseInt($('#timerSpeed').val()),  //milliseconds
     eraseTimerAtEnd: true,
     startColor: 'rgb(0, 255, 0)',
+    middleColor: 'rgb(255, 255, 0)',
     endColor: 'rgb(255, 0, 0)',
     textStyle: '72px Arial',
     textColor: '#000'

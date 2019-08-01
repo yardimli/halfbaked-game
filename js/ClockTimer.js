@@ -5,12 +5,12 @@ class ClockTimer {
 		this.updateTimer = null;
 
 		// pos
-		this.x = config.x || 0;
-		this.y = config.y || 0;
+		this.x = parseInt(canvas.width/2);
+		this.y = parseInt(canvas.height/2);
 
 		// status
 		this.needsUpdateFrame = false;
-		this.status = config.hasOwnProperty('status') ? config.status : 'running' ;
+		this.status = 'ready' ;
 		this.direction = config.hasOwnProperty('direction') ? (config.direction >= 0 ? 1 : -1) : 1 ;
 
 		// const
@@ -18,14 +18,12 @@ class ClockTimer {
 		this.curtTime = this.direction === 1 ? 0 : this.time;
 		this.speed = config.hasOwnProperty('speed') ? config.speed : 1000 ; // milliseconds
 		this.degProgress = this.direction === 1 ? 0 : 360;
-		this.size = config.hasOwnProperty('size') ? config.size : 25 ;
-		this.area = [this.x-this.size, this.y-this.size, this.x+this.size, this.y+this.size];
+		this.size = parseInt(canvas.width/2);
 
 		// style
 		this.startColor = config.hasOwnProperty('startColor') ? config.startColor : 'rgb(0, 255, 0)';
 		this.endColor = config.hasOwnProperty('endColor') ? config.endColor : 'rgb(255, 0, 0)';
 		this.gradients = this.interpolateColors(this.startColor, this.endColor, 360);
-
 		this.textStyle = config.hasOwnProperty('textStyle') ? config.textStyle : '12px Arial';
 		this.textColor = config.hasOwnProperty('textColor') ? config.textColor : '#000';
 
@@ -35,18 +33,17 @@ class ClockTimer {
 	startTimer(){
 
 		this.drawTimer();
-
-		var ClockTimer = this;
+		this.needsUpdateFrame = true;
 		this.status = 'running';
-		this.updateTimer = window.setInterval(function () {
+
+		this.updateTimer = window.setInterval(function (ClockTimer) {
 			if (ClockTimer.direction === 1) {
 				if (ClockTimer.curtTime < ClockTimer.time) {
 					ClockTimer.curtTime++;
 					ClockTimer.degProgress += (360 / ClockTimer.time);
 					ClockTimer.drawTimer();
 					ClockTimer.needsUpdateFrame = true;
-				}
-				if (ClockTimer.curtTime === ClockTimer.time) {
+				}else if (ClockTimer.curtTime === ClockTimer.time) {
 					ClockTimer.status = 'stop';
 					window.clearInterval(ClockTimer.updateTimer);
 				}
@@ -57,29 +54,19 @@ class ClockTimer {
 					ClockTimer.degProgress -= (360 / ClockTimer.time);
 					ClockTimer.drawTimer();
 					ClockTimer.needsUpdateFrame = true;
-				}
-				if (ClockTimer.curtTime === 0) {
+				}else if (ClockTimer.curtTime === 0) {
 					ClockTimer.status = 'stop';
 					window.clearInterval(ClockTimer.updateTimer);
 				}
 			}
 
-		}, this.speed, ClockTimer);
+		}, this.speed, this);
 
-	}
-
-	moveTimer(x, y){
-		if(typeof x !== 'number' || typeof y !== 'number') return false;
-		this.x += x;
-		this.y += y;
-		this.drawTimer();
 	}
 
 	drawTimer(){
-		console.log('Draw Timer');
 
 		this.ctx.save();
-
 		this.ctx.clearRect(0, 0, this.size*2, this.size*2);
 
 		var grd = this.ctx.createRadialGradient(this.x, this.y, 5, this.x, this.y, this.size);
@@ -95,7 +82,7 @@ class ClockTimer {
 
 		//Draw Center Circle
 		this.ctx.beginPath();
-		this.ctx.arc(this.x, this.y, this.size*0.5, 0, 2 * Math.PI);
+		this.ctx.arc(this.x, this.y, this.size*0.7, 0, 2 * Math.PI);
 		this.ctx.strokeStyle = 'rgba(255, 0, 0, 1)';
 		this.ctx.lineWidth = 0;
 		this.ctx.stroke();

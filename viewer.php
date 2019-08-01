@@ -151,7 +151,7 @@
 
 <!-- Modal -->
 <div class="modal fade" id="timerModal" tabindex="-1" role="dialog" aria-labelledby="deleteObjectModalTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="deleteObjectModalTitle">Add Timer</h5>
@@ -160,46 +160,82 @@
                 </button>
             </div>
             <div class="modal-body">
+                <span style="font-weight: bold;">You can add multiple timers to the scene.</span>
                 <form>
                     <div class="form-group row" style="margin-bottom: 5px;">
-                        <label class="col-sm-4 col-form-label">Follow Main Player</label>
-                        <div class="col-sm-2">
-                            <input class="form-check-input" type="checkbox" id="followPlayer" checked style="vertical-align: bottom;">
+                        <label class="col-sm-3 col-form-label">Follow Main Player</label>
+                        <div class="col-sm-8" style="padding-top: calc(0.375rem + 1px); padding-bottom: calc(0.375rem + 1px);">
+                            <input class="" type="checkbox" id="followPlayer" checked style="vertical-align: bottom;">
                         </div>
                     </div>
                     <div class="form-group row" style="margin-bottom: 5px;">
-                        <label for="staticEmail" class="col-sm-2 col-form-label">Time</label>
+                        <label class="col-sm-3 col-form-label">Mode</label>
+                        <div class="col-sm-8" style="padding-top: calc(0.375rem + 1px); padding-bottom: calc(0.375rem + 1px);">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="timerMode" checked value="1">
+                                <label class="form-check-label">Stopwatch</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="timerMode" value="-1">
+                                <label class="form-check-label">Countdown</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row" style="margin-bottom: 5px;">
+                        <label for="staticEmail" class="col-sm-3 col-form-label">Time</label>
                         <div class="col-sm-4">
-                            <input id="timerTime" type="number" min="0" class="form-control" value="30">
+                            <input id="timerTime" type="number" min="0" class="form-control" value="180">
                         </div>
                     </div>
                     <div class="form-group row" style="margin-bottom: 5px;">
-                        <label for="staticEmail" class="col-sm-2 col-form-label">Speed</label>
+                        <label for="staticEmail" class="col-sm-3 col-form-label">Speed</label>
                         <div class="col-sm-4">
                             <input id="timerSpeed" type="number" min="0" class="form-control" value="100">
                         </div>
+                        <span style="font-style: italic;color: gray;line-height: 38px;">1000 means update time every 1 sec.</span>
                     </div>
+                    <hr>
+                    <span style="font-weight: bold;">To set position and rotation, <span style="color: red;">uncheck</span> the "Follow Main Player"</span>
                     <div class="form-group row" style="margin-bottom: 5px;">
-                        <label class="col-sm-2 col-form-label">X</label>
+                        <label class="col-sm-3 col-form-label">X</label>
                         <div class="col-sm-4">
-                            <input id="timerPosX" type="number" class="form-control" value="0">
+                            <input id="timerPosX" type="number" class="form-control posInput" value="0" readonly>
                         </div>
                     </div>
                     <div class="form-group row" style="margin-bottom: 5px;">
-                        <label class="col-sm-2 col-form-label">Y</label>
+                        <label class="col-sm-3 col-form-label">Y</label>
                         <div class="col-sm-4">
-                            <input id="timerPosY" type="number" class="form-control" value="0">
+                            <input id="timerPosY" type="number" class="form-control posInput" value="25" readonly>
                         </div>
                     </div>
                     <div class="form-group row" style="margin-bottom: 5px;">
-                        <label class="col-sm-2 col-form-label">Z</label>
+                        <label class="col-sm-3 col-form-label">Z</label>
                         <div class="col-sm-4">
-                            <input id="timerPosZ" type="number" class="form-control" value="0">
+                            <input id="timerPosZ" type="number" class="form-control posInput" value="0" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row" style="margin-bottom: 5px;">
+                        <label class="col-sm-3 col-form-label">Rotate X</label>
+                        <div class="col-sm-4">
+                            <input id="timerRotateX" type="number" class="form-control rotateInput" value="0" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row" style="margin-bottom: 5px;">
+                        <label class="col-sm-3 col-form-label">Rotate Y</label>
+                        <div class="col-sm-4">
+                            <input id="timerRotateY" type="number" class="form-control rotateInput" value="0" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row" style="margin-bottom: 5px;">
+                        <label class="col-sm-3 col-form-label">Rotate Z</label>
+                        <div class="col-sm-4">
+                            <input id="timerRotateZ" type="number" class="form-control rotateInput" value="0" readonly>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
+                <span id="addTimerError" style="color: red;"></span>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-dark" id="addTimerButton">Add</button>
             </div>

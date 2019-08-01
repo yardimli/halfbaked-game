@@ -70,26 +70,33 @@ class ClockTimer {
 		this.ctx.save();
 		this.ctx.clearRect(0, 0, this.size*2, this.size*2);
 
-		var grd = this.ctx.createRadialGradient(this.x, this.y, 5, this.x, this.y, this.size);
 		if(this.direction === 1){
 			var colorIndex = Math.ceil(this.degProgress) < 360 ? Math.ceil(this.degProgress) : 359 ;
 		}else if(this.direction === -1){
 			var colorIndex = 360-Math.ceil(this.degProgress) < 360 ? 360-Math.ceil(this.degProgress) : 359 ;
 		}
+		
+		//Draw Center Circle
+		var grd = this.ctx.createRadialGradient(this.x, this.y, 5, this.x, this.y, this.size);
 		grd.addColorStop(0, 'rgba(255, 255, 255, 1)');
-		grd.addColorStop(0.7, 'rgba(' + this.gradients[colorIndex][0] + ', ' + this.gradients[colorIndex][1] + ', ' + this.gradients[colorIndex][2] + ', 1)');
-		grd.addColorStop(1, 'rgba(' + this.gradients[colorIndex][0] + ', ' + this.gradients[colorIndex][1] + ', ' + this.gradients[colorIndex][2] + ', 0)');
+		grd.addColorStop(0.5, 'rgba(' + this.gradients[colorIndex][0] + ', ' + this.gradients[colorIndex][1] + ', ' + this.gradients[colorIndex][2] + ', 1)');
+		grd.addColorStop(0.7, 'rgba(' + this.gradients[colorIndex][0] + ', ' + this.gradients[colorIndex][1] + ', ' + this.gradients[colorIndex][2] + ', 0)');
 		this.ctx.fillStyle = grd;
 
-		//Draw Center Circle
 		this.ctx.beginPath();
 		this.ctx.arc(this.x, this.y, this.size*0.7, 0, 2 * Math.PI);
-		this.ctx.strokeStyle = 'rgba(255, 0, 0, 1)';
+		this.ctx.strokeStyle = 'rgba(0, 0, 0, 0)';
 		this.ctx.lineWidth = 0;
 		this.ctx.stroke();
 		this.ctx.fill();
 
 		//Draw Big Pizza
+		grd = this.ctx.createRadialGradient(this.x, this.y, 5, this.x, this.y, this.size);
+		grd.addColorStop(0, 'rgba(255, 255, 255, 1)');
+		grd.addColorStop(0.7, 'rgba(' + this.gradients[colorIndex][0] + ', ' + this.gradients[colorIndex][1] + ', ' + this.gradients[colorIndex][2] + ', 1)');
+		grd.addColorStop(1, 'rgba(' + this.gradients[colorIndex][0] + ', ' + this.gradients[colorIndex][1] + ', ' + this.gradients[colorIndex][2] + ', 0)');
+		this.ctx.fillStyle = grd;
+
 		if(this.degProgress !== 0){
 			this.ctx.beginPath();
 			if(this.degProgress === 360){
@@ -99,7 +106,7 @@ class ClockTimer {
 			}
 			this.ctx.lineTo(this.x, this.y);
 			this.ctx.closePath();
-			this.ctx.strokeStyle = 'rgba(255, 125, 125, 0)';
+			this.ctx.strokeStyle = 'rgba(0, 0, 0, 0)';
 			this.ctx.lineWidth = 0;
 			this.ctx.stroke();
 			this.ctx.fill();

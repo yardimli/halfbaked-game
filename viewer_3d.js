@@ -44,6 +44,8 @@ var IgnoreThisClick = false;
 
 var connection = null;
 
+var Timers = [];
+
 $(document).ready(function () {
   init();
   animate();
@@ -110,8 +112,95 @@ $(document).ready(function () {
 
   })
 
+  //Add Timer Dialog Event--------------------------------------------------------
+  $('#timerModal').on('hidden.bs.modal', function (e) {
+    $('#addTimerError').html('');
+  })
+
+  $('#followPlayer').on('click', function(e){
+    if($(this).prop('checked')){
+      $('.posInput').prop('readOnly', true);
+      $('.rotateInput').prop('readOnly', true);
+    }else {
+      $('.posInput').prop('readOnly', false);
+      $('.rotateInput').prop('readOnly', false);
+    }
+  })
+
+  $('#addTimerButton').on('click', function(e){
+
+    var timerWidth = 25;
+    var timerHeight = 25;
+    var isFollowPlayer = $('#followPlayer').prop('checked');
+
+    if(isFollowPlayer){
+      for(var i=0; i<Timers.length; i++){
+        if(Timers[i].clockTimer.isFollowPlayer){
+          $('#addTimerError').html('There is a timer following the main player already.');
+          return false;
+        }
+      }
+    }
+
+    if(isFollowPlayer){
+      var timerPosition = new THREE.Vector3(main_player.position.x, main_player.position.y+main_player.geometry.parameters.height/2 + timerWidth/2, main_player.position.z)
+      var timerRotation = main_player.rotation;
+    }else {
+      var timerPosition = new THREE.Vector3(parseInt($('#timerPosX').val()), parseInt($('#timerPosY').val()), parseInt($('#timerPosZ').val()));
+      var timerRotation = new THREE.Vector3(parseInt($('#timerRotateX').val()), parseInt($('#timerRotateY').val()), parseInt($('#timerRotateZ').val()));
+    }
+
+    addTimer(timerWidth, timerHeight, timerPosition, timerRotation, isFollowPlayer);
+
+    $('#timerModal').modal('hide');
+  })
+
 });
 
+//------------------------------------------------------------------------------------------------------------------------------------------------
+function addTimer(width, height, position, rotation, isFollowPlayer){
+
+  var timerCanvas = document.createElement('canvas');
+  timerCanvas.width = width*10; timerCanvas.height = height*10;
+
+  var Timer = new ClockTimer(timerCanvas, {
+    time: parseInt($('#timerTime').val()),  //seconds
+    direction: parseInt($('input[name=timerMode]:checked').val()),
+    speed: parseInt($('#timerSpeed').val()),  //milliseconds
+    eraseTimerAtEnd: true,
+    startColor: 'rgb(0, 255, 0)',
+    middleColor: 'rgb(255, 255, 0)',
+    endColor: 'rgb(255, 0, 0)',
+    textStyle: '72px Arial',
+    textColor: '#000'
+  });
+  Timer.isFollowPlayer = isFollowPlayer;
+  Timer.startTimer();
+
+  var timerTexture = new THREE.Texture(timerCanvas);
+  timerTexture.wrapS = THREE.RepeatWrapping;
+  timerTexture.wrapT = THREE.RepeatWrapping;
+
+  var material = new THREE.MeshBasicMaterial({side: THREE.DoubleSide, map: timerTexture});
+  material.transparent = true;
+
+  var geometry = new THREE.PlaneGeometry(width, height);
+
+  var timerMesh = new THREE.Mesh( geometry, material );
+  timerMesh.rotation.set(THREE.Math.degToRad(rotation.x), THREE.Math.degToRad(rotation.y), THREE.Math.degToRad(rotation.z));
+  timerMesh.position.x = position.x;
+  timerMesh.position.y = position.y;
+  timerMesh.position.z = position.z;
+  timerMesh.name = 'Timer_' + Timers.length;
+
+  scene.add(timerMesh);
+
+  Timers.push({
+    clockTimer: Timer,
+    texture: timerTexture,
+    mesh: timerMesh
+  })
+}
 
 //------------------------------------------------------------------------------------------------------------------------------------------------
 var HemisphereLight1;
@@ -982,6 +1071,27 @@ function render() {
     main_player_Texture.needsUpdate = true;
     main_player_Anime.needsUpdateFrame = false;
   }
+
+  //Update Clock Timer Object Frame, Position or Remove it after time's up
+  Timers.forEach(function(timer ,i){
+    var clockTimer = timer.clockTimer;
+    var clockTexture = timer.texture;
+    var clockMesh = timer.mesh;
+    if(clockTimer.needsUpdateFrame){
+      clockTexture.needsUpdate = true;
+      clockTimer.needsUpdateFrame = false;
+    }
+    if(clockTimer.isFollowPlayer){
+      clockMesh.position.x = main_player.position.x;
+      clockMesh.position.y = main_player.position.y+main_player.geometry.parameters.height/2 + clockMesh.geometry.parameters.height/2;
+      clockMesh.position.z = main_player.position.z;
+    }
+    if(clockTimer.status === 'stop'){
+      scene.remove(scene.getObjectByName(clockMesh.name));
+      Timers.splice(i, 1);
+    }
+  })
+
 
   // If any movement was added, run it!
   if (movements.length > 0) {
